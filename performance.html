@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Copilot Price vs Coding</title>
+<meta name="description" content="GitHub Copilot models plotted by blended price per million tokens against the Artificial Analysis Coding or Intelligence Index, with the Pareto frontier.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%226%22 rx=%221%22 fill=%22%232a78d6%22/%3E%3Crect x=%226.5%22 y=%225%22 width=%223%22 height=%2210%22 rx=%221%22 fill=%22%23eb6834%22/%3E%3Crect x=%2212%22 y=%221%22 width=%223%22 height=%2214%22 rx=%221%22 fill=%22%231baf7a%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+
+<script>
+  try { const t = localStorage.getItem('copilot-pricing-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch {}
+</script>
+<style>
+/* Same design language as index.html and tokens.html (tokens, nav, filters, tooltip, table):
+   one dot per model, blended price on a log x axis, Coding or Intelligence Index on a linear y axis,
+   the Pareto frontier joined by a line. */
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --ink: #141413;
+  --ink-2: #5b5a56;
+  --ink-3: #6f6d68;
+  --rule: #e9e8e4;
+  --rule-strong: #d6d4ce;
+  --hover: #f3f2ef;
+
+  --s-openai: #2a78d6;
+  --s-anthropic: #eb6834;
+  --s-google: #1baf7a;
+  --s-microsoft: #eda100;
+  --s-xai: #e87ba4;
+  --s-moonshot: #008300;
+  --s-other: #8f8d87;
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151514; --surface: #1c1c1b; --ink: #f4f3ef; --ink-2: #b9b7b0; --ink-3: #85837d;
+    --rule: #2a2a28; --rule-strong: #3a3a37; --hover: #222221;
+    --s-openai: #3987e5; --s-anthropic: #d95926; --s-google: #199e70;
+    --s-microsoft: #c98500; --s-xai: #d55181; --s-moonshot: #008300; --s-other: #85837d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151514; --surface: #1c1c1b; --ink: #f4f3ef; --ink-2: #b9b7b0; --ink-3: #85837d;
+  --rule: #2a2a28; --rule-strong: #3a3a37; --hover: #222221;
+  --s-openai: #3987e5; --s-anthropic: #d95926; --s-google: #199e70;
+  --s-microsoft: #c98500; --s-xai: #d55181; --s-moonshot: #008300; --s-other: #85837d;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 14px/1.5 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 110rem;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 3vw, 40px);
+  padding-block: 24px 48px;
+  display: grid;
+  grid-template-columns: 17rem minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas: "head head" "side intro" "side main";
+  column-gap: clamp(24px, 3vw, 48px);
+}
+.app > .masthead { grid-area: head; }
+.intro { grid-area: intro; padding-top: 24px; }
+.sidebar { grid-area: side; }
+.content { grid-area: main; min-width: 0; padding-top: 32px; }
+
+/* Header */
+.masthead { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+.theme-btn {
+  appearance: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font: 400 12px/1 var(--font-sans);
+  padding: 7px 12px 7px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  flex: none;
+  transition: background .15s, color .15s;
+}
+.theme-btn:hover { background: var(--hover); color: var(--ink); }
+.theme-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.theme-btn .sun { display: none; }
+.is-dark .theme-btn .sun { display: block; }
+.is-dark .theme-btn .moon { display: none; }
+/* Site nav: one tab per page, shared by index.html, tokens.html, performance.html and compare.html */
+.site-nav { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
+.site-nav .brand {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  font: 600 14px/1 var(--font-sans); letter-spacing: -.01em; color: var(--ink);
+  padding-right: 16px; border-right: 1px solid var(--rule-strong);
+}
+.site-nav .brand svg { width: 16px; height: 16px; fill: currentColor; }
+.site-nav .tabs {
+  display: flex; gap: 2px; padding: 3px; min-width: 0; overflow-x: auto; scrollbar-width: none;
+  background: var(--hover); border: 1px solid var(--rule); border-radius: 999px;
+}
+.site-nav .tabs::-webkit-scrollbar { display: none; }
+.site-nav .tabs a {
+  flex: none; white-space: nowrap;
+  font: 500 13px/1 var(--font-sans); color: var(--ink-2); text-decoration: none;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid transparent;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.site-nav .tabs a:hover { color: var(--ink); }
+.site-nav .tabs .ts { display: none; }
+.site-nav .tabs a[aria-current="page"] {
+  color: var(--ink); background: var(--surface); border-color: var(--rule-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .06);
+}
+.site-nav .tabs a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .site-nav .brand { display: none; }
+  .site-nav .tabs a { font-size: 12px; padding: 7px 9px; }
+  .site-nav .tabs .tq { display: none; }
+  .site-nav .tabs .ts { display: inline; }
+  .theme-btn { padding: 7px; }
+  #theme-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+h1 {
+  font-weight: 500;
+  font-size: clamp(28px, 4.2vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.lede {
+  color: var(--ink-2);
+  font-size: 15px;
+  max-width: 64ch;
+  margin: 0;
+}
+.lede + .lede { margin-top: 8px; }
+.lede a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+
+/* Filters */
+.filters {
+  margin-top: 32px;
+  padding: 6px 0 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.f-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+}
+.f-label {
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.f-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.f-hint { color: var(--ink-3); font-size: 12px; margin-left: 4px; }
+.f-bulk { display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; color: var(--ink-3); }
+.f-foot {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  margin-top: 6px; padding: 12px 0;
+  border-top: 1px dashed var(--rule);
+  color: var(--ink-3); font-size: 12px;
+}
+.f-foot b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.mix { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mix input[type="range"] { width: min(240px, 60vw); margin: 0; accent-color: var(--ink); cursor: pointer; }
+.mix input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.mix-out { display: inline-flex; align-items: center; gap: 12px; font: 500 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+}
+.segmented button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 13px/1 var(--font-sans);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 0 0 1px var(--rule);
+}
+.chips { display: contents; }
+.chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font: 400 13px/1 var(--font-sans);
+  padding: 7px 12px 7px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity .15s, border-color .15s, background .15s;
+}
+.chip:hover { background: var(--hover); }
+.chip .sw {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.chip .n { font: 400 11px/1 var(--font-mono); color: var(--ink-3); }
+.chip[aria-pressed="false"] {
+  background: transparent; color: var(--ink-3); border-color: var(--rule-strong); border-style: dashed;
+}
+.chip[aria-pressed="false"] .sw { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.chip.zero { opacity: .5; }
+.link-btn {
+  appearance: none; border: 0; background: none; padding: 4px 2px;
+  font: 400 13px/1 var(--font-sans); color: var(--ink-2);
+  text-decoration: underline; text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px; cursor: pointer;
+}
+.link-btn:hover { color: var(--ink); }
+button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Summary */
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+  margin: 20px 0 20px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.takeaway { margin: 20px 0 0; max-width: 70ch; font-size: 17px; line-height: 1.45; color: var(--ink); text-wrap: pretty; }
+.takeaway b { font-weight: 600; }
+.takeaway .muted { color: var(--ink-2); }
+.takeaway .link-btn { font-size: inherit; padding: 0; color: var(--ink-2); }
+.takeaway .link-btn:hover { color: var(--ink); }
+.content .takeaway { margin-top: 0; }
+.content .takeaway + .summary { margin-top: 14px; }
+/* Picks: three frontier models chosen by a stated rule */
+.picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; max-width: 60rem; }
+.picks:empty { display: none; }
+.pick {
+  appearance: none; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px;
+  font: 400 12px/1.4 var(--font-sans); color: var(--ink-3); transition: border-color .15s;
+}
+.pick:hover { border-color: var(--rule-strong); }
+.pick .k { font: 500 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.pick .nm { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
+.pick .nm::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.pick .v { font: 400 12px/1.3 var(--font-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.pick .promo { align-self: flex-start; margin-top: 2px; padding: 3px 7px; border-radius: 999px; border: 1px dashed var(--ink-3); font-size: 11px; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .picks { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .pick { padding: 10px 12px; }
+  .pick .r { display: none; }
+}
+.picks + .summary, .picks-cmp + .summary { margin-top: 16px; }
+.picks-cmp { display: inline-block; margin-top: 10px; font-size: 13px; color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.picks-cmp:hover { color: var(--ink); }
+.chart .zone { fill: var(--ink); opacity: .045; }
+.chart .zone-lbl { font-size: 11px; fill: var(--ink-3); }
+.chart .pt { cursor: pointer; }
+.unscored li.focus-flash { animation: focus-flash 1.6s ease-out 2; }
+.summary b { color: var(--ink); font-weight: 500; }
+.legend-key { display: inline-flex; align-items: center; gap: 8px; }
+.key-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-3); }
+.key-dot.front { background: var(--ink); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); width: 9px; height: 9px; }
+.key-line { width: 18px; height: 2px; border-radius: 1px; background: var(--ink-2); }
+
+/* Chart */
+.chart {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 8px 4px 4px;
+}
+.chart svg { display: block; width: 100%; overflow: visible; font-family: var(--font-sans); }
+.chart .grid line { stroke: var(--rule); stroke-width: 1; }
+.chart .tick { font: 400 11px var(--font-mono); fill: var(--ink-3); font-variant-numeric: tabular-nums; }
+.chart .ax-title { font-size: 12px; fill: var(--ink-3); }
+.chart .front-line { fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: .45; }
+.chart .pt { cursor: default; outline: none; }
+.chart .pt .hit { fill: transparent; }
+.chart .pt .dot { fill: var(--c); stroke: var(--surface); stroke-width: 2; transition: r .15s; }
+.chart .pt.front .dot { stroke: var(--ink); stroke-width: 1.5; }
+.chart .pt.front .ring { fill: none; stroke: var(--surface); stroke-width: 2; }
+.chart .pt:hover .dot, .chart .pt:focus-visible .dot, .chart .pt.active .dot { r: 8; }
+.chart .pt:focus-visible .hit { stroke: var(--ink); stroke-width: 1.5; }
+.chart .lbl { font-size: 12px; fill: var(--ink-3); pointer-events: none; }
+.chart .lbl.front { font-weight: 600; fill: var(--ink); }
+.chart .lbl-halo { stroke: var(--surface); stroke-width: 4; stroke-linejoin: round; paint-order: stroke; }
+.chart.dim .pt:not(.active) { opacity: .35; }
+.chart.dim .lbl:not(.active) { opacity: .35; }
+.empty { padding: 48px 0; text-align: center; color: var(--ink-3); }
+.unscored {
+  margin-top: 16px; padding: 14px 16px;
+  border: 1px dashed var(--rule-strong); border-radius: 12px;
+}
+.unscored h2 { margin: 0 0 8px; }
+.unscored p { margin: 0 0 12px; color: var(--ink-2); font-size: 13px; max-width: 72ch; }
+.unscored code { font: 400 12px/1.5 var(--font-mono); color: var(--ink); }
+.unscored ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.unscored li {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 10px 5px 9px; border: 1px solid var(--rule-strong); border-radius: 999px;
+  font-size: 12.5px; color: var(--ink);
+}
+.unscored li .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.unscored li .why { font: 400 11px/1 var(--font-mono); color: var(--ink-3); }
+
+/* Tooltip */
+.tip {
+  position: absolute; z-index: 5;
+  min-width: 240px; max-width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / .08);
+  pointer-events: none;
+  font-size: 13px;
+}
+.tip .t-head { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 12px; margin-bottom: 4px; }
+.tip .t-line { width: 12px; height: 2px; border-radius: 1px; background: var(--c); }
+.tip .t-name { font-weight: 500; color: var(--ink); margin-bottom: 12px; }
+.tip dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
+.tip dt { color: var(--ink-3); }
+.tip dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.tip dd.on { color: var(--ink); font-weight: 500; }
+.tip dt.sep, .tip dd.sep { padding-top: 6px; border-top: 1px solid var(--rule); }
+.tip .t-note { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 12px; }
+
+/* Explainer and table */
+details { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
+details + details { margin-top: 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 13px; width: max-content; max-width: 100%; }
+summary:hover { color: var(--ink); }
+.explain { max-width: 64ch; color: var(--ink-2); font-size: 14px; margin-top: 12px; }
+.explain p { margin: 0 0 12px; }
+.explain code { font: 400 13px/1.5 var(--font-mono); color: var(--ink); }
+.explain ul { margin: 0 0 12px; padding-left: 20px; }
+.explain li { margin-bottom: 6px; }
+.explain a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.table-wrap { overflow-x: auto; margin-top: 16px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 9px 12px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
+th { font-weight: 500; color: var(--ink-3); font-size: 12px; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+td .sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-right: 8px; }
+
+footer {
+  margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule);
+  color: var(--ink-3); font-size: 12px;
+  display: flex; flex-wrap: wrap; gap: 6px 24px;
+}
+footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+
+@media (min-width: 901px) {
+  .app { grid-template-columns: 18rem minmax(0, 1fr); }
+  .sidebar {
+    position: sticky; top: 0; align-self: start;
+    max-height: 100vh; overflow-y: auto;
+    padding: 16px 20px 16px 0;
+    margin-top: 16px;
+    border-right: 1px solid var(--rule);
+    scrollbar-width: thin;
+  }
+  .filters { margin: 0; padding: 0; border: 0; }
+  .f-row {
+    position: relative;
+    grid-template-columns: 1fr; gap: 8px;
+    padding: 12px 0;
+    border-top: 1px dashed var(--rule);
+  }
+  .f-row:first-child { border-top: 0; padding-top: 0; }
+  .f-ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .sidebar .chip { min-width: 0; padding: 6px 8px 6px 9px; font-size: 12.5px; gap: 7px; }
+  .sidebar .chip > span:not(.n):not(.sw) { overflow: hidden; text-overflow: ellipsis; }
+  .sidebar .chip .n { margin-left: auto; }
+  .f-hint, .segmented { grid-column: 1 / -1; }
+  .f-hint { margin: 0; font-size: 11.5px; line-height: 1.35; }
+  .segmented { display: flex; }
+  .segmented button { flex: 1; padding: 7px 8px; }
+  .f-ctrl.mix { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+  .mix input[type="range"] { width: 100%; }
+  .mix-out { font-size: 12px; }
+  #reset-mix { position: absolute; top: 9px; right: 0; padding: 4px 0; font-size: 12px; }
+  .f-bulk { position: absolute; top: 9px; right: 0; margin: 0; font-size: 12px; }
+  .f-bulk .link-btn { font-size: 12px; }
+  .f-foot { margin-top: 0; padding: 12px 0 0; }
+  .content .summary { margin-top: 0; }
+}
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "head" "intro" "side" "main";
+  }
+  .content { padding-top: 0; }
+}
+@media (max-width: 640px) {
+  .f-row { grid-template-columns: 1fr; gap: 10px; }
+  .f-hint { flex-basis: 100%; margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="masthead">
+    <nav class="site-nav" aria-label="Pages">
+      <span class="brand"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.01 8.01 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Copilot pricing</span>
+      <div class="tabs">
+        <a href="./">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
+        <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
+        <a href="performance.html" aria-current="page">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
+        <a href="compare.html">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>
+      </div>
+    </nav>
+    <button type="button" class="theme-btn" id="theme-toggle" aria-pressed="false">
+      <svg class="moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z"/></svg>
+      <svg class="sun" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg>
+      <span id="theme-label">Dark mode</span>
+    </button>
+  </div>
+
+  <header class="intro">
+    <h1>Which models give the most <span id="h-metric">coding ability</span> per credit?</h1>
+    <p class="lede">Each dot is a Copilot model. Further left is cheaper: blended <span class="gl-t">price<button class="gl" data-gl="blended"></button></span> in AI <span class="gl-t">credits<button class="gl" data-gl="credit"></button></span> per million tokens. Higher is better: the <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a> <span class="m-label">Coding Index</span><button class="gl" data-gl="index"></button>. The best deals sit up and to the left.</p>
+    <p class="lede">The line links those best deals, the Pareto <span class="gl-t">frontier<button class="gl" data-gl="frontier"></button>:</span> for any model below it, a cheaper model scores at least as well.</p>
+  </header>
+
+  <aside class="sidebar">
+    <section class="filters" aria-label="Score, mix and filters">
+      <div class="f-row">
+        <span class="f-label"><span id="fl-metric">Score</span><button class="gl" data-gl="index"></button></span>
+        <div class="f-ctrl">
+          <div class="segmented" role="group" aria-labelledby="fl-metric">
+            <button type="button" data-metric="coding" aria-pressed="true">Coding</button>
+            <button type="button" data-metric="intelligence" aria-pressed="false">Intelligence</button>
+          </div>
+          <span class="f-hint">Artificial Analysis index on the vertical axis</span>
+        </div>
+      </div>
+      <div class="f-row">
+        <span class="f-label"><span id="fl-scale">Scale</span><button class="gl" data-gl="log"></button></span>
+        <div class="f-ctrl">
+          <div class="segmented" role="group" aria-labelledby="fl-scale">
+            <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
+            <button type="button" data-scale="log" aria-pressed="false">Log</button>
+          </div>
+          <span class="f-hint">Price axis; log spreads out the cheap models</span>
+        </div>
+      </div>
+      <div class="f-row">
+        <span class="f-label"><label for="mix">Mix</label><button class="gl" data-gl="mix"></button></span>
+        <div class="f-ctrl mix">
+          <input type="range" id="mix" min="0" max="100" step="5" value="90" aria-describedby="mix-out">
+          <span class="mix-out" id="mix-out" aria-live="polite">
+            <span><b id="mix-in">90%</b> input</span>
+            <span><b id="mix-o">10%</b> output</span>
+          </span>
+          <button type="button" class="link-btn" id="reset-mix" hidden>Back to 90/10</button>
+        </div>
+      </div>
+      <div class="f-row">
+        <span class="f-label" id="fl-provider">Provider</span>
+        <div class="f-ctrl" role="group" aria-labelledby="fl-provider">
+          <div class="chips" id="providers"></div>
+          <span class="f-bulk">
+            <button type="button" class="link-btn" id="all">All</button> ·
+            <button type="button" class="link-btn" id="none">None</button>
+          </span>
+        </div>
+      </div>
+      <div class="f-row">
+        <span class="f-label"><span id="fl-class">Class</span><button class="gl" data-gl="class"></button></span>
+        <div class="f-ctrl" role="group" aria-labelledby="fl-class">
+          <div class="chips" id="categories"></div>
+          <span class="f-hint">GitHub’s own grouping of models by capability</span>
+        </div>
+      </div>
+      <div class="f-foot" aria-live="polite">
+        <span id="f-count"></span>
+        <button type="button" class="link-btn" id="reset" hidden>Reset filters</button>
+      </div>
+    </section>
+  </aside>
+
+  <main class="content">
+    <p class="takeaway" id="takeaway" aria-live="polite"></p>
+    <div class="picks" id="picks" role="group" aria-label="Picks"></div>
+    <a class="picks-cmp" id="picks-cmp" hidden>Compare the picks side by side →</a>
+    <div class="summary">
+      <span class="legend-key"><span class="key-dot front"></span>On the frontier</span>
+      <span class="legend-key"><span class="key-dot"></span>Dominated (colour = provider)</span>
+      <span class="legend-key"><span class="key-line"></span><span class="gl-t">Pareto frontier<button class="gl" data-gl="frontier"></button></span></span>
+    </div>
+
+    <section class="chart" id="chart" aria-label="Blended price against the score">
+      <svg id="svg" role="img" aria-labelledby="svg-title"><title id="svg-title">Blended price in AI credits per 1M tokens against the Artificial Analysis Coding Index</title></svg>
+      <div class="tip" id="tip" hidden></div>
+    </section>
+    <section class="unscored" id="unscored" aria-labelledby="unscored-title" hidden>
+      <h2 class="f-label" id="unscored-title"></h2>
+      <p>These Copilot models have no <span class="m-label">Coding Index</span> on Artificial Analysis yet, so they are not plotted. They will join the chart once a score is published.</p>
+      <ul id="unscored-list"></ul>
+    </section>
+
+    <details id="explain">
+      <summary>How is this calculated?</summary>
+      <div class="explain">
+        <p><b>Price.</b> GitHub’s list price per million input and output tokens, blended by the mix: <code>r × input + (1 − r) × output</code>, with <code>r</code> = 90% by default, because coding agents read far more than they write. Default tier only: long-context rates and caching are left out.</p>
+        <p><b>Score.</b> An <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a> index, picked with the Score switch. <b>Coding</b> (default) is their composite of coding benchmarks (e.g. Terminal-Bench, SciCode); recent models often get it a few weeks after release. <b>Intelligence</b> is their broader composite of reasoning, knowledge, maths and coding, published sooner. Models without the selected index are listed under the chart.</p>
+        <p>Artificial Analysis benchmarks each model at several reasoning efforts. This page uses <b>High</b>; when a model has no High result for the selected index, the nearest one (Xhigh, then Medium, Max, Low). The tooltip names the variant used.</p>
+        <p><b>Frontier.</b> Sort the models in view by price. A model is on the frontier when it scores higher than every cheaper one. The frontier is recomputed when filters or the mix change.</p>
+        <ul>
+          <li>The index measures the model, not Copilot’s harness around it, and reasoning effort changes how many tokens a task uses: a higher score can cost more tokens per task than the blended price suggests.</li>
+          <li>Two Copilot entries can share one score (e.g. Claude Opus 4.8 and its fast mode, which costs twice as much).</li>
+        </ul>
+      </div>
+    </details>
+
+    <details id="details">
+      <summary>Show scores as a table</summary>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>Provider</th><th>Class</th><th class="num">Blended credits / 1M</th><th class="num m-label">Coding Index</th><th>Scored as</th><th>Frontier</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <footer>
+      <span>Prices: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">Models and pricing for GitHub Copilot</a></span>
+      <span>Scores: <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a></span>
+      <span id="updated"></span>
+    </footer>
+  </main>
+</div>
+
+<script src="shared.js"></script>
+<script>
+// Data: data/models.csv (scripts/update-pricing.mjs) and data/scores.csv (scripts/update-scores.mjs).
+const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output', 'intelligence', 'coding'];
+// Score switch: column in data/scores.csv → labels.
+const METRICS = {
+  coding: { label: 'Coding Index', headline: 'coding ability' },
+  intelligence: { label: 'Intelligence Index', headline: 'intelligence' },
+};
+
+function parseCSV(text) {
+  const out = [];
+  let row = [], field = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') q = false;
+      else field += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',') { row.push(field); field = ''; }
+    else if (ch === '\n') { row.push(field.replace(/\r$/, '')); out.push(row); row = []; field = ''; }
+    else field += ch;
+  }
+  if (field || row.length) { row.push(field); out.push(row); }
+  const [head, ...data] = out;
+  return data.map((r, id) => {
+    const m = { id };
+    head.forEach((h, i) => {
+      const v = r[i] ?? '';
+      m[h] = v === '' ? null : NUMERIC.includes(h) ? Number(v) : v;
+    });
+    return m;
+  });
+}
+
+const text = url => fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.text(); });
+const json = url => fetch(url, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
+Promise.all([text('data/models.csv'), text('data/scores.csv'), json('data/meta.json'), json('data/scores-meta.json'), json('data/aa-mapping.json')])
+  .then(([models, scores, meta, scoresMeta, mapping]) => init(parseCSV(models), parseCSV(scores), meta, scoresMeta, mapping), err => {
+    console.error(err);
+    const p = document.createElement('p');
+    p.className = 'empty';
+    p.textContent = 'Couldn’t load data/models.csv or data/scores.csv. Serve the page over HTTP (python3 -m http.server).';
+    document.getElementById('chart').replaceChildren(p);
+  });
+
+function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
+  const KNOWN = [
+    { name: 'OpenAI', color: '--s-openai' },
+    { name: 'Anthropic', color: '--s-anthropic' },
+    { name: 'Google', color: '--s-google' },
+    { name: 'Microsoft', color: '--s-microsoft' },
+    { name: 'xAI', color: '--s-xai' },
+    { name: 'Moonshot AI', color: '--s-moonshot' },
+  ];
+  // Default tier only, joined with its scores. Models without the selected index are listed under the chart.
+  const scoreOf = new Map(SCORES.map(s => [s.model, s]));
+  const DEFAULT = ALL.filter(m => m.tier === 'default').map(m => ({ ...m, score: scoreOf.get(m.model) || {} }));
+  const MODELS = DEFAULT.filter(m => Object.keys(METRICS).some(k => m.score[k] != null));
+  const hasScore = m => m.score[state.metric] != null;
+  const otherMetric = () => Object.keys(METRICS).find(k => k !== state.metric);
+  const article = w => (/^[aeiou]/i.test(w) ? 'an' : 'a');
+
+  const present = new Set(MODELS.map(m => m.provider));
+  const PROVIDERS = [
+    ...KNOWN.filter(p => present.has(p.name)),
+    ...[...present].filter(n => !KNOWN.some(p => p.name === n)).map(name => ({ name, color: '--s-other' })),
+  ];
+  const CAT_ORDER = ['Lightweight', 'Versatile', 'Powerful'];
+  const presentCats = new Set(MODELS.map(m => m.category));
+  const CATEGORIES = [...CAT_ORDER.filter(c => presentCats.has(c)), ...[...presentCats].filter(c => !CAT_ORDER.includes(c))];
+
+  const fmtDate = s => new Date(s + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'long' });
+  $('updated').textContent = [meta.updated && 'Prices updated ' + fmtDate(meta.updated),
+    scoresMeta.updated && 'scores updated ' + fmtDate(scoresMeta.updated)].filter(Boolean).join(', ');
+
+  // Unscored models may come from a provider with no dot, hence the lookup in KNOWN too.
+  const colorOf = p => `var(${(PROVIDERS.find(x => x.name === p) || KNOWN.find(x => x.name === p))?.color || '--s-other'})`;
+  // Prices are held in USD and shown in AI credits; USD only as a secondary figure.
+  const { credits, usd } = CopilotShared;
+  const score = v => (Math.round(v * 10) / 10).toFixed(1);
+
+  const DEFAULT_IN = 90;
+  const STORE = 'copilot-perf-view';
+  const DEFAULT_METRIC = 'coding';
+  const DEFAULT_SCALE = 'linear';
+  const SCALES = ['linear', 'log'];
+  const state = { metric: DEFAULT_METRIC, scale: DEFAULT_SCALE, inPct: DEFAULT_IN, active: new Set(PROVIDERS.map(p => p.name)), cats: new Set(CATEGORIES) };
+  const validPct = v => Number.isFinite(v) && v >= 0 && v <= 100;
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (saved) {
+      if (validPct(saved.inPct)) state.inPct = saved.inPct;
+      if (saved.metric in METRICS) state.metric = saved.metric;
+      if (SCALES.includes(saved.scale)) state.scale = saved.scale;
+      if (Array.isArray(saved.active)) state.active = new Set(PROVIDERS.map(p => p.name)
+        .filter(n => saved.active.includes(n) || (Array.isArray(saved.known) && !saved.known.includes(n))));
+      if (Array.isArray(saved.cats)) state.cats = new Set(CATEGORIES
+        .filter(c => saved.cats.includes(c) || (Array.isArray(saved.knownCats) && !saved.knownCats.includes(c))));
+    }
+  } catch {}
+  // Mix, providers and classes follow the reader across pages.
+  const shared = CopilotShared.read();
+  if (validPct(shared.inPct)) state.inPct = shared.inPct;
+  const sharedActive = CopilotShared.restore(PROVIDERS.map(p => p.name), shared.active, shared.known);
+  const sharedCats = CopilotShared.restore(CATEGORIES, shared.cats, shared.knownCats);
+  if (sharedActive) state.active = sharedActive;
+  if (sharedCats) state.cats = sharedCats;
+  const focusModel = CopilotShared.takeFocus();
+  // A shared link (?score=intelligence&in=80) wins over the saved state.
+  const query = new URLSearchParams(location.search);
+  if (query.has('in') && validPct(Number(query.get('in')))) state.inPct = Number(query.get('in'));
+  if (query.get('score') in METRICS) state.metric = query.get('score');
+  if (SCALES.includes(query.get('scale'))) state.scale = query.get('scale');
+
+  const save = () => {
+    CopilotShared.write({ inPct: state.inPct, active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES });
+    try { localStorage.setItem(STORE, JSON.stringify({ metric: state.metric, scale: state.scale, inPct: state.inPct,
+      active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES })); } catch {}
+    const q = new URLSearchParams(location.search);
+    if (state.metric === DEFAULT_METRIC) q.delete('score'); else q.set('score', state.metric);
+    if (state.scale === DEFAULT_SCALE) q.delete('scale'); else q.set('scale', state.scale);
+    if (state.inPct === DEFAULT_IN) q.delete('in'); else q.set('in', state.inPct);
+    const s = q.toString();
+    try { history.replaceState(null, '', s ? '?' + s : location.pathname); } catch {}
+  };
+
+  function $(id) { return document.getElementById(id); }
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  const SVG = 'http://www.w3.org/2000/svg';
+  const sv = (tag, attrs = {}, text) => {
+    const n = document.createElementNS(SVG, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (text != null) n.textContent = text;
+    return n;
+  };
+
+  // Provider chips
+  const chips = new Map();
+  PROVIDERS.forEach(p => {
+    const b = el('button', 'chip');
+    b.type = 'button';
+    b.style.setProperty('--c', colorOf(p.name));
+    const n = el('span', 'n');
+    b.append(el('span', 'sw'), el('span', null, p.name), n);
+    b.addEventListener('click', () => {
+      state.active.has(p.name) ? state.active.delete(p.name) : state.active.add(p.name);
+      render();
+    });
+    chips.set(p.name, { b, n });
+    $('providers').append(b);
+  });
+
+  // Class chips
+  const catChips = new Map();
+  CATEGORIES.forEach(c => {
+    const b = el('button', 'chip');
+    b.type = 'button';
+    const n = el('span', 'n');
+    b.append(el('span', null, c), n);
+    b.addEventListener('click', () => {
+      state.cats.has(c) ? state.cats.delete(c) : state.cats.add(c);
+      render();
+    });
+    catChips.set(c, { b, n });
+    $('categories').append(b);
+  });
+
+  const passes = (m, skip) =>
+    (skip === 'provider' || state.active.has(m.provider))
+    && (skip === 'cat' || state.cats.has(m.category));
+  const isFiltered = () => state.active.size < PROVIDERS.length || state.cats.size < CATEGORIES.length;
+  function resetFilters() {
+    PROVIDERS.forEach(p => state.active.add(p.name));
+    CATEGORIES.forEach(c => state.cats.add(c));
+    render();
+  }
+
+  const blended = m => { const r = state.inPct / 100; return r * m.input + (1 - r) * m.output; };
+
+  // Pareto frontier: by price ascending (best score first on ties), keep each model that beats every cheaper one.
+  function frontier(list) {
+    const sorted = [...list].sort((a, b) => a.price - b.price || b.s - a.s);
+    const out = [];
+    let best = -Infinity;
+    for (const p of sorted) if (p.s > best) { out.push(p); best = p.s; }
+    return out;
+  }
+
+  // Log ticks at 1, 2, 5 × 10^k inside the domain.
+  function logTicks(lo, hi) {
+    const t = [];
+    for (let k = Math.floor(Math.log10(lo)); k <= Math.ceil(Math.log10(hi)); k++) {
+      for (const f of [1, 2, 5]) { const v = f * 10 ** k; if (v >= lo && v <= hi) t.push(Math.round(v * 1e6) / 1e6); }
+    }
+    return t;
+  }
+
+  // "Round" linear ticks from 0: steps of 1, 2, 2.5 or 5 × 10^k, at most n intervals.
+  function niceScale(max, n) {
+    const raw = max / n;
+    const pow = 10 ** Math.floor(Math.log10(raw));
+    const step = [1, 2, 2.5, 5, 10].map(k => k * pow).find(s => s >= raw);
+    const top = Math.ceil(max / step) * step;
+    const ticks = [];
+    for (let t = 0; t <= top + 1e-9; t += step) ticks.push(Math.round(t * 1000) / 1000);
+    return { top, ticks };
+  }
+
+  let points = [], frontSet = new Set();
+  const pins = CopilotShared.pinnable({ tip: $('tip'), open: (p, pinned) => showTip(p, pinned), close: () => hideTip() });
+  const svg = $('svg');
+  const tip = $('tip');
+  let active = null;
+
+  function render() {
+    // Controls
+    $('mix').value = state.inPct;
+    $('mix-in').textContent = state.inPct + '%';
+    $('mix-o').textContent = (100 - state.inPct) + '%';
+    $('mix').setAttribute('aria-valuetext', `${state.inPct}% input, ${100 - state.inPct}% output`);
+    $('reset-mix').hidden = state.inPct === DEFAULT_IN;
+    const label = METRICS[state.metric].label;
+    document.querySelectorAll('[data-metric]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.metric === state.metric)));
+    document.querySelectorAll('[data-scale]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.scale === state.scale)));
+    document.querySelectorAll('.m-label').forEach(n => { n.textContent = label; });
+    $('h-metric').textContent = METRICS[state.metric].headline;
+    $('svg-title').textContent = `Blended price in AI credits per 1M tokens against the Artificial Analysis ${label}`;
+    const SCORED = MODELS.filter(hasScore);
+    const UNSCORED = DEFAULT.filter(m => !hasScore(m));
+    const syncChip = ({ b, n }, on, count) => {
+      b.setAttribute('aria-pressed', String(on));
+      n.textContent = count;
+      b.classList.toggle('zero', !count);
+    };
+    chips.forEach((c, name) => syncChip(c, state.active.has(name), SCORED.filter(m => m.provider === name && passes(m, 'provider')).length));
+    catChips.forEach((c, name) => syncChip(c, state.cats.has(name), SCORED.filter(m => m.category === name && passes(m, 'cat')).length));
+    $('f-count').replaceChildren('Showing ', el('b', null, String(SCORED.filter(m => passes(m)).length)), ` of ${SCORED.length} scored models`);
+    $('reset').hidden = !isFiltered();
+
+    const k = state.metric;
+    points = SCORED.filter(m => passes(m)).map(m => ({ m, price: blended(m), s: m.score[k], effort: m.score[`${k}Effort`], aaName: m.score[`${k}AaName`] }));
+    const front = frontier(points);
+    frontSet = new Set(front);
+    draw(front);
+
+    // Takeaway: the top scorer, the cheapest frontier model within 90% of it, and how many are dominated.
+    if (points.length) {
+      const top = front[front.length - 1];
+      const value = front.find(p => p.s >= 0.9 * top.s);
+      const dominated = points.length - front.length;
+      const at = p => ` (score ${score(p.s)} for ${credits(p.price)} credits per million tokens)`;
+      const parts = [`Top ${label}: `, el('b', null, top.m.model), at(top), '. '];
+      if (value !== top) {
+        const r = top.price / value.price;
+        parts.push(el('b', null, value.m.model), ` gets ${Math.round(value.s / top.s * 100)}% of that score for `,
+          el('b', null, (r < 10 ? String(Math.round(r * 10) / 10) : Math.round(r)) + '× less'), '. ');
+      }
+      if (dominated) parts.push(el('span', 'muted', `${dominated} of ${points.length} models have a cheaper alternative that scores at least as well. `));
+      // Newer models often lack the selected index: say so, so "Top" isn't read as the overall answer.
+      if (UNSCORED.length) {
+        const other = otherMetric();
+        const n = UNSCORED.filter(m => m.score[other] != null).length;
+        parts.push(el('span', 'muted', `${UNSCORED.length} model${UNSCORED.length > 1 ? 's' : ''} without ${article(label)} ${label} yet ${UNSCORED.length > 1 ? 'are' : 'is'} not ranked (listed below the chart)`));
+        if (n) {
+          const btn = el('button', 'link-btn', `${n} of them ${n > 1 ? 'have' : 'has'} ${article(METRICS[other].label)} ${METRICS[other].label} →`);
+          btn.type = 'button';
+          btn.addEventListener('click', () => { state.metric = other; render(); });
+          parts.push(el('span', 'muted', ': '), btn);
+        } else parts.push(el('span', 'muted', '.'));
+      }
+      $('takeaway').replaceChildren(...parts);
+      renderPicks(front, top);
+    } else {
+      $('takeaway').textContent = 'No models in view.';
+      $('picks').replaceChildren();
+      $('picks-cmp').hidden = true;
+    }
+
+    $('unscored').hidden = !UNSCORED.length;
+    $('unscored-title').textContent = `Not scored yet · ${UNSCORED.length}`;
+    $('unscored-list').replaceChildren(...UNSCORED.map(m => {
+      const li = el('li');
+      li.style.setProperty('--c', colorOf(m.provider));
+      // null in aa-mapping.json: the model isn't on Artificial Analysis at all.
+      li.append(el('span', 'sw'), m.model, el('span', 'why', MAPPING[m.model] === null ? 'not tracked' : 'coming soon'));
+      return li;
+    }));
+
+    // Table: frontier first, then by score
+    const rows = [...points].sort((a, b) => frontSet.has(b) - frontSet.has(a) || b.s - a.s);
+    $('tbody').replaceChildren(...rows.map(p => {
+      const tr = el('tr');
+      const cell = el('td');
+      cell.style.setProperty('--c', colorOf(p.m.provider));
+      cell.append(el('span', 'sw'), p.m.model);
+      tr.append(cell, el('td', null, p.m.provider), el('td', null, p.m.category), el('td', 'num', credits(p.price)),
+        el('td', 'num', score(p.s)), el('td', null, p.aaName), el('td', null, frontSet.has(p) ? 'Yes' : ''));
+      return tr;
+    }));
+    save();
+  }
+
+  // Three picks from the frontier, each by a stated rule. One model can fill several roles.
+  function renderPicks(front, top) {
+    const roles = [
+      { k: 'Budget pick', rule: 'Cheapest with at least 75% of the top score', p: front.find(p => p.s >= 0.75 * top.s) },
+      { k: 'Balanced pick', rule: 'Cheapest with at least 90% of the top score', p: front.find(p => p.s >= 0.9 * top.s) },
+      { k: 'Best score', rule: `Highest ${METRICS[state.metric].label} in view`, p: top },
+    ];
+    const cards = [];
+    roles.forEach(r => {
+      const same = cards.find(c => c.p === r.p);
+      if (same) { same.k.push(r.k); return; }
+      cards.push({ k: [r.k], rule: r.rule, p: r.p });
+    });
+    const q = new URLSearchParams(cards.map(c => ['m', c.p.m.model]));
+    if (state.inPct !== DEFAULT_IN) q.set('in', state.inPct);
+    $('picks-cmp').href = 'compare.html?' + q;
+    $('picks-cmp').hidden = cards.length < 2;
+    $('picks').replaceChildren(...cards.map(c => {
+      const b = el('button', 'pick');
+      b.type = 'button';
+      b.style.setProperty('--c', colorOf(c.p.m.provider));
+      b.append(el('span', 'k', c.k.join(' · ')), el('span', 'nm', c.p.m.model),
+        el('span', 'v', `${score(c.p.s)} · ${credits(c.p.price)} credits / 1M`), el('span', 'r', c.rule));
+      b.title = c.rule;
+      // A pick that rests on a temporary price says so (the note comes from GitHub's pricing page).
+      if (/promotion/i.test(c.p.m.note || '')) {
+        b.append(el('span', 'promo', 'Promotional price: see its note'));
+        b.title += '\n\n' + c.p.m.note;
+      }
+      b.addEventListener('click', e => { e.stopPropagation(); pins.pin(c.p); });
+      return b;
+    }));
+  }
+
+  function draw(front) {
+    pins.reset();
+    svg.querySelectorAll(':scope > :not(title)').forEach(n => n.remove());
+    $('chart').querySelector('.empty')?.remove();
+    if (!points.length) {
+      svg.setAttribute('height', 0);
+      const btn = el('button', 'link-btn', 'Reset filters');
+      btn.type = 'button';
+      btn.addEventListener('click', resetFilters);
+      const p = el('p', 'empty');
+      p.append('No model matches these filters. ', btn);
+      $('chart').append(p);
+      return;
+    }
+
+    const W = svg.clientWidth || $('chart').clientWidth;
+    const narrow = W < 560;
+    const H = narrow ? 440 : Math.min(620, Math.max(460, W * 0.55));
+    svg.setAttribute('height', H);
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const M = { top: 20, right: narrow ? 16 : 28, bottom: 52, left: narrow ? 44 : 60 };
+    const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+
+    // Domains: x from 0 to a round price (linear) or with some room either side (log),
+    // y snapped to multiples of 5 (or 10 for wide ranges).
+    const log = state.scale === 'log';
+    const prices = points.map(p => p.price), scores = points.map(p => p.s);
+    const lin = log ? null : niceScale(Math.max(...prices) * 1.05, narrow ? 4 : 6);
+    const xlo = log ? Math.min(...prices) / 1.35 : 0, xhi = log ? Math.max(...prices) * 1.35 : lin.top;
+    const smin = Math.min(...scores), smax = Math.max(...scores);
+    const step = smax - smin > 40 ? 10 : 5;
+    const ylo = Math.max(0, Math.floor((smin - 2) / step) * step), yhi = Math.ceil((smax + 2) / step) * step;
+    const x = log
+      ? v => M.left + (Math.log(v) - Math.log(xlo)) / (Math.log(xhi) - Math.log(xlo)) * iw
+      : v => M.left + (v - xlo) / (xhi - xlo) * iw;
+    const y = v => M.top + (1 - (v - ylo) / (yhi - ylo)) * ih;
+
+    // Grid and ticks
+    const grid = sv('g', { class: 'grid', 'aria-hidden': 'true' });
+    const ticks = sv('g', { 'aria-hidden': 'true' });
+    // On narrow screens, drop the 2 × 10^k log ticks when there are many.
+    const all = log ? logTicks(xlo, xhi) : lin.ticks;
+    const xt = log && narrow && all.length > 6 ? all.filter(t => Math.round(t / 10 ** Math.floor(Math.log10(t))) !== 2) : all;
+    xt.forEach(t => {
+      grid.append(sv('line', { x1: x(t), x2: x(t), y1: M.top, y2: M.top + ih }));
+      ticks.append(sv('text', { class: 'tick', x: x(t), y: M.top + ih + 18, 'text-anchor': 'middle' }, credits(t)));
+    });
+    for (let t = ylo; t <= yhi + 1e-9; t += step) {
+      grid.append(sv('line', { x1: M.left, x2: M.left + iw, y1: y(t), y2: y(t) }));
+      ticks.append(sv('text', { class: 'tick', x: M.left - 10, y: y(t) + 4, 'text-anchor': 'end' }, String(t)));
+    }
+    ticks.append(sv('text', { class: 'ax-title', x: M.left + iw / 2, y: H - 10, 'text-anchor': 'middle' }, narrow
+      ? `← cheaper · credits per 1M tokens${log ? ' (log)' : ''} · pricier →`
+      : `← cheaper · Blended credits per 1M tokens, ${state.inPct}/${100 - state.inPct} input/output${log ? ' (log scale)' : ''} · pricier →`));
+    ticks.append(sv('text', { class: 'ax-title', transform: `translate(14 ${M.top + ih / 2}) rotate(-90)`, 'text-anchor': 'middle' },
+      `${METRICS[state.metric].label} · better →`));
+    svg.append(grid, ticks);
+
+    // Dominated zone: below and right of the frontier, where every model has a cheaper one that scores as well.
+    if (front.length) {
+      const last = front[front.length - 1], bottom = M.top + ih, right = M.left + iw;
+      svg.append(sv('polygon', { class: 'zone', 'aria-hidden': 'true', points: [
+        `${x(front[0].price)},${bottom}`, ...front.map(p => `${x(p.price)},${y(p.s)}`), `${right},${y(last.s)}`, `${right},${bottom}`,
+      ].join(' ') }));
+      if (points.length > front.length) svg.append(sv('text', { class: 'zone-lbl', x: right - 8, y: bottom - 10, 'text-anchor': 'end', 'aria-hidden': 'true' },
+        narrow ? 'Shaded: a cheaper model scores as well' : 'Shaded area: each model here has a cheaper one that scores at least as well'));
+    }
+
+    // Frontier line
+    if (front.length > 1) {
+      svg.append(sv('polyline', { class: 'front-line', 'aria-hidden': 'true',
+        points: front.map(p => `${x(p.price)},${y(p.s)}`).join(' ') }));
+    }
+
+    // Dots: dominated first, frontier on top. Each gets a larger invisible hit target.
+    const labels = sv('g', { 'aria-hidden': 'true' });
+    const dots = sv('g');
+    const order = [...points].sort((a, b) => frontSet.has(a) - frontSet.has(b));
+    order.forEach(p => {
+      p.cx = x(p.price); p.cy = y(p.s);
+      const isFront = frontSet.has(p);
+      const g = sv('g', { class: 'pt' + (isFront ? ' front' : ''), tabindex: '0', role: 'img',
+        'aria-label': `${p.m.model}, ${p.m.provider}: ${credits(p.price)} credits per 1M tokens, ${METRICS[state.metric].label} ${score(p.s)}${isFront ? ', on the frontier' : ''}` });
+      g.style.setProperty('--c', colorOf(p.m.provider));
+      g.append(sv('circle', { class: 'hit', cx: p.cx, cy: p.cy, r: 12 }), sv('circle', { class: 'dot', cx: p.cx, cy: p.cy, r: isFront ? 6.5 : 5.5 }));
+      pins.attach(g, p);
+      p.g = g;
+      dots.append(g);
+    });
+    svg.append(labels, dots);
+
+    // Labels: frontier first, then by score. Try right, left, above, below; skip a dominated label that still collides.
+    const placed = [];
+    const outside = r => r.x < M.left - 4 || r.x + r.w > W - 2 || r.y < 0 || r.y + r.h > M.top + ih;
+    const collisions = r => placed.filter(o => r.x < o.x + o.w && r.x + r.w > o.x && r.y < o.y + o.h && r.y + r.h > o.y).length
+      + points.filter(q => q.cx > r.x - 5 && q.cx < r.x + r.w + 5 && q.cy > r.y - 5 && q.cy < r.y + r.h + 5).length;
+    const overlaps = r => outside(r) || collisions(r) > 0;
+    const byPriority = [...points].sort((a, b) => frontSet.has(b) - frontSet.has(a) || b.s - a.s);
+    byPriority.forEach(p => {
+      const isFront = frontSet.has(p);
+      const t = sv('text', { class: 'lbl lbl-halo' + (isFront ? ' front' : '') }, p.m.model);
+      labels.append(t);
+      const w = t.getComputedTextLength(), h = 14, gap = 10;
+      const spots = [
+        { x: p.cx + gap, y: p.cy - h / 2, anchor: 'start' },
+        { x: p.cx - gap - w, y: p.cy - h / 2, anchor: 'end' },
+        { x: p.cx - w / 2, y: p.cy - gap - h, anchor: 'middle' },
+        { x: p.cx - w / 2, y: p.cy + gap, anchor: 'middle' },
+        { x: p.cx - 6, y: p.cy - gap - h, anchor: 'start' },
+        { x: p.cx - 6, y: p.cy + gap, anchor: 'start' },
+      ];
+      let spot = spots.find(s => !overlaps({ ...s, w, h }));
+      if (!spot) {
+        if (!isFront) { t.remove(); return; }
+        // A frontier label is always drawn: the in-bounds spot with the fewest collisions.
+        const fits = spots.filter(s => !outside({ ...s, w, h }));
+        spot = (fits.length ? fits : spots).reduce((a, b) => (collisions({ ...b, w, h }) < collisions({ ...a, w, h }) ? b : a));
+      }
+      placed.push({ x: spot.x, y: spot.y, w, h });
+      const tx = spot.anchor === 'start' ? spot.x : spot.anchor === 'end' ? spot.x + w : spot.x + w / 2;
+      t.setAttribute('x', tx);
+      t.setAttribute('y', spot.y + h - 3);
+      t.setAttribute('text-anchor', spot.anchor);
+      p.label = t;
+    });
+  }
+
+  // Tooltip
+  function showTip(p, pinned) {
+    hideTip();
+    active = p;
+    p.g.classList.add('active');
+    p.label?.classList.add('active');
+    $('chart').classList.add('dim');
+    const m = p.m;
+    tip.style.setProperty('--c', colorOf(m.provider));
+    const head = el('div', 't-head');
+    head.append(el('span', 't-line'), el('span', null, `${m.provider} · ${m.category}`));
+    const dl = el('dl');
+    const add = (key, v, cls) => { dl.append(el('dt', cls === 'sep' ? 'sep' : null, key), el('dd', cls || null, v)); };
+    add(METRICS[state.metric].label, score(p.s), 'on');
+    add('Blended / 1M', `${credits(p.price)} credits (${usd(p.price)})`, 'on');
+    add('Price in / out', `${credits(m.input)} / ${credits(m.output)} credits`);
+    add('Frontier', frontSet.has(p) ? 'Yes' : 'No');
+    add('Scored as', p.effort, 'sep');
+    tip.replaceChildren(head, el('div', 't-name', m.model), dl, el('div', 't-note', `Artificial Analysis: ${p.aaName}`));
+    if (m.note) tip.append(el('div', 't-note', m.note));
+    tip.append(pinned ? CopilotShared.pageLinks('value', m.model) : CopilotShared.hint('Click to compare it on the other pages'));
+    tip.classList.toggle('pinned', !!pinned);
+    tip.hidden = false;
+
+    const c = $('chart').getBoundingClientRect();
+    const s = svg.getBoundingClientRect();
+    const px = s.left - c.left + p.cx, py = s.top - c.top + p.cy;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = px + 18;
+    if (left + tw > c.width) left = px - tw - 18;
+    if (left < 0) left = Math.max(0, Math.min(px - tw / 2, c.width - tw));
+    let top = py - th / 2;
+    top = Math.max(0, Math.min(top, c.height - th));
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hideTip() {
+    tip.hidden = true;
+    tip.classList.remove('pinned');
+    $('chart').classList.remove('dim');
+    if (active) { active.g.classList.remove('active'); active.label?.classList.remove('active'); active = null; }
+  }
+
+  // Controls
+  document.querySelectorAll('[data-metric]').forEach(b =>
+    b.addEventListener('click', () => { state.metric = b.dataset.metric; render(); }));
+  document.querySelectorAll('[data-scale]').forEach(b =>
+    b.addEventListener('click', () => { state.scale = b.dataset.scale; render(); }));
+  $('mix').addEventListener('input', e => { state.inPct = Number(e.target.value); render(); });
+  $('reset-mix').addEventListener('click', () => { state.inPct = DEFAULT_IN; render(); });
+  $('all').addEventListener('click', () => { PROVIDERS.forEach(p => state.active.add(p.name)); render(); });
+  $('none').addEventListener('click', () => { state.active.clear(); render(); });
+  $('reset').addEventListener('click', resetFilters);
+
+  let lastW = 0;
+  new ResizeObserver(() => {
+    const w = $('chart').clientWidth;
+    if (Math.abs(w - lastW) > 1) { lastW = w; render(); }
+  }).observe($('chart'));
+
+  // Theme: shared with the other pages, follows the system until the user picks one.
+  const THEME = 'copilot-pricing-theme';
+  const darkMQ = matchMedia('(prefers-color-scheme: dark)');
+  const isDark = () => {
+    const t = document.documentElement.dataset.theme;
+    return t ? t === 'dark' : darkMQ.matches;
+  };
+  const syncTheme = () => {
+    const dark = isDark();
+    document.documentElement.classList.toggle('is-dark', dark);
+    $('theme-toggle').setAttribute('aria-pressed', String(dark));
+    $('theme-label').textContent = dark ? 'Light mode' : 'Dark mode';
+  };
+  $('theme-toggle').addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(THEME, next); } catch {}
+    syncTheme();
+  });
+  darkMQ.addEventListener('change', syncTheme);
+  syncTheme();
+
+  render();
+  // Labels are measured with the web font; redraw once it has loaded.
+  const fontsReady = document.fonts ? document.fonts.ready.then(() => render()) : Promise.resolve();
+
+  // Arriving from another page (?focus=<model>): show and pin its dot, or point to it in the unscored list.
+  if (focusModel) fontsReady.then(() => {
+    const m = DEFAULT.find(o => o.model === focusModel);
+    if (!m) return;
+    if (!hasScore(m) && m.score[otherMetric()] != null) state.metric = otherMetric();
+    if (hasScore(m)) {
+      state.active.add(m.provider);
+      state.cats.add(m.category);
+      render();
+      const p = points.find(q => q.m === m);
+      if (!p) return;
+      $('chart').scrollIntoView({ block: 'center' });
+      requestAnimationFrame(() => pins.pin(p));
+    } else {
+      const li = [...$('unscored-list').children].find(li => li.childNodes[1]?.textContent === m.model);
+      if (li) { li.scrollIntoView({ block: 'center' }); li.classList.add('focus-flash'); }
+    }
+  });
+}
+</script>
+<script src="glossary.js"></script>
+</body>
+</html>

@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compare Copilot Models</title>
+<meta name="description" content="Two to five GitHub Copilot models side by side: Artificial Analysis Intelligence and Coding Index, input, cached input, cache write and output prices, long-context rates and cost per agent request.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%226%22 rx=%221%22 fill=%22%232a78d6%22/%3E%3Crect x=%226.5%22 y=%225%22 width=%223%22 height=%2210%22 rx=%221%22 fill=%22%23eb6834%22/%3E%3Crect x=%2212%22 y=%221%22 width=%223%22 height=%2214%22 rx=%221%22 fill=%22%231baf7a%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+
+<script>
+  try { const t = localStorage.getItem('copilot-pricing-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch {}
+</script>
+<style>
+/* Same design language as the other pages (tokens, nav, chips, table): a spec sheet with
+   one column per chosen model and one row per attribute, grouped in sections. */
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --ink: #141413;
+  --ink-2: #5b5a56;
+  --ink-3: #6f6d68;
+  --rule: #e9e8e4;
+  --rule-strong: #d6d4ce;
+  --hover: #f3f2ef;
+  --good: #1a7a4c;
+  --bad: #b2431f;
+
+  --s-openai: #2a78d6;
+  --s-anthropic: #eb6834;
+  --s-google: #1baf7a;
+  --s-microsoft: #eda100;
+  --s-xai: #e87ba4;
+  --s-moonshot: #008300;
+  --s-other: #8f8d87;
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151514; --surface: #1c1c1b; --ink: #f4f3ef; --ink-2: #b9b7b0; --ink-3: #85837d;
+    --rule: #2a2a28; --rule-strong: #3a3a37; --hover: #222221; --good: #4cc08a; --bad: #ec7a55;
+    --s-openai: #3987e5; --s-anthropic: #d95926; --s-google: #199e70;
+    --s-microsoft: #c98500; --s-xai: #d55181; --s-moonshot: #008300; --s-other: #85837d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151514; --surface: #1c1c1b; --ink: #f4f3ef; --ink-2: #b9b7b0; --ink-3: #85837d;
+  --rule: #2a2a28; --rule-strong: #3a3a37; --hover: #222221; --good: #4cc08a; --bad: #ec7a55;
+  --s-openai: #3987e5; --s-anthropic: #d95926; --s-google: #199e70;
+  --s-microsoft: #c98500; --s-xai: #d55181; --s-moonshot: #008300; --s-other: #85837d;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 14px/1.5 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 110rem;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 3vw, 40px);
+  padding-block: 24px 48px;
+}
+.intro { padding-top: 24px; }
+.content { min-width: 0; }
+
+/* Header */
+.masthead { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+.theme-btn {
+  appearance: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font: 400 12px/1 var(--font-sans);
+  padding: 7px 12px 7px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  flex: none;
+  transition: background .15s, color .15s;
+}
+.theme-btn:hover { background: var(--hover); color: var(--ink); }
+.theme-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.theme-btn .sun { display: none; }
+.is-dark .theme-btn .sun { display: block; }
+.is-dark .theme-btn .moon { display: none; }
+/* Site nav: one tab per page, shared by index.html, tokens.html, performance.html and compare.html */
+.site-nav { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
+.site-nav .brand {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  font: 600 14px/1 var(--font-sans); letter-spacing: -.01em; color: var(--ink);
+  padding-right: 16px; border-right: 1px solid var(--rule-strong);
+}
+.site-nav .brand svg { width: 16px; height: 16px; fill: currentColor; }
+.site-nav .tabs {
+  display: flex; gap: 2px; padding: 3px; min-width: 0; overflow-x: auto; scrollbar-width: none;
+  background: var(--hover); border: 1px solid var(--rule); border-radius: 999px;
+}
+.site-nav .tabs::-webkit-scrollbar { display: none; }
+.site-nav .tabs a {
+  flex: none; white-space: nowrap;
+  font: 500 13px/1 var(--font-sans); color: var(--ink-2); text-decoration: none;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid transparent;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.site-nav .tabs a:hover { color: var(--ink); }
+.site-nav .tabs .ts { display: none; }
+.site-nav .tabs a[aria-current="page"] {
+  color: var(--ink); background: var(--surface); border-color: var(--rule-strong);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .06);
+}
+.site-nav .tabs a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .site-nav .brand { display: none; }
+  .site-nav .tabs a { font-size: 12px; padding: 7px 9px; }
+  .site-nav .tabs .tq { display: none; }
+  .site-nav .tabs .ts { display: inline; }
+  .theme-btn { padding: 7px; }
+  #theme-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+h1 {
+  font-weight: 500;
+  font-size: clamp(28px, 4.2vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.lede {
+  color: var(--ink-2);
+  font-size: 15px;
+  max-width: 64ch;
+  margin: 0;
+}
+.lede a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+
+/* Controls */
+.filters {
+  margin-top: 24px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.f-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+}
+.f-row + .f-row { border-top: 1px dashed var(--rule); }
+.f-label {
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.f-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.f-hint { color: var(--ink-3); font-size: 12px; margin-left: 4px; }
+.mix { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mix input[type="range"] { width: min(240px, 60vw); margin: 0; accent-color: var(--ink); cursor: pointer; }
+.mix input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.mix-out { display: inline-flex; align-items: center; gap: 12px; font: 500 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+}
+.segmented button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 13px/1 var(--font-sans);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 0 0 1px var(--rule);
+}
+.chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font: 400 13px/1 var(--font-sans);
+  padding: 7px 10px 7px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.chip:hover { background: var(--hover); }
+.chip .sw {
+  width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: var(--c);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.chip .x { font-size: 15px; line-height: 1; color: var(--ink-3); margin-left: 2px; }
+.chip:hover .x { color: var(--ink); }
+.link-btn {
+  appearance: none; border: 0; background: none; padding: 4px 2px;
+  font: 400 13px/1 var(--font-sans); color: var(--ink-2);
+  text-decoration: underline; text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px; cursor: pointer;
+}
+.link-btn:hover { color: var(--ink); }
+button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Model picker: a text box that filters a list (combobox) */
+.combo { position: relative; flex: 1 1 14rem; max-width: 22rem; }
+.combo input {
+  width: 100%;
+  font: 400 13px/1 var(--font-sans); color: var(--ink);
+  background: var(--surface); border: 1px dashed var(--ink-3); border-radius: 999px;
+  padding: 8px 14px;
+}
+.combo input::placeholder { color: var(--ink-3); }
+.combo input:focus { outline: 2px solid var(--ink); outline-offset: 1px; border-style: solid; }
+.combo input:disabled { opacity: .6; cursor: not-allowed; }
+.combo ul {
+  position: absolute; z-index: 10; top: calc(100% + 6px); left: 0;
+  width: max(100%, 22rem); max-width: calc(100vw - 32px); max-height: min(24rem, 60vh); overflow-y: auto;
+  margin: 0; padding: 6px; list-style: none;
+  background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / .1);
+}
+.combo .grp { padding: 8px 8px 4px; font: 500 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.combo [role="option"] {
+  display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; align-items: center; gap: 4px 10px;
+  padding: 7px 8px; border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+.combo [role="option"] .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.combo [role="option"] .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.combo [role="option"] .meta { font: 400 11px/1 var(--font-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.combo [role="option"].active { background: var(--hover); }
+.combo [role="option"][aria-disabled="true"] { cursor: default; color: var(--ink-3); }
+.combo .none { padding: 10px 8px; color: var(--ink-3); font-size: 13px; }
+
+/* Takeaway */
+.takeaway { margin: 24px 0 0; max-width: 72ch; font-size: 17px; line-height: 1.45; color: var(--ink); text-wrap: pretty; }
+.takeaway b { font-weight: 600; }
+.takeaway .muted { color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 12px 0 0; color: var(--ink-3); font-size: 12px; }
+.legend b { color: var(--ink); font-weight: 600; }
+.legend .good { color: var(--good); }
+.legend .bad { color: var(--bad); }
+
+/* Spec sheet */
+.cmp-wrap { overflow-x: auto; margin-top: 20px; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+.cmp { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; font-size: 13px; }
+.cmp col.rl { width: 13rem; }
+.cmp th, .cmp td { padding: 10px 14px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.cmp tbody tr:last-child > * { border-bottom: 0; }
+.cmp th.rl {
+  position: sticky; left: 0; z-index: 1; background: var(--surface);
+  font-weight: 400; color: var(--ink-2); border-right: 1px solid var(--rule);
+}
+.cmp thead th { vertical-align: bottom; border-bottom: 1px solid var(--rule-strong); }
+.cmp thead th.rl { color: var(--ink-3); font: 500 11px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.cmp tr.sec th {
+  padding: 18px 14px 8px; background: var(--bg);
+  font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  border-bottom: 1px solid var(--rule);
+}
+.cmp tr.sec th > span { position: sticky; left: 14px; }
+.cmp tr.sec .f-hint { font: 400 12px/1 var(--font-sans); letter-spacing: 0; text-transform: none; margin-left: 10px; }
+.cmp tbody tr:not(.sec):hover > * { background: var(--hover); }
+/* Column heads */
+.mh { position: relative; padding-right: 34px !important; }
+.mh .who { display: flex; align-items: center; gap: 8px; font: 500 15px/1.25 var(--font-sans); color: var(--ink); }
+.mh .who::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+.mh .sub { margin-top: 4px; color: var(--ink-3); font-size: 12px; font-weight: 400; }
+.mh .base { display: inline-block; margin-top: 8px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--ink); font: 500 11px/1 var(--font-sans); color: var(--ink); }
+.mh .link-btn { margin-top: 6px; padding: 2px 0; font-size: 12px; }
+.mh .rm {
+  position: absolute; top: 8px; right: 8px;
+  appearance: none; width: 24px; height: 24px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--ink-3); font: 400 17px/1 var(--font-sans); cursor: pointer;
+}
+.mh .rm:hover { background: var(--hover); color: var(--ink); }
+.mh.is-base { box-shadow: inset 0 3px 0 var(--ink); }
+/* Cells */
+.cmp td .v { font: 400 14px/1.3 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.cmp td .v.txt { font-family: var(--font-sans); }
+.cmp td .v.na { color: var(--ink-3); cursor: help; }
+.cmp td.best .v { font-weight: 600; }
+.cmp td.best .v::after { content: " ★"; font-size: 11px; color: var(--ink-2); }
+.cmp td .d { margin-top: 3px; font: 400 11.5px/1.2 var(--font-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.cmp td .d.good { color: var(--good); }
+.cmp td .d.bad { color: var(--bad); }
+.cmp td .s { margin-top: 3px; font-size: 11.5px; line-height: 1.35; color: var(--ink-3); }
+.cmp td .bar { margin-top: 6px; height: 3px; border-radius: 2px; background: var(--rule); overflow: hidden; }
+.cmp td .bar > span { display: block; height: 100%; background: var(--c); border-radius: 2px; }
+.cmp td.note .v { font: 400 12.5px/1.45 var(--font-sans); color: var(--ink-2); }
+.cmp .add-col { color: var(--ink-3); font-size: 12.5px; vertical-align: middle; text-align: center; border-left: 1px dashed var(--rule-strong); }
+.empty { padding: 48px 16px; text-align: center; color: var(--ink-3); }
+
+/* Explainer */
+details { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 13px; width: max-content; max-width: 100%; }
+summary:hover { color: var(--ink); }
+.explain { max-width: 64ch; color: var(--ink-2); font-size: 14px; margin-top: 12px; }
+.explain p { margin: 0 0 12px; }
+.explain code { font: 400 13px/1.5 var(--font-mono); color: var(--ink); }
+.explain a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+
+footer {
+  margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule);
+  color: var(--ink-3); font-size: 12px;
+  display: flex; flex-wrap: wrap; gap: 6px 24px;
+}
+footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+
+@media (max-width: 640px) {
+  .f-row { grid-template-columns: 1fr; gap: 10px; }
+  .combo { max-width: none; flex-basis: 100%; }
+  .cmp col.rl { width: 8.5rem; }
+  .cmp th, .cmp td { padding: 9px 10px; }
+  .cmp tr.sec th > span { left: 10px; }
+  .mh .who { font-size: 14px; }
+  .takeaway { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="masthead">
+    <nav class="site-nav" aria-label="Pages">
+      <span class="brand"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.01 8.01 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Copilot pricing</span>
+      <div class="tabs">
+        <a href="./">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
+        <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
+        <a href="performance.html">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
+        <a href="compare.html" aria-current="page">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>
+      </div>
+    </nav>
+    <button type="button" class="theme-btn" id="theme-toggle" aria-pressed="false">
+      <svg class="moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z"/></svg>
+      <svg class="sun" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg>
+      <span id="theme-label">Dark mode</span>
+    </button>
+  </div>
+
+  <header class="intro">
+    <h1>How do these models compare?</h1>
+    <p class="lede">Pick two to five Copilot models to see everything we know about them side by side: <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a> scores, every price GitHub lists, long-context rates and what one agent request costs at your mix.</p>
+  </header>
+
+  <main class="content">
+    <section class="filters" aria-label="Models, mix and display">
+      <div class="f-row">
+        <span class="f-label" id="fl-models">Models</span>
+        <div class="f-ctrl" role="group" aria-labelledby="fl-models">
+          <span id="chosen" style="display: contents"></span>
+          <div class="combo">
+            <input type="text" id="pick" role="combobox" aria-expanded="false" aria-controls="pick-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Add a model…" aria-label="Add a model">
+            <ul id="pick-list" role="listbox" aria-label="Models" hidden></ul>
+          </div>
+          <button type="button" class="link-btn" id="clear">Clear</button>
+        </div>
+      </div>
+      <div class="f-row">
+        <span class="f-label"><label for="mix">Mix</label><button class="gl" data-gl="mix"></button></span>
+        <div class="f-ctrl mix">
+          <input type="range" id="mix" min="0" max="100" step="5" value="90" aria-describedby="mix-out">
+          <span class="mix-out" id="mix-out" aria-live="polite">
+            <span><b id="mix-in">90%</b> input</span>
+            <span><b id="mix-o">10%</b> output</span>
+          </span>
+        </div>
+      </div>
+      <div class="f-row">
+        <span class="f-label" id="fl-rows">Rows</span>
+        <div class="f-ctrl">
+          <div class="segmented" role="group" aria-labelledby="fl-rows">
+            <button type="button" data-rows="all" aria-pressed="true">All</button>
+            <button type="button" data-rows="diff" aria-pressed="false">Differences only</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="takeaway" id="takeaway" aria-live="polite"></p>
+    <p class="legend" id="legend">
+      <span><b>★</b> best in the row</span>
+      <span>Under each value: the gap to the <b>baseline</b> column, <span class="good">better</span> or <span class="bad">worse</span></span>
+    </p>
+
+    <div class="cmp-wrap" id="cmp-wrap">
+      <table class="cmp" id="cmp" aria-label="Chosen models side by side"></table>
+    </div>
+
+    <details>
+      <summary>How is this calculated?</summary>
+      <div class="explain">
+        <p><b>Prices.</b> GitHub’s list prices in AI credits per million tokens (1 credit = $0.01), with the US dollar price in brackets. <b>Cached input</b> is what a token costs when the same prompt prefix was sent recently and the provider reuses it; <b>cache write</b> is what some providers charge to store that prefix the first time. Some models charge more per token once a single prompt passes a threshold: those rates are in the <b>Long context</b> section.</p>
+        <p><b>Blended price.</b> <code>r × input + (1 − r) × output</code>, with <code>r</code> the input share of the mix (90% by default, as coding agents read far more than they write). Default tier, without caching.</p>
+        <p><b>Agent request.</b> 50,000 tokens at the blended price: one agent step that sends files and history and gets an answer back, in AI credits.</p>
+        <p><b>Scores.</b> <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a> Intelligence and Coding Index, at the effort named under each score (High when available). The rank counts every Copilot model with that index. <b>Coding points per 100 credits</b> is the Coding Index divided by the blended price of 1M tokens, counted in hundreds of credits; <b>on the frontier</b> means no cheaper Copilot model has a higher Coding Index at this mix (see <a href="performance.html">3 · Value</a>).</p>
+        <p><b>Baseline.</b> Gaps are measured against the baseline column: ×N for prices (lower is better), points for scores. Click <i>Set as baseline</i> under a model to change it.</p>
+      </div>
+    </details>
+
+    <footer>
+      <span>Prices: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">Models and pricing for GitHub Copilot</a></span>
+      <span>Scores: <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a></span>
+      <span id="updated"></span>
+    </footer>
+  </main>
+</div>
+
+<script src="shared.js"></script>
+<script>
+// Data: data/models.csv (scripts/update-pricing.mjs) and data/scores.csv (scripts/update-scores.mjs).
+const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output', 'intelligence', 'coding'];
+
+function parseCSV(text) {
+  const out = [];
+  let row = [], field = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') q = false;
+      else field += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',') { row.push(field); field = ''; }
+    else if (ch === '\n') { row.push(field.replace(/\r$/, '')); out.push(row); row = []; field = ''; }
+    else field += ch;
+  }
+  if (field || row.length) { row.push(field); out.push(row); }
+  const [head, ...data] = out;
+  return data.map((r, id) => {
+    const m = { id };
+    head.forEach((h, i) => {
+      const v = r[i] ?? '';
+      m[h] = v === '' ? null : NUMERIC.includes(h) ? Number(v) : v;
+    });
+    return m;
+  });
+}
+
+const text = url => fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.text(); });
+const json = url => fetch(url, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
+Promise.all([text('data/models.csv'), text('data/scores.csv'), json('data/meta.json'), json('data/scores-meta.json'), json('data/aa-mapping.json')])
+  .then(([models, scores, meta, scoresMeta, mapping]) => init(parseCSV(models), parseCSV(scores), meta, scoresMeta, mapping), err => {
+    console.error(err);
+    const p = document.createElement('p');
+    p.className = 'empty';
+    p.textContent = 'Couldn’t load data/models.csv or data/scores.csv. Serve the page over HTTP (python3 -m http.server).';
+    document.getElementById('cmp-wrap').replaceChildren(p);
+  });
+
+function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
+  const MAX = 5;
+  const KNOWN = [
+    { name: 'OpenAI', color: '--s-openai' },
+    { name: 'Anthropic', color: '--s-anthropic' },
+    { name: 'Google', color: '--s-google' },
+    { name: 'Microsoft', color: '--s-microsoft' },
+    { name: 'xAI', color: '--s-xai' },
+    { name: 'Moonshot AI', color: '--s-moonshot' },
+  ];
+  // One entry per model: its default tier, its long-context tier if any, and its scores.
+  const scoreOf = new Map(SCORES.map(s => [s.model, s]));
+  const longOf = new Map(ALL.filter(m => m.tier === 'long').map(m => [m.model, m]));
+  const MODELS = ALL.filter(m => m.tier === 'default').map(m => ({ ...m, long: longOf.get(m.model) || null, score: scoreOf.get(m.model) || {} }));
+  const byName = new Map(MODELS.map(m => [m.model, m]));
+  const PROVIDERS = [...new Set(MODELS.map(m => m.provider))]
+    .sort((a, b) => (KNOWN.findIndex(p => p.name === a) + 1 || 99) - (KNOWN.findIndex(p => p.name === b) + 1 || 99));
+  const CAT_ORDER = ['Lightweight', 'Versatile', 'Powerful'];
+
+  const fmtDate = s => new Date(s + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'long' });
+  $('updated').textContent = [meta.updated && 'Prices updated ' + fmtDate(meta.updated),
+    scoresMeta.updated && 'scores updated ' + fmtDate(scoresMeta.updated)].filter(Boolean).join(', ');
+
+  const colorOf = p => `var(${KNOWN.find(x => x.name === p)?.color || '--s-other'})`;
+  // Prices are held in USD and shown in AI credits, with USD in brackets on list prices.
+  const { credits, usd } = CopilotShared;
+  const creditsUsd = v => `${credits(v)} (${usd(v)})`;
+  const score = v => (Math.round(v * 10) / 10).toFixed(1);
+  const times = r => (r < 10 ? String(Math.round(r * 10) / 10) : String(Math.round(r))) + '×';
+
+  // State: URL (?m=…&m=…&base=1&in=80) > shared shortlist > a default of three top coders.
+  const DEFAULT_IN = 90;
+  const STORE = 'copilot-compare-view';
+  const state = { models: [], base: 0, inPct: DEFAULT_IN, diffOnly: false };
+  const validPct = v => Number.isFinite(v) && v >= 0 && v <= 100;
+  const clean = list => [...new Set((Array.isArray(list) ? list : []).filter(n => byName.has(n)))].slice(0, MAX);
+  try { state.diffOnly = !!JSON.parse(localStorage.getItem(STORE) || 'null')?.diffOnly; } catch {}
+  const shared = CopilotShared.read();
+  if (validPct(shared.inPct)) state.inPct = shared.inPct;
+  state.models = clean(shared.compare);
+  const focusModel = CopilotShared.takeFocus();
+  const query = new URLSearchParams(location.search);
+  if (query.has('m')) state.models = clean(query.getAll('m'));
+  if (query.has('in') && validPct(Number(query.get('in')))) state.inPct = Number(query.get('in'));
+  if (!query.has('m') && !Array.isArray(shared.compare)) state.models = defaultPicks();
+  const qBase = Number(query.get('base'));
+  if (Number.isInteger(qBase) && qBase > 0 && qBase < state.models.length) state.base = qBase;
+  // Arriving from another page's tooltip: add that model (replacing the last one when full).
+  if (focusModel && byName.has(focusModel) && !state.models.includes(focusModel)) {
+    if (state.models.length >= MAX) state.models.pop();
+    state.models.push(focusModel);
+  }
+
+  // The best Coding Index in each class, most capable class first.
+  function defaultPicks() {
+    return [...CAT_ORDER].reverse().map(c => MODELS.filter(m => m.category === c && m.score.coding != null)
+      .sort((a, b) => b.score.coding - a.score.coding)[0]?.model).filter(Boolean);
+  }
+
+  const save = () => {
+    CopilotShared.write({ inPct: state.inPct, compare: state.models });
+    try { localStorage.setItem(STORE, JSON.stringify({ diffOnly: state.diffOnly })); } catch {}
+    const q = new URLSearchParams();
+    state.models.forEach(n => q.append('m', n));
+    if (state.base) q.set('base', state.base);
+    if (state.inPct !== DEFAULT_IN) q.set('in', state.inPct);
+    const s = q.toString();
+    try { history.replaceState(null, '', s ? '?' + s : location.pathname); } catch {}
+  };
+
+  function $(id) { return document.getElementById(id); }
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  const glBtn = key => {
+    const b = el('button', 'gl');
+    b.type = 'button';
+    b.dataset.gl = key;
+    if (window.glossaryBind) window.glossaryBind(b);
+    return b;
+  };
+
+  // Figures that depend on the mix, over every Copilot model (ranks and frontier aren't limited to the chosen ones).
+  const blended = m => { const r = state.inPct / 100; return r * m.input + (1 - r) * m.output; };
+  const request = m => blended(m) * CopilotShared.REQUEST_TOKENS / 1e6;
+  const perDollar = m => (m.score.coding != null ? m.score.coding / blended(m) : null);
+  const rankOf = (m, k) => {
+    const all = MODELS.filter(o => o.score[k] != null);
+    return m.score[k] == null ? null : { r: 1 + all.filter(o => o.score[k] > m.score[k]).length, n: all.length };
+  };
+  function frontierSet() {
+    const sorted = MODELS.filter(m => m.score.coding != null).sort((a, b) => blended(a) - blended(b) || b.score.coding - a.score.coding);
+    const out = new Set();
+    let best = -Infinity;
+    for (const m of sorted) if (m.score.coding > best) { out.add(m); best = m.score.coding; }
+    return out;
+  }
+  const noScore = m => (MAPPING[m.model] === null ? 'Not on Artificial Analysis' : 'Not scored yet by Artificial Analysis');
+
+  // Rows of the sheet. get(m) → number | string | null. better: which way wins (★ and gap colour).
+  // gap: 'ratio' (×N, for prices) or 'pts' (difference, for scores). bar: draw a bar scaled to the row's max.
+  function sections(front) {
+    const scoreRow = (k, label) => ({
+      label, gl: 'index', get: m => m.score[k], fmt: score, better: 'high', gap: 'pts', bar: true,
+      sub: m => { const r = rankOf(m, k); return r && `#${r.r} of ${r.n} · ${m.score[`${k}AaName`]}`; },
+      na: noScore,
+    });
+    const price = (label, get, gl, na, extra = {}) => ({ label, gl, get, fmt: creditsUsd, better: 'low', gap: 'ratio', bar: true, na: () => na, ...extra });
+    const anyLong = state.models.some(n => byName.get(n).long);
+    return [
+      { title: 'Model', rows: [
+        { label: 'Provider', get: m => m.provider },
+        { label: 'Family', get: m => m.family },
+        { label: 'Class', gl: 'class', get: m => m.category },
+        { label: 'Status', get: m => m.status },
+      ] },
+      { title: 'Scores', hint: 'Artificial Analysis, higher is better', rows: [
+        scoreRow('intelligence', 'Intelligence Index'),
+        scoreRow('coding', 'Coding Index'),
+      ] },
+      { title: 'Prices', hint: 'AI credits per 1M tokens (US dollars)', rows: [
+        price('Input', m => m.input, 'input'),
+        price('Cached input', m => m.cachedInput, 'cached', 'No cached-input price listed',
+          { sub: m => m.cachedInput != null && m.input ? `${Math.round((1 - m.cachedInput / m.input) * 100)}% off input` : null }),
+        price('Cache write', m => m.cacheWrite, 'cachewrite', 'No cache-write price listed'),
+        price('Output', m => m.output, 'output'),
+        { label: 'Output ÷ input', get: m => m.output / m.input, fmt: v => times(v) },
+        { label: 'Applies up to', gl: 'long', get: m => m.long ? m.threshold : 'All prompt sizes' },
+      ] },
+      anyLong && { title: 'Long context', hint: 'Rates once a prompt passes the threshold', rows: [
+        { label: 'Applies above', gl: 'long', get: m => m.long ? m.long.threshold : null, na: () => 'Single tier: same price at every size' },
+        // Only "Applies above" says why a cell is empty; the rows below keep it in the tooltip.
+        price('Input', m => m.long?.input ?? null, 'input', 'Single tier: same price at every size', { quiet: true }),
+        price('Cached input', m => m.long?.cachedInput ?? null, 'cached', 'No long-context cached-input price', { quiet: true }),
+        price('Cache write', m => m.long?.cacheWrite ?? null, 'cachewrite', 'No long-context cache-write price', { quiet: true }),
+        price('Output', m => m.long?.output ?? null, 'output', 'Single tier: same price at every size', { quiet: true }),
+      ] },
+      { title: `At your mix · ${state.inPct}% input`, hint: 'Default tier, no caching', rows: [
+        price('Blended credits / 1M', blended, 'blended', null, { fmt: credits }),
+        price('Credits per agent request', request, 'request', null, { fmt: credits }),
+        { label: 'Coding points per 100 credits', gl: 'perdollar', get: perDollar, fmt: v => (v < 100 ? v.toFixed(1) : String(Math.round(v))),
+          better: 'high', gap: 'ratio', bar: true, na: noScore },
+        { label: 'On the frontier', gl: 'frontier', get: m => (m.score.coding == null ? null : front.has(m) ? 'Yes' : 'No'), na: noScore },
+      ] },
+      { title: 'Notes', rows: [
+        { label: 'GitHub note', get: m => m.note, cls: 'note', na: () => 'No note' },
+      ] },
+    ].filter(Boolean);
+  }
+
+  // Gap to the baseline, as text and better/worse.
+  function gap(row, v, b) {
+    if (v == null || b == null || typeof v !== 'number') return null;
+    if (row.gap === 'pts') {
+      const d = Math.round((v - b) * 10) / 10;
+      if (!d) return { t: 'same' };
+      return { t: `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(1)} pts`, good: (d > 0) === (row.better === 'high') };
+    }
+    if (row.gap === 'ratio') {
+      if (!b || !v) return null;
+      const r = v / b;
+      if (Math.abs(r - 1) < 0.005) return { t: 'same' };
+      const more = r > 1;
+      return { t: `${times(more ? r : 1 / r)} ${row.better === 'high' ? (more ? 'more' : 'less') : (more ? 'pricier' : 'cheaper')}`,
+        good: more === (row.better === 'high') };
+    }
+    return null;
+  }
+
+
+  function render() {
+    if (state.base >= state.models.length) state.base = 0;
+    $('mix').value = state.inPct;
+    $('mix-in').textContent = state.inPct + '%';
+    $('mix-o').textContent = (100 - state.inPct) + '%';
+    $('mix').setAttribute('aria-valuetext', `${state.inPct}% input, ${100 - state.inPct}% output`);
+    document.querySelectorAll('[data-rows]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.rows === 'diff') === state.diffOnly)));
+    renderChosen();
+    renderTable();
+    renderTakeaway();
+    save();
+  }
+
+  function renderChosen() {
+    $('chosen').replaceChildren(...state.models.map(n => {
+      const b = el('button', 'chip');
+      b.type = 'button';
+      b.style.setProperty('--c', colorOf(byName.get(n).provider));
+      b.setAttribute('aria-label', `Remove ${n}`);
+      b.title = `Remove ${n}`;
+      b.append(el('span', 'sw'), el('span', null, n), el('span', 'x', '×'));
+      b.addEventListener('click', () => remove(n));
+      return b;
+    }));
+    const full = state.models.length >= MAX;
+    $('pick').disabled = full;
+    $('pick').placeholder = full ? `Max ${MAX} models: remove one to add another` : state.models.length ? 'Add a model…' : 'Add a model to start…';
+    $('clear').hidden = !state.models.length;
+  }
+
+  function renderTable() {
+    const table = $('cmp');
+    const chosen = state.models.map(n => byName.get(n));
+    $('legend').hidden = chosen.length < 2;
+    if (!chosen.length) {
+      table.replaceChildren();
+      const p = el('p', 'empty', 'No model chosen yet. Type a name in the box above, or ');
+      const btn = el('button', 'link-btn', 'start with three top coders');
+      btn.type = 'button';
+      btn.addEventListener('click', () => { state.models = defaultPicks(); state.base = 0; render(); });
+      p.append(btn, '.');
+      $('cmp-wrap').querySelector('.empty')?.remove();
+      $('cmp-wrap').append(p);
+      return;
+    }
+    $('cmp-wrap').querySelector('.empty')?.remove();
+    const base = chosen[state.base];
+    const slot = chosen.length < MAX;
+    // On phones the label column narrows and each model keeps a readable width; the sheet scrolls sideways.
+    table.style.minWidth = `calc(${matchMedia('(max-width: 640px)').matches ? 8.5 : 13}rem + ${chosen.length} * 10rem${slot ? ' + 7rem' : ''})`;
+
+    const cg = el('colgroup');
+    cg.append(el('col', 'rl'), ...chosen.map(() => el('col')));
+    if (slot) { const c = el('col'); c.style.width = '7rem'; cg.append(c); }
+
+    const head = el('tr');
+    head.append(Object.assign(el('th', 'rl', `${chosen.length} model${chosen.length > 1 ? 's' : ''}`), { scope: 'col' }));
+    chosen.forEach((m, i) => {
+      const th = el('th', 'mh' + (i === state.base ? ' is-base' : ''));
+      th.scope = 'col';
+      th.style.setProperty('--c', colorOf(m.provider));
+      th.append(el('div', 'who', m.model), el('div', 'sub', `${m.provider} · ${m.category}`));
+      if (chosen.length > 1) {
+        if (i === state.base) th.append(el('span', 'base', 'Baseline'));
+        else {
+          const b = el('button', 'link-btn', 'Set as baseline');
+          b.type = 'button';
+          b.addEventListener('click', () => { state.base = i; render(); });
+          th.append(el('div', null), b);
+        }
+      }
+      const rm = el('button', 'rm', '×');
+      rm.type = 'button';
+      rm.setAttribute('aria-label', `Remove ${m.model}`);
+      rm.title = 'Remove';
+      rm.addEventListener('click', () => remove(m.model));
+      th.append(rm);
+      head.append(th);
+    });
+    if (slot) {
+      const th = el('th', 'add-col');
+      const b = el('button', 'link-btn', '+ Add');
+      b.type = 'button';
+      b.addEventListener('click', () => { $('pick').focus(); openList(); });
+      th.append(b);
+      head.append(th);
+    }
+    const thead = el('thead');
+    thead.append(head);
+
+    const front = frontierSet();
+    const tbody = el('tbody');
+    const cols = chosen.length + 1 + (slot ? 1 : 0);
+    sections(front).forEach(sec => {
+      const rows = sec.rows.map(row => ({ row, vals: chosen.map(m => row.get(m)) }))
+        // Differences only: drop rows where every chosen model has the same value.
+        .filter(({ vals }) => !state.diffOnly || chosen.length < 2 || new Set(vals.map(v => (typeof v === 'number' ? Math.round(v * 1e4) : v))).size > 1);
+      if (!rows.length) return;
+      const tr = el('tr', 'sec');
+      const th = el('th');
+      th.colSpan = cols;
+      th.scope = 'colgroup';
+      const span = el('span', null, sec.title);
+      if (sec.hint) span.append(el('span', 'f-hint', sec.hint));
+      th.append(span);
+      tr.append(th);
+      tbody.append(tr);
+
+      rows.forEach(({ row, vals }) => {
+        const tr = el('tr');
+        const th = el('th', 'rl', row.label);
+        th.scope = 'row';
+        if (row.gl) th.append(glBtn(row.gl));
+        tr.append(th);
+        const nums = vals.filter(v => typeof v === 'number');
+        const max = Math.max(...nums);
+        // ★ only when the row has a winner: two or more values that aren't all equal.
+        const best = row.better && nums.length > 1 && new Set(nums).size > 1
+          ? (row.better === 'low' ? Math.min(...nums) : max) : null;
+        const b = vals[state.base];
+        chosen.forEach((m, i) => {
+          const v = vals[i];
+          const td = el('td', row.cls || null);
+          td.style.setProperty('--c', colorOf(m.provider));
+          if (v == null) {
+            const na = el('div', 'v na', '—');
+            na.title = row.na ? row.na(m) || 'Not listed' : 'Not listed';
+            td.append(na);
+            if (row.na && row.cls !== 'note' && !row.quiet) td.append(el('div', 's', row.na(m)));
+          } else {
+            if (best != null && v === best) td.classList.add('best');
+            td.append(el('div', 'v' + (typeof v === 'number' ? '' : ' txt'), row.fmt ? row.fmt(v) : String(v)));
+            const sub = row.sub?.(m);
+            if (sub) td.append(el('div', 's', sub));
+            if (i !== state.base && chosen.length > 1) {
+              const g = gap(row, v, b);
+              if (g) td.append(el('div', 'd' + (g.good == null ? '' : g.good ? ' good' : ' bad'), g.t));
+            }
+            if (row.bar && max > 0) {
+              const bar = el('div', 'bar');
+              const fill = el('span');
+              fill.style.width = `${Math.max(2, v / max * 100)}%`;
+              bar.append(fill);
+              td.append(bar);
+            }
+          }
+          tr.append(td);
+        });
+        if (slot) tr.append(el('td', 'add-col'));
+        tbody.append(tr);
+      });
+    });
+    table.replaceChildren(cg, thead, tbody);
+  }
+
+  // One sentence: the top coder, the cheapest at this mix and the gap between them.
+  function renderTakeaway() {
+    const chosen = state.models.map(n => byName.get(n));
+    const t = $('takeaway');
+    if (chosen.length < 2) {
+      t.replaceChildren(chosen.length ? `Add at least one more model to compare it with ${chosen[0].model}.` : 'Pick two to five models to put them side by side.');
+      return;
+    }
+    const scored = chosen.filter(m => m.score.coding != null);
+    const cheap = [...chosen].sort((a, b) => blended(a) - blended(b))[0];
+    const dear = [...chosen].sort((a, b) => blended(b) - blended(a))[0];
+    const parts = [];
+    if (scored.length) {
+      const top = [...scored].sort((a, b) => b.score.coding - a.score.coding)[0];
+      if (top === cheap) {
+        parts.push(el('b', null, top.model), ` has the best Coding Index here (${score(top.score.coding)}) and is also the cheapest at your mix: `,
+          el('b', null, `${credits(request(top))} credits`), ' per agent request.');
+      } else {
+        const r = request(top) / request(cheap);
+        parts.push(el('b', null, top.model), ` has the best Coding Index here (${score(top.score.coding)}). `,
+          el('b', null, cheap.model), ' costs ', el('b', null, `${times(r)} less`), ' per agent request');
+        parts.push(cheap.score.coding != null ? `, with ${Math.round(cheap.score.coding / top.score.coding * 100)}% of that score.` : '.');
+      }
+    } else {
+      parts.push('None of these models has a Coding Index yet. ', el('b', null, cheap.model), ' is the cheapest at your mix, ',
+        el('b', null, `${times(request(dear) / request(cheap))} less`), ` than ${dear.model} per agent request.`);
+    }
+    const missing = chosen.filter(m => m.score.coding == null);
+    if (scored.length && missing.length) {
+      parts.push(' ', el('span', 'muted', `${missing.map(m => m.model).join(', ')} ${missing.length > 1 ? 'have' : 'has'} no Coding Index yet.`));
+    }
+    t.replaceChildren(...parts);
+  }
+
+  function add(n) {
+    if (!byName.has(n) || state.models.includes(n) || state.models.length >= MAX) return;
+    state.models.push(n);
+    render();
+  }
+  function remove(n) {
+    const i = state.models.indexOf(n);
+    if (i < 0) return;
+    state.models.splice(i, 1);
+    if (i < state.base) state.base--;
+    else if (i === state.base) state.base = 0;
+    render();
+    if (!$('pick').disabled && document.activeElement === document.body) $('pick').focus();
+  }
+
+  // Picker: type to filter (name, provider, family or class), ↑/↓ to move, Enter to add, Esc to close.
+  const input = $('pick');
+  const list = $('pick-list');
+  let options = [], activeIdx = -1;
+  function openList() {
+    const q = input.value.trim().toLowerCase();
+    const match = m => !q || [m.model, m.provider, m.family, m.category].some(s => s.toLowerCase().includes(q));
+    const items = [];
+    options = [];
+    PROVIDERS.forEach(p => {
+      const ms = MODELS.filter(m => m.provider === p && match(m));
+      if (!ms.length) return;
+      items.push(Object.assign(el('li', 'grp', p), { role: 'presentation' }));
+      ms.forEach(m => {
+        const li = el('li');
+        li.id = `opt-${m.id}`;
+        li.setAttribute('role', 'option');
+        li.style.setProperty('--c', colorOf(m.provider));
+        const taken = state.models.includes(m.model);
+        li.setAttribute('aria-disabled', String(taken));
+        li.append(el('span', 'sw'), el('span', 'nm', m.model),
+          el('span', 'meta', taken ? 'added' : `${m.category} · ${credits(m.input)} / ${credits(m.output)} credits`));
+        li.addEventListener('mousedown', e => e.preventDefault());
+        li.addEventListener('click', () => choose(m));
+        if (!taken) options.push({ li, m });
+        items.push(li);
+      });
+    });
+    if (!items.length) items.push(el('li', 'none', 'No model matches.'));
+    list.replaceChildren(...items);
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    setActive(q && options.length ? 0 : -1);
+  }
+  function closeList() {
+    list.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    activeIdx = -1;
+  }
+  function setActive(i) {
+    options.forEach(o => { o.li.classList.remove('active'); o.li.removeAttribute('aria-selected'); });
+    activeIdx = i;
+    const o = options[i];
+    if (!o) { input.removeAttribute('aria-activedescendant'); return; }
+    o.li.classList.add('active');
+    o.li.setAttribute('aria-selected', 'true');
+    input.setAttribute('aria-activedescendant', o.li.id);
+    o.li.scrollIntoView({ block: 'nearest' });
+  }
+  function choose(m) {
+    if (state.models.includes(m.model)) return;
+    input.value = '';
+    add(m.model);
+    if (state.models.length < MAX) openList(); else { closeList(); input.blur(); }
+  }
+  input.addEventListener('focus', openList);
+  input.addEventListener('click', () => { if (list.hidden) openList(); });
+  input.addEventListener('input', openList);
+  input.addEventListener('blur', closeList);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (list.hidden) openList();
+      if (!options.length) return;
+      const step = e.key === 'ArrowDown' ? 1 : -1;
+      setActive((activeIdx + step + options.length) % options.length);
+    } else if (e.key === 'Enter') {
+      const o = options[activeIdx] || (options.length === 1 ? options[0] : null);
+      if (o) { e.preventDefault(); choose(o.m); }
+    } else if (e.key === 'Escape') {
+      if (!list.hidden) { e.preventDefault(); closeList(); } else input.value = '';
+    }
+  });
+
+  // Controls
+  $('mix').addEventListener('input', e => { state.inPct = Number(e.target.value); render(); });
+  document.querySelectorAll('[data-rows]').forEach(b =>
+    b.addEventListener('click', () => { state.diffOnly = b.dataset.rows === 'diff'; render(); }));
+  $('clear').addEventListener('click', () => { state.models = []; state.base = 0; render(); input.focus(); });
+  let narrow = matchMedia('(max-width: 640px)').matches;
+  addEventListener('resize', () => {
+    const n = matchMedia('(max-width: 640px)').matches;
+    if (n !== narrow) { narrow = n; renderTable(); }
+  });
+
+  // Theme: shared with the other pages, follows the system until the user picks one.
+  const THEME = 'copilot-pricing-theme';
+  const darkMQ = matchMedia('(prefers-color-scheme: dark)');
+  const isDark = () => {
+    const t = document.documentElement.dataset.theme;
+    return t ? t === 'dark' : darkMQ.matches;
+  };
+  const syncTheme = () => {
+    const dark = isDark();
+    document.documentElement.classList.toggle('is-dark', dark);
+    $('theme-toggle').setAttribute('aria-pressed', String(dark));
+    $('theme-label').textContent = dark ? 'Light mode' : 'Dark mode';
+  };
+  $('theme-toggle').addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(THEME, next); } catch {}
+    syncTheme();
+  });
+  darkMQ.addEventListener('change', syncTheme);
+  syncTheme();
+
+  render();
+}
+</script>
+<script src="glossary.js"></script>
+</body>
+</html>

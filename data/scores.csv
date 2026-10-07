@@ -1,0 +1,31 @@
+model,coding,codingEffort,codingAaName,codingAaId,intelligence,intelligenceEffort,intelligenceAaName,intelligenceAaId
+GPT-5 mini,15.6,High,GPT-5 mini (High),29855680-7469-43eb-8b88-cd3fb1d99da3,16.8,High,GPT-5 mini (High),29855680-7469-43eb-8b88-cd3fb1d99da3
+GPT-5.3-Codex,,,,,32.5,Xhigh,GPT-5.3 Codex (Xhigh),59b5b14b-5365-4ee7-824a-18a8e6309644
+GPT-5.4,71.1,Xhigh,GPT-5.4 (Xhigh),a89c4b28-2d8c-456e-88ea-255fb51fd2b6,39,Xhigh,GPT-5.4 (Xhigh),a89c4b28-2d8c-456e-88ea-255fb51fd2b6
+GPT-5.4 mini,56.1,Xhigh,GPT-5.4 mini (Xhigh),ba242e40-83b7-4cd3-a0e0-b56237984914,24.1,Xhigh,GPT-5.4 mini (Xhigh),ba242e40-83b7-4cd3-a0e0-b56237984914
+GPT-5.4 nano,56.1,Xhigh,GPT-5.4 nano (Xhigh),d4fc3f33-f2b0-4da1-88ee-f1f82bd4de31,20.7,Xhigh,GPT-5.4 nano (Xhigh),d4fc3f33-f2b0-4da1-88ee-f1f82bd4de31
+GPT-5.5,71.6,High,GPT-5.5 (High),b13c1257-d746-4027-8fc8-4892dc14701c,37,High,GPT-5.5 (High),b13c1257-d746-4027-8fc8-4892dc14701c
+GPT-5.6 Luna,63.3,High,GPT-5.6 Luna (High),aa55297e-8fbf-4372-b4ab-9b068dc6396c,32.1,High,GPT-5.6 Luna (High),aa55297e-8fbf-4372-b4ab-9b068dc6396c
+GPT-5.6 Sol,77.2,High,GPT-5.6 Sol (High),8afc250d-b538-45a2-812a-4605f4ffd87e,42.3,High,GPT-5.6 Sol (High),8afc250d-b538-45a2-812a-4605f4ffd87e
+GPT-5.6 Terra,67.1,High,GPT-5.6 Terra (High),81972fba-1219-477e-bbfb-18c656a63ff7,34.2,High,GPT-5.6 Terra (High),81972fba-1219-477e-bbfb-18c656a63ff7
+GPT-6 Astra,77.1,High,GPT-6 Astra (High),e05a4828-0536-4876-870d-a235023f992b,50.9,High,GPT-6 Astra (High),e05a4828-0536-4876-870d-a235023f992b
+GPT-6 Luna,,,,,32.9,High,GPT-6 Luna (High),7d1229bc-deea-4717-ba5b-f59a35d991e3
+GPT-6 Sol,,,,,42.4,High,GPT-6 Sol (High),52eebe3e-6ede-4e46-92db-c5dea49fc410
+GPT-6.1 Sol,,,,,50.2,High,GPT-6.1 Sol (High),3b84fee3-b70a-41bc-819e-5fbdef9a0042
+Claude Haiku 4.5,43.9,Reasoning,Claude 4.5 Haiku (Reasoning),a6340098-d7ae-462d-b372-0a0a67fc44b4,16.9,Reasoning,Claude 4.5 Haiku (Reasoning),a6340098-d7ae-462d-b372-0a0a67fc44b4
+Claude Sonnet 4,37.6,Reasoning,Claude 4 Sonnet (Reasoning),a7564055-f8ba-4c4b-9e2d-060f61263645,18.9,Reasoning,Claude 4 Sonnet (Reasoning),a7564055-f8ba-4c4b-9e2d-060f61263645
+Claude Sonnet 4.6,63,Max,Claude Sonnet 4.6 (Max),df8d14e0-3997-4e4d-b4ad-9c047acc9c69,30.1,Max,Claude Sonnet 4.6 (Max),df8d14e0-3997-4e4d-b4ad-9c047acc9c69
+Claude Opus 4.8,74.3,Max,Claude Opus 4.8 (Max),992b7b84-5069-4c6a-9295-834252553d50,41.8,Max,Claude Opus 4.8 (Max),992b7b84-5069-4c6a-9295-834252553d50
+Claude Opus 5,76.5,High,Claude Opus 5 (High),712be54a-77ae-41b2-9a58-21181479d6ee,48.1,High,Claude Opus 5 (High),712be54a-77ae-41b2-9a58-21181479d6ee
+Claude Opus 5.5,,,,,53.6,High,"Claude Opus 5.5 (High, Default Fallback)",f314eade-2232-44bf-a3ab-9b326bc67de6
+Claude Sonnet 5,71.5,Max,Claude Sonnet 5 (Max),23c86e4a-c769-43c0-a056-79e3cd15834f,31.7,High,Claude Sonnet 5 (High),ba0224cf-0351-4f56-8508-b3f1a740ae4a
+Claude Sonnet 5.5,,,,,46.8,High,"Claude Sonnet 5.5 (High, Default Fallback)",268525e2-f873-4178-bc07-e6a0ee1f002d
+Claude Opus 4.8 (fast mode) (preview),74.3,Max,Claude Opus 4.8 (Max),992b7b84-5069-4c6a-9295-834252553d50,41.8,Max,Claude Opus 4.8 (Max),992b7b84-5069-4c6a-9295-834252553d50
+Claude Fable 5,76.5,Max,"Claude Fable 5 (Max, Opus 4.8 Fallback)",cd55210d-358e-4df1-ba9c-9acb5f186cc9,49.6,Max,"Claude Fable 5 (Max, Opus 4.8 Fallback)",cd55210d-358e-4df1-ba9c-9acb5f186cc9
+Claude Fable 5.1,79.1,High,"Claude Fable 5.1 (High, Default Fallback)",9d7d72cd-d95d-45a0-b109-4ad292c9aabd,51.2,High,"Claude Fable 5.1 (High, Default Fallback)",9d7d72cd-d95d-45a0-b109-4ad292c9aabd
+Gemini 3.7 Flash,76.1,High,Gemini 3.7 Flash (High),b2331108-72ed-415a-82d1-188633875bbc,39.1,High,Gemini 3.7 Flash (High),b2331108-72ed-415a-82d1-188633875bbc
+Gemini 3.8 Flash,76.3,High,Gemini 3.8 Flash (High),8a999846-4c1d-4ce7-a8b7-1310a7166fd7,40.9,High,Gemini 3.8 Flash (High),8a999846-4c1d-4ce7-a8b7-1310a7166fd7
+Grok 4.5,72.4,High,Grok 4.5 (High),794f69b5-cede-482b-b1cc-d769478497cd,38.8,High,Grok 4.5 (High),794f69b5-cede-482b-b1cc-d769478497cd
+Grok 4.6,76.8,High,Grok 4.6 (High),c8adc5cf-fd5a-407b-af51-dc3bede3e49c,44.3,High,Grok 4.6 (High),c8adc5cf-fd5a-407b-af51-dc3bede3e49c
+Grok 4.7,,,,,46.3,High,Grok 4.7 (High),272f5f03-aea9-4675-a244-2b753b618cdf
+Kimi K3,76.2,Max,Kimi K3 (Max),f7d2fc3e-1f7b-405f-818c-07952a4af78f,43.6,Max,Kimi K3 (Max),f7d2fc3e-1f7b-405f-818c-07952a4af78f

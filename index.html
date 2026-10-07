@@ -39,7 +39,7 @@
 
   --label-w: 17rem;
   --plot-gap: 1.5rem;
-  --plot-right: 9rem;
+  --plot-right: 10rem;
   --row-h: 30px;
   --row-h-2: 26px;
   --ghead-h: 28px;
@@ -424,7 +424,8 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
   transition: left .45s cubic-bezier(.3,.7,.2,1);
 }
 .val .mult { color: var(--ink-3); margin-left: 8px; }
-.val .sep { color: var(--ink-3); margin: 0 6px; }
+.val .tag { color: var(--ink-3); margin-right: 4px; }
+.val .tag.sep { margin-left: 10px; }
 .two .val { font-size: 11px; }
 
 /* Family headers */
@@ -442,7 +443,6 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
 }
 .ghead.first { border-top-color: transparent; }
 .ghead .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
-.ghead .range { color: var(--ink-3); letter-spacing: 0; text-transform: none; font-weight: 400; }
 .empty {
   padding: 48px 0; text-align: center; color: var(--ink-3);
 }
@@ -498,7 +498,7 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
 
 /* Mobile: the name moves above the price line */
 @media (max-width: 640px) {
-  :root { --label-w: 0px; --plot-gap: 0px; --plot-right: 8rem; --row-h: 48px; --row-h-2: 48px; }
+  :root { --label-w: 0px; --plot-gap: 0px; --plot-right: 10rem; --row-h: 48px; --row-h-2: 48px; }
   .row { grid-template-columns: 1fr; grid-template-rows: 22px 22px; align-content: center; }
   .lbl { justify-content: flex-start; text-align: left; }
   .row::before { inset: 0 -6px; }
@@ -836,10 +836,9 @@ function init(MODELS, meta) {
     const prov = MODELS.find(m => m.family === f).provider;
     const h = el('div', 'ghead');
     h.style.setProperty('--c', colorOf(prov));
-    const range = el('span', 'range');
-    h.append(el('span', 'sw'), el('span', null, f), range);
+    h.append(el('span', 'sw'), el('span', null, f));
     h.setAttribute('aria-hidden', 'true');
-    heads.set(f, { h, range });
+    heads.set(f, { h });
     $('rows').append(h);
   });
 
@@ -860,9 +859,9 @@ function init(MODELS, meta) {
       const bar = el('span', `bar ${METRIC_TAG[k]}` + (m.tier === 'long' ? ' long' : ''));
       const val = el('span', `val ${METRIC_TAG[k]}`);
       const price = el('span'), x = el('span', 'mult');
-      // In+out view: one label per row, "$in / $out ×N", on the output value.
+      // In+out view: one label per row, "in $in  out $out ×N", on the output value.
       const pre = el('span'), inPrice = el('span');
-      pre.append(inPrice, el('span', 'sep', '/'));
+      pre.append(el('span', 'tag', 'in'), inPrice, el('span', 'tag sep', 'out'));
       val.append(pre, price, x);
       track.append(bar, val);
       parts[k] = { bar, val, pre, inPrice, price, x };
@@ -982,10 +981,7 @@ function init(MODELS, meta) {
     let y = 0, first = true;
     items.forEach(it => {
       if (it.head) {
-        const { h, range } = heads.get(it.head);
-        const vals = it.ms.map(m => m[metric]);
-        const a = Math.min(...vals), b = Math.max(...vals);
-        range.textContent = (a === b ? credits(a) : `${credits(a)} – ${credits(b)}`) + ' credits';
+        const { h } = heads.get(it.head);
         h.classList.toggle('first', first);
         h.style.transform = `translateY(${y}px)`;
         shown.add(it.head);

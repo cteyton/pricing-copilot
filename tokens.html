@@ -418,7 +418,6 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
 }
 .ghead.first { border-top-color: transparent; }
 .ghead .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
-.ghead .range { color: var(--ink-3); letter-spacing: 0; text-transform: none; font-weight: 400; }
 .empty { padding: 48px 0; text-align: center; color: var(--ink-3); }
 
 /* Tooltip */
@@ -948,10 +947,9 @@ function init(MODELS, meta) {
     const prov = MODELS.find(m => m.family === f).provider;
     const h = el('div', 'ghead');
     h.style.setProperty('--c', colorOf(prov));
-    const range = el('span', 'range');
-    h.append(el('span', 'sw'), el('span', null, f), range);
+    h.append(el('span', 'sw'), el('span', null, f));
     h.setAttribute('aria-hidden', 'true');
-    heads.set(f, { h, range });
+    heads.set(f, { h });
     $('rows').append(h);
   });
 
@@ -1009,7 +1007,6 @@ function init(MODELS, meta) {
 
   // Amounts in the chosen unit: tokens, or agent requests of REQUEST_TOKENS each.
   const amount = n => state.unit === 'requests' ? tokens(n / REQUEST_TOKENS) : tokens(n);
-  const unitWord = () => state.unit === 'requests' ? 'agent requests' : 'tokens';
 
   const qualityLink = () => { const a = el('a', null, 'compare quality on page 3 →'); a.href = 'performance.html'; return a; };
 
@@ -1095,10 +1092,7 @@ function init(MODELS, meta) {
     let y = 0, first = true;
     if (ok) items.forEach(it => {
       if (it.head) {
-        const { h, range } = heads.get(it.head);
-        const vals = it.ms.map(m => B.get(m.id).total);
-        const a = Math.min(...vals), b = Math.max(...vals);
-        range.textContent = (a === b ? amount(a) : `${amount(a)} – ${amount(b)}`) + ' ' + unitWord();
+        const { h } = heads.get(it.head);
         h.classList.toggle('first', first);
         h.style.transform = `translateY(${y}px)`;
         shown.add(it.head);

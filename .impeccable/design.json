@@ -1,0 +1,576 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T15:22:19.028703+00:00",
+  "title": "Design System: Copilot pricing",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#fafaf9",
+        "tonalRamp": [
+          "oklch(15% 0.001 106.4)",
+          "oklch(27% 0.001 106.4)",
+          "oklch(39% 0.001 106.4)",
+          "oklch(51% 0.001 106.4)",
+          "oklch(63% 0.001 106.4)",
+          "oklch(75% 0.001 106.4)",
+          "oklch(85% 0.001 106.4)",
+          "oklch(95% 0.001 106.4)"
+        ]
+      },
+      "sheet": {
+        "role": "neutral",
+        "displayName": "Sheet",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(27% 0.000 89.9)",
+          "oklch(39% 0.000 89.9)",
+          "oklch(51% 0.000 89.9)",
+          "oklch(63% 0.000 89.9)",
+          "oklch(75% 0.000 89.9)",
+          "oklch(85% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Ledger Ink",
+        "canonical": "#141413",
+        "tonalRamp": [
+          "oklch(15% 0.002 106.6)",
+          "oklch(27% 0.002 106.6)",
+          "oklch(39% 0.002 106.6)",
+          "oklch(51% 0.002 106.6)",
+          "oklch(63% 0.002 106.6)",
+          "oklch(75% 0.002 106.6)",
+          "oklch(85% 0.002 106.6)",
+          "oklch(95% 0.002 106.6)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "canonical": "#5b5a56",
+        "tonalRamp": [
+          "oklch(15% 0.006 95.2)",
+          "oklch(27% 0.006 95.2)",
+          "oklch(39% 0.006 95.2)",
+          "oklch(51% 0.006 95.2)",
+          "oklch(63% 0.006 95.2)",
+          "oklch(75% 0.006 95.2)",
+          "oklch(85% 0.006 95.2)",
+          "oklch(95% 0.006 95.2)"
+        ]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Ink Faint",
+        "canonical": "#6f6d68",
+        "tonalRamp": [
+          "oklch(15% 0.008 88.7)",
+          "oklch(27% 0.008 88.7)",
+          "oklch(39% 0.008 88.7)",
+          "oklch(51% 0.008 88.7)",
+          "oklch(63% 0.008 88.7)",
+          "oklch(75% 0.008 88.7)",
+          "oklch(85% 0.008 88.7)",
+          "oklch(95% 0.008 88.7)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#e9e8e4",
+        "tonalRamp": [
+          "oklch(15% 0.005 95.1)",
+          "oklch(27% 0.005 95.1)",
+          "oklch(39% 0.005 95.1)",
+          "oklch(51% 0.005 95.1)",
+          "oklch(63% 0.005 95.1)",
+          "oklch(75% 0.005 95.1)",
+          "oklch(85% 0.005 95.1)",
+          "oklch(95% 0.005 95.1)"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Rule Strong",
+        "canonical": "#d6d4ce",
+        "tonalRamp": [
+          "oklch(15% 0.008 91.5)",
+          "oklch(27% 0.008 91.5)",
+          "oklch(39% 0.008 91.5)",
+          "oklch(51% 0.008 91.5)",
+          "oklch(63% 0.008 91.5)",
+          "oklch(75% 0.008 91.5)",
+          "oklch(85% 0.008 91.5)",
+          "oklch(95% 0.008 91.5)"
+        ]
+      },
+      "wash": {
+        "role": "neutral",
+        "displayName": "Wash",
+        "canonical": "#f3f2ef",
+        "tonalRamp": [
+          "oklch(15% 0.004 91.4)",
+          "oklch(27% 0.004 91.4)",
+          "oklch(39% 0.004 91.4)",
+          "oklch(51% 0.004 91.4)",
+          "oklch(63% 0.004 91.4)",
+          "oklch(75% 0.004 91.4)",
+          "oklch(85% 0.004 91.4)",
+          "oklch(95% 0.004 91.4)"
+        ]
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "Paper (dark)",
+        "canonical": "#151514",
+        "tonalRamp": [
+          "oklch(15% 0.002 106.6)",
+          "oklch(27% 0.002 106.6)",
+          "oklch(39% 0.002 106.6)",
+          "oklch(51% 0.002 106.6)",
+          "oklch(63% 0.002 106.6)",
+          "oklch(75% 0.002 106.6)",
+          "oklch(85% 0.002 106.6)",
+          "oklch(95% 0.002 106.6)"
+        ]
+      },
+      "sheet-dark": {
+        "role": "neutral",
+        "displayName": "Sheet (dark)",
+        "canonical": "#1c1c1b",
+        "tonalRamp": [
+          "oklch(15% 0.002 106.6)",
+          "oklch(27% 0.002 106.6)",
+          "oklch(39% 0.002 106.6)",
+          "oklch(51% 0.002 106.6)",
+          "oklch(63% 0.002 106.6)",
+          "oklch(75% 0.002 106.6)",
+          "oklch(85% 0.002 106.6)",
+          "oklch(95% 0.002 106.6)"
+        ]
+      },
+      "ink-dark": {
+        "role": "primary",
+        "displayName": "Ledger Ink (dark)",
+        "canonical": "#f4f3ef",
+        "tonalRamp": [
+          "oklch(15% 0.005 95.1)",
+          "oklch(27% 0.005 95.1)",
+          "oklch(39% 0.005 95.1)",
+          "oklch(51% 0.005 95.1)",
+          "oklch(63% 0.005 95.1)",
+          "oklch(75% 0.005 95.1)",
+          "oklch(85% 0.005 95.1)",
+          "oklch(95% 0.005 95.1)"
+        ]
+      },
+      "ink-soft-dark": {
+        "role": "neutral",
+        "displayName": "Ink Soft (dark)",
+        "canonical": "#b9b7b0",
+        "tonalRamp": [
+          "oklch(15% 0.010 93.6)",
+          "oklch(27% 0.010 93.6)",
+          "oklch(39% 0.010 93.6)",
+          "oklch(51% 0.010 93.6)",
+          "oklch(63% 0.010 93.6)",
+          "oklch(75% 0.010 93.6)",
+          "oklch(85% 0.010 93.6)",
+          "oklch(95% 0.010 93.6)"
+        ]
+      },
+      "ink-faint-dark": {
+        "role": "neutral",
+        "displayName": "Ink Faint (dark)",
+        "canonical": "#85837d",
+        "tonalRamp": [
+          "oklch(15% 0.009 91.5)",
+          "oklch(27% 0.009 91.5)",
+          "oklch(39% 0.009 91.5)",
+          "oklch(51% 0.009 91.5)",
+          "oklch(63% 0.009 91.5)",
+          "oklch(75% 0.009 91.5)",
+          "oklch(85% 0.009 91.5)",
+          "oklch(95% 0.009 91.5)"
+        ]
+      },
+      "rule-dark": {
+        "role": "neutral",
+        "displayName": "Rule (dark)",
+        "canonical": "#2a2a28",
+        "tonalRamp": [
+          "oklch(15% 0.004 106.6)",
+          "oklch(27% 0.004 106.6)",
+          "oklch(39% 0.004 106.6)",
+          "oklch(51% 0.004 106.6)",
+          "oklch(63% 0.004 106.6)",
+          "oklch(75% 0.004 106.6)",
+          "oklch(85% 0.004 106.6)",
+          "oklch(95% 0.004 106.6)"
+        ]
+      },
+      "rule-strong-dark": {
+        "role": "neutral",
+        "displayName": "Rule Strong (dark)",
+        "canonical": "#3a3a37",
+        "tonalRamp": [
+          "oklch(15% 0.005 106.7)",
+          "oklch(27% 0.005 106.7)",
+          "oklch(39% 0.005 106.7)",
+          "oklch(51% 0.005 106.7)",
+          "oklch(63% 0.005 106.7)",
+          "oklch(75% 0.005 106.7)",
+          "oklch(85% 0.005 106.7)",
+          "oklch(95% 0.005 106.7)"
+        ]
+      },
+      "wash-dark": {
+        "role": "neutral",
+        "displayName": "Wash (dark)",
+        "canonical": "#222221",
+        "tonalRamp": [
+          "oklch(15% 0.002 106.5)",
+          "oklch(27% 0.002 106.5)",
+          "oklch(39% 0.002 106.5)",
+          "oklch(51% 0.002 106.5)",
+          "oklch(63% 0.002 106.5)",
+          "oklch(75% 0.002 106.5)",
+          "oklch(85% 0.002 106.5)",
+          "oklch(95% 0.002 106.5)"
+        ]
+      },
+      "openai-blue": {
+        "role": "secondary",
+        "displayName": "OpenAI Blue",
+        "canonical": "#2a78d6",
+        "tonalRamp": [
+          "oklch(15% 0.163 255.5)",
+          "oklch(27% 0.163 255.5)",
+          "oklch(39% 0.163 255.5)",
+          "oklch(51% 0.163 255.5)",
+          "oklch(63% 0.163 255.5)",
+          "oklch(75% 0.163 255.5)",
+          "oklch(85% 0.163 255.5)",
+          "oklch(95% 0.163 255.5)"
+        ]
+      },
+      "anthropic-clay": {
+        "role": "secondary",
+        "displayName": "Anthropic Clay",
+        "canonical": "#eb6834",
+        "tonalRamp": [
+          "oklch(15% 0.175 40.6)",
+          "oklch(27% 0.175 40.6)",
+          "oklch(39% 0.175 40.6)",
+          "oklch(51% 0.175 40.6)",
+          "oklch(63% 0.175 40.6)",
+          "oklch(75% 0.175 40.6)",
+          "oklch(85% 0.175 40.6)",
+          "oklch(95% 0.175 40.6)"
+        ]
+      },
+      "google-green": {
+        "role": "secondary",
+        "displayName": "Google Green",
+        "canonical": "#1baf7a",
+        "tonalRamp": [
+          "oklch(15% 0.141 162.1)",
+          "oklch(27% 0.141 162.1)",
+          "oklch(39% 0.141 162.1)",
+          "oklch(51% 0.141 162.1)",
+          "oklch(63% 0.141 162.1)",
+          "oklch(75% 0.141 162.1)",
+          "oklch(85% 0.141 162.1)",
+          "oklch(95% 0.141 162.1)"
+        ]
+      },
+      "microsoft-amber": {
+        "role": "secondary",
+        "displayName": "Microsoft Amber",
+        "canonical": "#eda100",
+        "tonalRamp": [
+          "oklch(15% 0.161 75.1)",
+          "oklch(27% 0.161 75.1)",
+          "oklch(39% 0.161 75.1)",
+          "oklch(51% 0.161 75.1)",
+          "oklch(63% 0.161 75.1)",
+          "oklch(75% 0.161 75.1)",
+          "oklch(85% 0.161 75.1)",
+          "oklch(95% 0.161 75.1)"
+        ]
+      },
+      "xai-pink": {
+        "role": "secondary",
+        "displayName": "xAI Pink",
+        "canonical": "#e87ba4",
+        "tonalRamp": [
+          "oklch(15% 0.141 357.4)",
+          "oklch(27% 0.141 357.4)",
+          "oklch(39% 0.141 357.4)",
+          "oklch(51% 0.141 357.4)",
+          "oklch(63% 0.141 357.4)",
+          "oklch(75% 0.141 357.4)",
+          "oklch(85% 0.141 357.4)",
+          "oklch(95% 0.141 357.4)"
+        ]
+      },
+      "moonshot-green": {
+        "role": "secondary",
+        "displayName": "Moonshot Green",
+        "canonical": "#008300",
+        "tonalRamp": [
+          "oklch(15% 0.180 142.5)",
+          "oklch(27% 0.180 142.5)",
+          "oklch(39% 0.180 142.5)",
+          "oklch(51% 0.180 142.5)",
+          "oklch(63% 0.180 142.5)",
+          "oklch(75% 0.180 142.5)",
+          "oklch(85% 0.180 142.5)",
+          "oklch(95% 0.180 142.5)"
+        ]
+      },
+      "other-stone": {
+        "role": "secondary",
+        "displayName": "Other Stone",
+        "canonical": "#8f8d87",
+        "tonalRamp": [
+          "oklch(15% 0.009 91.5)",
+          "oklch(27% 0.009 91.5)",
+          "oklch(39% 0.009 91.5)",
+          "oklch(51% 0.009 91.5)",
+          "oklch(63% 0.009 91.5)",
+          "oklch(75% 0.009 91.5)",
+          "oklch(85% 0.009 91.5)",
+          "oklch(95% 0.009 91.5)"
+        ]
+      },
+      "better-green": {
+        "role": "tertiary",
+        "displayName": "Better Green",
+        "canonical": "#1a7a4c",
+        "tonalRamp": [
+          "oklch(15% 0.113 156.9)",
+          "oklch(27% 0.113 156.9)",
+          "oklch(39% 0.113 156.9)",
+          "oklch(51% 0.113 156.9)",
+          "oklch(63% 0.113 156.9)",
+          "oklch(75% 0.113 156.9)",
+          "oklch(85% 0.113 156.9)",
+          "oklch(95% 0.113 156.9)"
+        ]
+      },
+      "worse-rust": {
+        "role": "tertiary",
+        "displayName": "Worse Rust",
+        "canonical": "#b2431f",
+        "tonalRamp": [
+          "oklch(15% 0.153 37.6)",
+          "oklch(27% 0.153 37.6)",
+          "oklch(39% 0.153 37.6)",
+          "oklch(51% 0.153 37.6)",
+          "oklch(63% 0.153 37.6)",
+          "oklch(75% 0.153 37.6)",
+          "oklch(85% 0.153 37.6)",
+          "oklch(95% 0.153 37.6)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The page's question as its H1."
+      },
+      "display-start": {
+        "displayName": "Display (start page)",
+        "purpose": "The start page's larger H1."
+      },
+      "takeaway": {
+        "displayName": "Takeaway",
+        "purpose": "Bold-led answer sentence above each chart."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "Intro paragraph under the H1."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanations, tables, tooltips."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Segmented options, filter buttons, chips, step names."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Prices, credits, counts, axis ticks; tabular numerals."
+      },
+      "data-label": {
+        "displayName": "Data label",
+        "purpose": "Uppercase mono labels naming data, never above a heading."
+      }
+    },
+    "shadows": [
+      {
+        "name": "selected-lift",
+        "value": "0 1px 2px rgb(0 0 0 / .06)",
+        "purpose": "Current segment or current step."
+      },
+      {
+        "name": "tooltip",
+        "value": "0 8px 24px rgb(0 0 0 / .08)",
+        "purpose": "Chart tooltips and glossary pop-ups."
+      },
+      {
+        "name": "floating-panel",
+        "value": "0 12px 32px rgb(0 0 0 / .12), 0 2px 6px rgb(0 0 0 / .05)",
+        "purpose": "Filter panels and the folded nav list."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state",
+        "value": ".15s ease",
+        "purpose": "Hover and selection colour/background changes."
+      },
+      {
+        "name": "pop-in",
+        "value": ".18s cubic-bezier(.2, .8, .2, 1)",
+        "purpose": "Panels fade in and drop 4px; chevrons rotate 180°. Disabled under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "640px"
+      },
+      {
+        "name": "one-column",
+        "value": "900px"
+      },
+      {
+        "name": "nav-fold",
+        "value": "860px (masthead container)"
+      },
+      {
+        "name": "nav-compact",
+        "value": "1080px (masthead container)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Filter Button",
+      "kind": "button",
+      "refersTo": "filter-button",
+      "description": "Summary button in the filter bar; opens a floating panel.",
+      "html": "<button class=\"ds-fb\" aria-expanded=\"false\"><span class=\"ds-k\">Mix</span><span class=\"ds-v\">90 / 10</span><svg viewBox=\"0 0 12 12\" aria-hidden=\"true\"><path d=\"M3 4.5 6 7.5 9 4.5\"/></svg></button>",
+      "css": ".ds-fb{--ink:#141413;--ink-2:#5b5a56;--ink-3:#6f6d68;--surface:#fff;--hover:#f3f2ef;--rule:#e9e8e4;--rule-strong:#d6d4ce;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 12px;border:1px solid var(--rule-strong);border-radius:999px;background:var(--surface);color:var(--ink);font:400 13px/1 Geist,system-ui,sans-serif;cursor:pointer;transition:background .15s,border-color .15s}.ds-fb:hover{background:var(--hover)}.ds-fb[aria-expanded=true]{background:var(--hover);border-color:var(--ink-3)}.ds-fb:focus-visible{outline:2px solid var(--ink);outline-offset:2px}.ds-k{color:var(--ink-3)}.ds-v{font-weight:500;font-variant-numeric:tabular-nums}.ds-fb svg{width:12px;height:12px;fill:none;stroke:var(--ink-3);stroke-width:1.6;stroke-linecap:round}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": "segmented",
+      "description": "Two-to-three option switch for chart settings.",
+      "html": "<div class=\"ds-seg\"><button aria-pressed=\"true\">Coding</button><button aria-pressed=\"false\">Intelligence</button></div>",
+      "css": ".ds-seg{--ink:#141413;--ink-2:#5b5a56;--ink-3:#6f6d68;--surface:#fff;--hover:#f3f2ef;--rule:#e9e8e4;--rule-strong:#d6d4ce;display:inline-flex;padding:3px;border-radius:8px;background:var(--hover);border:1px solid var(--rule)}.ds-seg button{appearance:none;border:0;background:transparent;color:var(--ink-2);font:500 13px/1 Geist,system-ui,sans-serif;padding:7px 12px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}.ds-seg button:hover{color:var(--ink)}.ds-seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0/.06),0 0 0 1px var(--rule)}.ds-seg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}"
+    },
+    {
+      "name": "Provider Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Toggle for one provider, with its swatch and model count.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\" style=\"--c:#eb6834\"><span class=\"ds-sw\"></span>Anthropic<span class=\"ds-n\">12</span></button><button class=\"ds-chip\" aria-pressed=\"false\" style=\"--c:#2a78d6\"><span class=\"ds-sw\"></span>OpenAI<span class=\"ds-n\">13</span></button>",
+      "css": ".ds-chip{--ink:#141413;--ink-2:#5b5a56;--ink-3:#6f6d68;--surface:#fff;--hover:#f3f2ef;--rule:#e9e8e4;--rule-strong:#d6d4ce;display:inline-flex;align-items:center;gap:8px;margin:2px;border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink);font:400 13px/1 Geist,system-ui,sans-serif;padding:7px 12px 7px 10px;border-radius:999px;cursor:pointer}.ds-chip:hover{background:var(--hover)}.ds-chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}.ds-sw{width:8px;height:8px;border-radius:50%;background:var(--c)}.ds-n{font:400 11px/1 'Geist Mono',ui-monospace,monospace;color:var(--ink-3)}.ds-chip[aria-pressed=false]{background:transparent;color:var(--ink-3);border-style:dashed}.ds-chip[aria-pressed=false] .ds-sw{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink-3)}"
+    },
+    {
+      "name": "Step Navigation",
+      "kind": "nav",
+      "refersTo": "step-rail",
+      "description": "The five detail pages as numbered steps with their questions.",
+      "html": "<ol class=\"ds-steps\"><li><a href=\"#\"><span class=\"n\">1</span><span class=\"t\">Cost</span><span class=\"q\">What does a model cost?</span></a></li><li><a href=\"#\" aria-current=\"page\"><span class=\"n\">2</span><span class=\"t\">Budget</span><span class=\"q\">What does my budget buy?</span></a></li><li><a href=\"#\"><span class=\"n\">3</span><span class=\"t\">Value</span><span class=\"q\">Which model is worth it?</span></a></li></ol>",
+      "css": ".ds-steps{--ink:#141413;--ink-2:#5b5a56;--ink-3:#6f6d68;--surface:#fff;--hover:#f3f2ef;--rule:#e9e8e4;--rule-strong:#d6d4ce;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2px;margin:0;padding:3px;list-style:none;background:var(--hover);border:1px solid var(--rule);border-radius:12px}.ds-steps a{display:grid;grid-template-columns:auto 1fr;column-gap:8px;row-gap:3px;align-items:baseline;padding:8px 12px 9px;border:1px solid transparent;border-radius:9px;color:var(--ink-2);text-decoration:none;transition:background .15s,color .15s}.ds-steps a:hover{color:var(--ink)}.ds-steps a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}.ds-steps .n{font:500 11px/1 'Geist Mono',monospace;color:var(--ink-3)}.ds-steps .t{font:500 13px/1 Geist,system-ui,sans-serif}.ds-steps .q{grid-column:2;font:400 12px/1.3 Geist,system-ui,sans-serif;color:var(--ink-3)}.ds-steps a[aria-current=page]{background:var(--surface);color:var(--ink);border-color:var(--rule-strong);box-shadow:0 1px 2px rgb(0 0 0/.06)}"
+    },
+    {
+      "name": "Number Input",
+      "kind": "input",
+      "refersTo": "filter-panel",
+      "description": "Numeric field for budget and threshold.",
+      "html": "<input class=\"ds-num\" type=\"number\" value=\"6000\" aria-label=\"Monthly budget\">",
+      "css": ".ds-num{--ink:#141413;--ink-2:#5b5a56;--ink-3:#6f6d68;--surface:#fff;--hover:#f3f2ef;--rule:#e9e8e4;--rule-strong:#d6d4ce;width:7rem;padding:7px 10px;border:1px solid var(--rule-strong);border-radius:8px;background:var(--surface);color:var(--ink);font:500 13px/1 'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}.ds-num:focus-visible{outline:2px solid var(--ink);outline-offset:2px}"
+    },
+    {
+      "name": "Filter Panel",
+      "kind": "card",
+      "refersTo": "filter-panel",
+      "description": "Floating panel opened from a filter button.",
+      "html": "<div class=\"ds-pop\"><div class=\"ds-h\">Input / output mix</div><input type=\"range\" value=\"90\"><p class=\"ds-hint\">Coding agents re-read files and history at every step, so most of what they use is input.</p></div>",
+      "css": ".ds-pop{--ink:#141413;--ink-2:#5b5a56;--ink-3:#6f6d68;--surface:#fff;--hover:#f3f2ef;--rule:#e9e8e4;--rule-strong:#d6d4ce;width:280px;padding:14px 16px 16px;background:var(--surface);border:1px solid var(--rule-strong);border-radius:12px;box-shadow:0 12px 32px rgb(0 0 0/.12),0 2px 6px rgb(0 0 0/.05);color:var(--ink);font-family:Geist,system-ui,sans-serif}.ds-h{font:500 13px/1.2 Geist,system-ui,sans-serif;margin-bottom:12px}.ds-pop input{width:100%;accent-color:var(--ink)}.ds-hint{margin:12px 0 0;color:var(--ink-3);font-size:12px;line-height:1.4}"
+    },
+    {
+      "name": "Chart Frame",
+      "kind": "card",
+      "refersTo": "chart-frame",
+      "description": "Bordered sheet holding a chart; flat at rest.",
+      "html": "<div class=\"ds-frame\"><svg viewBox=\"0 0 240 90\" width=\"100%\"><line x1=\"0\" y1=\"80\" x2=\"240\" y2=\"80\" stroke=\"#e9e8e4\"/><circle cx=\"60\" cy=\"50\" r=\"5\" fill=\"#eb6834\"/><circle cx=\"140\" cy=\"30\" r=\"5\" fill=\"#2a78d6\"/><circle cx=\"200\" cy=\"62\" r=\"5\" fill=\"#1baf7a\"/></svg></div>",
+      "css": ".ds-frame{--ink:#141413;--ink-2:#5b5a56;--ink-3:#6f6d68;--surface:#fff;--hover:#f3f2ef;--rule:#e9e8e4;--rule-strong:#d6d4ce;width:280px;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:8px 4px 4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Price Ledger",
+    "overview": "**Creative North Star: \"The Price Ledger\"**\n\nThe site reads like a well-kept ledger: warm off-white paper by day, near-black paper by night, neutral ink, and numbers set in a mono face so they line up and compare at a glance. Nothing on the page competes with the figures. The interface is quiet so that a price gap of 47× or a score of 79.1 stands out on its own.\n\nColour is rationed. The only hues are the six provider colours, which identify a model wherever it appears (a chart dot, a bar, a chip, a swatch in a table), plus a green/rust pair that marks better and worse on the comparison table. Everything else is ink on paper, separated by hairline rules and one-step tonal washes rather than boxes and shadows.\n\nDensity is that of a careful reference work: generous around the question and its answer, tight inside controls and tables. Every page leads with a plain-language question as its heading, answers it in a bold takeaway sentence, then shows the chart. Controls stay out of the way: assumptions and filters fold into a single bar of summary buttons, and chart settings sit in a small toolbar above the chart.",
+    "keyCharacteristics": [
+      "Neutral paper and ink in two themes (light and dark), switched by the reader or the OS.",
+      "Six provider hues as the only decorative colour; they always mean \"this provider\".",
+      "Geist for words, Geist Mono for figures, with tabular numerals everywhere numbers are compared.",
+      "Flat surfaces divided by 1px rules; shadows only on things that float.",
+      "Pills for things you toggle or open, softly rounded rectangles for things that hold content."
+    ],
+    "rules": [
+      {
+        "name": "The Provider-Only Hue Rule",
+        "body": "A saturated colour on screen means a provider. Don't use the provider hues for status, emphasis or decoration, and don't introduce a brand accent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Theme Parity Rule",
+        "body": "Every colour token exists in both themes, and the dark values are defined under both `prefers-color-scheme: dark` (unless the reader chose light) and an explicit `data-theme=\"dark\"`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Any number a reader might compare with another number is set with tabular numerals, in Geist Mono when it stands alone.",
+        "section": "typography"
+      },
+      {
+        "name": "The Data Label Rule",
+        "body": "Uppercase mono labels name a piece of data or a table group. They never sit above a heading as a kicker.",
+        "section": "typography"
+      },
+      {
+        "name": "The Float-Only Shadow Rule",
+        "body": "If it doesn't float above the page or mark the current choice, it has no shadow. Cards, the chart frame and the answer card are bordered sheets, not lifted ones.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** lead every page with its question as the H1 and a bold takeaway sentence before the chart.",
+      "**Do** keep provider colours consistent across every view: the same model is the same hue on every page.",
+      "**Do** set compared numbers in Geist Mono with tabular numerals.",
+      "**Do** put assumptions and model filters in the filter bar as summary buttons, and chart-drawing settings in the toolbar above the chart.",
+      "**Do** move explanations into the glossary \"?\" pop-up or a filter panel's single hint line instead of leaving them under every control.",
+      "**Do** define every colour for both themes and check AA contrast in each."
+    ],
+    "donts": [
+      "**Don't** add a brand accent colour or use provider hues for status or emphasis.",
+      "**Don't** put a shadow on a resting card, chart or table: only floating layers and the current selection are lifted.",
+      "**Don't** put an uppercase mono label above a heading as a kicker.",
+      "**Don't** bring back a sidebar of stacked filters or a tab strip that shrinks its labels as the window narrows.",
+      "**Don't** mention scripts, data files or maintenance steps in visible copy."
+    ]
+  }
+}

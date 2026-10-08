@@ -55,10 +55,21 @@ node --env-file=.env scripts/update-scores.mjs   # needs ARTIFICIAL_INTELLIGENCE
 
 Run manually (not in CI). Same safeguards as the pricing script: nothing is written when unchanged or when fewer than half the previous models match. `SCORES_SOURCE=path/to/response.json` parses a saved API response instead.
 
+## Release dates
+
+- `data/release-dates.csv`: hand-maintained release history (`company,model,release_date`, ISO dates), sorted by date. It covers more models than Copilot offers. `company` and `model` are the vendor's names, not Copilot's.
+- `data/release-mapping.json`: map from the Copilot `model` name to the `model` in `release-dates.csv` (e.g. `Claude Opus 4.8 (fast mode) (preview)` → `Claude Opus 4.8`). `null` marks a model with no known date. Add an entry, and a dated row if needed, when Copilot adds a model.
+
+```sh
+node scripts/check-release-dates.mjs
+```
+
+Read-only. Fails on a bad date, a duplicate model, or a mapping that points to a missing row; warns about Copilot models with no mapping or no date.
+
 ## Update
 
 ```sh
-./update.sh   # pricing then scores (needs .env for the scores step)
+./update.sh   # pricing, scores (needs .env for the scores step), then the release-date check
 ```
 
 Or each script on its own:

@@ -1,0 +1,180 @@
+company,model,release_date
+OpenAI,GPT-3.5,2022-11-30
+Anthropic,Claude 1,2023-03-14
+OpenAI,GPT-4,2023-03-14
+Z.ai,ChatGLM-6B,2023-03-14
+Google,Bard,2023-03-21
+Anthropic,Claude 2,2023-07-11
+Qwen,Qwen-7B,2023-08-03
+Anthropic,Claude Instant 1.2,2023-08-09
+Moonshot AI,Kimi Chat,2023-10-09
+SpaceXAI (Grok),Grok-1,2023-11-03
+OpenAI,GPT-4 Turbo,2023-11-06
+Anthropic,Claude 2.1,2023-11-21
+Qwen,Qwen-72B,2023-11-30
+Google,Gemini 1.0 Nano,2023-12-06
+Google,Gemini 1.0 Pro,2023-12-13
+Z.ai,GLM-4,2024-01-16
+Qwen,Qwen1.5,2024-02-04
+Google,Gemini 1.0 Ultra,2024-02-08
+Google,Gemini 1.5 Pro,2024-02-15
+Google,Gemma 1,2024-02-21
+Anthropic,Claude 3 Haiku,2024-03-04
+Anthropic,Claude 3 Opus,2024-03-04
+Anthropic,Claude 3 Sonnet,2024-03-04
+SpaceXAI (Grok),Grok-1.5,2024-03-29
+OpenAI,GPT-4o,2024-05-13
+Google,Gemini 1.5 Flash,2024-05-14
+Z.ai,GLM-4-9B,2024-06-05
+Qwen,Qwen2,2024-06-06
+Anthropic,Claude 3.5 Sonnet,2024-06-20
+Google,Gemma 2,2024-06-27
+OpenAI,GPT-4o mini,2024-07-18
+SpaceXAI (Grok),Grok-2,2024-08-14
+Z.ai,GLM-4-Plus,2024-08-29
+OpenAI,o1-mini,2024-09-12
+OpenAI,o1-preview,2024-09-12
+Qwen,Qwen2.5,2024-09-19
+Google,Gemini 1.5 Flash-002,2024-09-24
+Google,Gemini 1.5 Pro-002,2024-09-24
+Google,Gemini 1.5 Flash-8B,2024-10-03
+Anthropic,Claude 3.5 Haiku,2024-10-22
+Anthropic,Claude 3.5 Sonnet (upgraded),2024-10-22
+Qwen,Qwen2.5-Coder,2024-11-12
+Qwen,QwQ-32B-Preview,2024-11-28
+OpenAI,o1,2024-12-05
+Moonshot AI,Kimi K1.5,2025-01-20
+Qwen,Qwen2.5-Max,2025-01-28
+Google,Gemini 2.0 Flash,2025-01-30
+OpenAI,o3-mini,2025-01-31
+OpenAI,o3-mini-high,2025-01-31
+Google,Gemini 2.0 Flash-Lite,2025-02-05
+Google,Gemini 2.0 Pro,2025-02-05
+SpaceXAI (Grok),Grok 3,2025-02-17
+SpaceXAI (Grok),Grok 3 mini,2025-02-17
+Anthropic,Claude 3.7 Sonnet,2025-02-24
+OpenAI,GPT-4.5,2025-02-27
+Qwen,QwQ-32B,2025-03-06
+Google,Gemma 3,2025-03-12
+OpenAI,o1-pro,2025-03-19
+Google,Gemini 2.5 Pro,2025-03-25
+Moonshot AI,Kimi-VL,2025-04-10
+OpenAI,GPT-4.1,2025-04-14
+OpenAI,GPT-4.1 mini,2025-04-14
+OpenAI,GPT-4.1 nano,2025-04-14
+OpenAI,o3,2025-04-16
+OpenAI,o4-mini,2025-04-16
+OpenAI,o4-mini-high,2025-04-16
+Google,Gemini 2.5 Flash,2025-04-17
+Qwen,Qwen3,2025-04-29
+Anthropic,Claude Opus 4,2025-05-22
+Anthropic,Claude Sonnet 4,2025-05-22
+OpenAI,o3-pro,2025-06-10
+Google,Gemini 2.5 Flash-Lite,2025-06-17
+Moonshot AI,Kimi-Dev,2025-06-17
+SpaceXAI (Grok),Grok 4,2025-07-09
+SpaceXAI (Grok),Grok 4 Heavy,2025-07-09
+Moonshot AI,Kimi K2,2025-07-11
+Qwen,Qwen3-Coder,2025-07-22
+Z.ai,GLM-4.5,2025-07-28
+Z.ai,GLM-4.5-Air,2025-07-28
+Anthropic,Claude Opus 4.1,2025-08-05
+OpenAI,gpt-oss-120b,2025-08-05
+OpenAI,gpt-oss-20b,2025-08-05
+OpenAI,GPT-5,2025-08-07
+OpenAI,GPT-5 Pro,2025-08-07
+OpenAI,GPT-5 mini,2025-08-07
+OpenAI,GPT-5 nano,2025-08-07
+SpaceXAI (Grok),Grok 2.5,2025-08-23
+SpaceXAI (Grok),Grok Code Fast 1,2025-08-28
+Moonshot AI,Kimi K2 (0905),2025-09-05
+Qwen,Qwen3-Next,2025-09-11
+OpenAI,GPT-5-Codex,2025-09-15
+SpaceXAI (Grok),Grok 4 Fast,2025-09-19
+Qwen,Qwen3-Max,2025-09-24
+Anthropic,Claude Sonnet 4.5,2025-09-29
+Z.ai,GLM-4.6,2025-09-30
+Anthropic,Claude Haiku 4.5,2025-10-15
+SpaceXAI (Grok),Composer,2025-10-29
+Moonshot AI,Kimi Linear,2025-10-30
+Moonshot AI,Kimi K2 Thinking,2025-11-06
+OpenAI,GPT-5-Codex-Mini,2025-11-07
+OpenAI,GPT-5.1,2025-11-12
+SpaceXAI (Grok),Grok 4.1,2025-11-17
+Google,Gemini 3.0 Pro,2025-11-18
+OpenAI,GPT-5.1-Codex-Max,2025-11-19
+SpaceXAI (Grok),Grok 4.1 Fast,2025-11-19
+Anthropic,Claude Opus 4.5,2025-11-24
+OpenAI,GPT-5.2,2025-12-11
+Google,Gemini 3.0 Flash,2025-12-17
+Z.ai,GLM-4.7,2025-12-22
+Moonshot AI,Kimi K2.5,2026-01-27
+Qwen,Qwen3-Coder-Next,2026-02-03
+Anthropic,Claude Opus 4.6,2026-02-05
+OpenAI,GPT-5.3-Codex,2026-02-05
+SpaceXAI (Grok),Composer 1.5,2026-02-09
+OpenAI,GPT-5.3-Codex-Spark,2026-02-12
+Z.ai,GLM-5,2026-02-12
+Qwen,Qwen3.5,2026-02-16
+Qwen,Qwen3.5-Plus,2026-02-16
+Anthropic,Claude Sonnet 4.6,2026-02-17
+SpaceXAI (Grok),Grok 4.20 Beta,2026-02-17
+Google,Gemini 3.1 Pro,2026-02-19
+Google,Gemini 3.1 Flash-Lite,2026-03-03
+OpenAI,GPT-5.4,2026-03-05
+OpenAI,GPT-5.4-Pro,2026-03-05
+OpenAI,GPT-5.4 mini,2026-03-17
+OpenAI,GPT-5.4 nano,2026-03-17
+SpaceXAI (Grok),Composer 2,2026-03-19
+Google,Gemma 4,2026-04-02
+Qwen,Qwen3.6-Plus,2026-04-02
+Z.ai,GLM-5.1,2026-04-07
+Anthropic,Claude Opus 4.7,2026-04-16
+Qwen,Qwen3.6,2026-04-16
+SpaceXAI (Grok),Grok 4.3 Beta,2026-04-17
+Moonshot AI,Kimi K2.6,2026-04-21
+OpenAI,GPT-5.5,2026-04-23
+OpenAI,GPT-5.5-Pro,2026-04-23
+SpaceXAI (Grok),Composer 2.5,2026-05-18
+Google,Gemini 3.5 Flash,2026-05-19
+Qwen,Qwen3.7-Max,2026-05-20
+Anthropic,Claude Opus 4.8,2026-05-28
+Qwen,Qwen3.7-Plus,2026-06-01
+Anthropic,Claude Fable 5,2026-06-09
+Anthropic,Claude Mythos 5,2026-06-09
+Moonshot AI,Kimi K2.7 Code,2026-06-12
+Z.ai,GLM-5.2,2026-06-16
+OpenAI,GPT-5.5-Cyber,2026-06-22
+OpenAI,GPT-5.6 Luna,2026-06-26
+OpenAI,GPT-5.6 Sol,2026-06-26
+OpenAI,GPT-5.6 Terra,2026-06-26
+Anthropic,Claude Sonnet 5,2026-06-30
+SpaceXAI (Grok),Grok 4.5,2026-07-08
+Moonshot AI,Kimi K3,2026-07-16
+Google,Gemini 3.5 Flash Cyber,2026-07-21
+Google,Gemini 3.5 Flash-Lite,2026-07-21
+Google,Gemini 3.6 Flash,2026-07-21
+Anthropic,Claude Opus 5,2026-07-24
+Qwen,Qwen3.8-Max,2026-08-03
+OpenAI,GPT-5.6-Cyber,2026-08-10
+Microsoft,MAI-Code-1.1-Flash,2026-08-11
+SpaceXAI (Grok),Grok 4.6,2026-08-12
+Google,Gemini 3.7 Flash,2026-08-13
+Qwen,Qwen3.8-27B,2026-08-14
+Z.ai,GLM-5.3,2026-08-14
+Qwen,Qwen3.8-Flash-Next,2026-08-26
+Z.ai,GLM-5.3-Flash,2026-08-26
+Anthropic,Claude Fable 5.1,2026-09-01
+Anthropic,Claude Mythos 5.1,2026-09-01
+Google,Gemini 3.8 Flash,2026-09-02
+Google,Gemini 3.8 Flash Cyber,2026-09-02
+Qwen,Qwen3.8-Max-0902,2026-09-02
+OpenAI,GPT-6 Astra,2026-09-03
+SpaceXAI (Grok),Grok 4.7,2026-09-21
+Anthropic,Claude Opus 5.5,2026-09-22
+OpenAI,GPT-6 Luna,2026-09-22
+OpenAI,GPT-6 Sol,2026-09-22
+Anthropic,Claude Sonnet 5.5,2026-09-28
+OpenAI,GPT-6.1 Sol,2026-09-29
+Google,Gemini 4 Argon,2026-09-30
+Anthropic,Claude Haiku 5.5,2026-10-07

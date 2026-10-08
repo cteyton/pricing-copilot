@@ -36,12 +36,99 @@ window.CopilotShared = (() => {
   style.textContent = css;
   document.head.append(style);
 
-  // On phones the tab strip scrolls sideways: bring the current page's tab into view.
-  const tabs = document.querySelector('.site-nav .tabs');
-  const current = tabs?.querySelector('[aria-current="page"]');
-  if (current && tabs.scrollWidth > tabs.clientWidth) {
-    const left = current.getBoundingClientRect().left - tabs.getBoundingClientRect().left;
-    tabs.scrollLeft = left - (tabs.clientWidth - current.offsetWidth) / 2;
+  // Disclosure panels: the narrow-screen page list and the filter bar's panels.
+  // One open at a time; Esc or a click outside closes it.
+  let openBtn = null;
+  function closePanel(focus) {
+    if (!openBtn) return;
+    const btn = openBtn;
+    openBtn = null;
+    btn.setAttribute('aria-expanded', 'false');
+    if (btn.classList.contains('steps-btn')) btn.closest('.site-nav').classList.remove('open');
+    else document.getElementById(btn.getAttribute('aria-controls')).hidden = true;
+    if (focus) btn.focus();
+  }
+  function openPanel(btn) {
+    closePanel(false);
+    openBtn = btn;
+    btn.setAttribute('aria-expanded', 'true');
+    if (btn.classList.contains('steps-btn')) { btn.closest('.site-nav').classList.add('open'); return; }
+    const pop = document.getElementById(btn.getAttribute('aria-controls'));
+    pop.hidden = false;
+    // Flip to the right edge when the panel would overflow the window.
+    pop.classList.remove('end');
+    if (pop.getBoundingClientRect().right > document.documentElement.clientWidth - 16) pop.classList.add('end');
+    pop.querySelector('input, button:not(.gl)')?.focus({ preventScroll: true });
+  }
+  document.querySelectorAll('.steps-btn, .fb-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openBtn === btn ? closePanel(false) : openPanel(btn);
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!openBtn || !e.target.isConnected) return;
+    const panel = openBtn.classList.contains('steps-btn') ? openBtn.closest('.site-nav') : document.getElementById(openBtn.getAttribute('aria-controls'));
+    if (!panel.contains(e.target) && !e.target.closest?.('.gl-pop')) closePanel(false);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && openBtn && document.getElementById('gl-pop')?.hidden !== false) closePanel(true); });
+  document.addEventListener('focusin', e => {
+    if (!openBtn) return;
+    const panel = openBtn.classList.contains('steps-btn') ? openBtn.closest('.site-nav') : openBtn.closest('.fb-item');
+    if (!panel.contains(e.target)) closePanel(false);
+  });
+
+  // Each filter-bar button shows what its panel is set to. The pages update the controls
+  // inside the panels; the buttons follow by watching them.
+  const chipName = c => c.querySelector('span:not(.sw):not(.n):not(.key-bar)')?.textContent ?? '';
+  const summaries = {
+    // data-sum="chips:<container id>": All, None, the one chosen, or "3 of 6"
+    chips(id, btn) {
+      const chips = [...document.getElementById(id).querySelectorAll('.chip')];
+      const on = chips.filter(c => c.getAttribute('aria-pressed') !== 'false');
+      const sw = btn.querySelector('.sw-row');
+      // Provider colours next to the value, only for a partial choice small enough to read.
+      const partial = on.length && on.length < chips.length && on.length <= 4;
+      if (sw) sw.replaceChildren(...(partial ? on : []).filter(c => c.style.getPropertyValue('--c')).map(c => {
+        const i = document.createElement('i');
+        i.style.setProperty('--c', c.style.getPropertyValue('--c'));
+        return i;
+      }));
+      if (!chips.length || on.length === chips.length) return 'All';
+      if (!on.length) return 'None';
+      if (on.length === 1) return chipName(on[0]);
+      return `${on.length} of ${chips.length}`;
+    },
+    mix() {
+      const i = document.getElementById('mix-in')?.textContent ?? '';
+      const o = document.getElementById('mix-o')?.textContent ?? '';
+      return `${i.replace('%', '')} / ${o.replace('%', '')}`;
+    },
+    min: () => '≥ ' + document.getElementById('min').value,
+    credits() {
+      const v = Number(document.getElementById('credits').value) || 0;
+      return v.toLocaleString('en-US');
+    },
+  };
+  const sumBtns = [...document.querySelectorAll('.fb-btn[data-sum]')];
+  function refresh() {
+    sumBtns.forEach(btn => {
+      const [kind, arg] = btn.dataset.sum.split(':');
+      const out = btn.querySelector('.fb-v');
+      const v = summaries[kind]?.(arg, btn);
+      if (out && v != null && out.textContent !== v) out.textContent = v;
+    });
+  }
+  if (sumBtns.length) {
+    let queued = false;
+    const later = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; refresh(); }); } };
+    const mo = new MutationObserver(later);
+    document.querySelectorAll('.fb-pop').forEach(p => {
+      mo.observe(p, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['aria-pressed', 'class', 'hidden'] });
+      p.addEventListener('input', later);
+      p.addEventListener('change', later);
+    });
+    later();
   }
 
   function read() {

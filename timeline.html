@@ -30,7 +30,6 @@
   background: var(--surface); color: var(--ink); font: 500 13px/1 var(--font-mono); font-variant-numeric: tabular-nums;
 }
 .thr input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.sidebar .thr, .sidebar #reset-min { grid-column: 1 / -1; justify-self: start; }
 :root {
   --bg: #fafaf9;
   --surface: #ffffff;
@@ -96,65 +95,7 @@ body {
 .sidebar { grid-area: side; }
 .content { grid-area: main; min-width: 0; padding-top: 32px; }
 
-/* Header */
-.masthead { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
-.theme-btn {
-  appearance: none;
-  display: inline-flex; align-items: center; gap: 8px;
-  border: 1px solid var(--rule-strong);
-  background: transparent;
-  color: var(--ink-2);
-  font: 400 12px/1 var(--font-sans);
-  padding: 7px 12px 7px 10px;
-  border-radius: 999px;
-  cursor: pointer;
-  flex: none;
-  transition: background .15s, color .15s;
-}
-.theme-btn:hover { background: var(--hover); color: var(--ink); }
-.theme-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
-.theme-btn .sun { display: none; }
-.is-dark .theme-btn .sun { display: block; }
-.is-dark .theme-btn .moon { display: none; }
-/* Site nav: one tab per page, shared by index.html, cost.html, tokens.html, performance.html, compare.html and timeline.html */
-.site-nav { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
-.site-nav .brand {
-  display: inline-flex; align-items: center; gap: 8px; flex: none;
-  font: 600 14px/1 var(--font-sans); letter-spacing: -.01em; color: var(--ink);
-  padding-right: 16px; border-right: 1px solid var(--rule-strong);
-}
-.site-nav .brand svg { width: 16px; height: 16px; fill: currentColor; }
-.site-nav .tabs {
-  display: flex; gap: 2px; padding: 3px; min-width: 0; overflow-x: auto; scrollbar-width: none;
-  background: var(--hover); border: 1px solid var(--rule); border-radius: 999px;
-}
-.site-nav .tabs::-webkit-scrollbar { display: none; }
-.site-nav .tabs a {
-  flex: none; white-space: nowrap;
-  font: 500 13px/1 var(--font-sans); color: var(--ink-2); text-decoration: none;
-  padding: 8px 14px; border-radius: 999px; border: 1px solid transparent;
-  transition: background .15s, color .15s, box-shadow .15s;
-}
-.site-nav .tabs a:hover { color: var(--ink); }
-.site-nav .tabs .ts { display: none; }
-.site-nav .tabs a[aria-current="page"] {
-  color: var(--ink); background: var(--surface); border-color: var(--rule-strong);
-  box-shadow: 0 1px 2px rgb(0 0 0 / .06);
-}
-.site-nav .tabs a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-/* Six tabs: drop the brand name, then use the short labels, before the tabs have to scroll.
-   Measured on the masthead, not the viewport: index.html is narrower than the other pages. */
-.masthead { container-type: inline-size; }
-@container (max-width: 1480px) { .site-nav .brand { font-size: 0; gap: 0; } }
-@container (max-width: 1340px) { .site-nav .tabs .tq { display: none; } .site-nav .tabs .ts { display: inline; } }
-@media (max-width: 640px) {
-  .site-nav .brand { display: none; }
-  .site-nav .tabs a { font-size: 12px; padding: 7px 9px; }
-  .site-nav .tabs .tq { display: none; }
-  .site-nav .tabs .ts { display: inline; }
-  .theme-btn { padding: 7px; }
-  #theme-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-}
+/* Header: nav and theme button in site.css */
 h1 {
   font-weight: 500;
   font-size: clamp(28px, 4.2vw, 40px);
@@ -384,49 +325,6 @@ footer {
 }
 footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
 
-@media (min-width: 901px) {
-  .app { grid-template-columns: 18rem minmax(0, 1fr); }
-  .sidebar {
-    position: sticky; top: 0; align-self: start;
-    max-height: 100vh; overflow-y: auto;
-    padding: 16px 20px 16px 0;
-    margin-top: 16px;
-    border-right: 1px solid var(--rule);
-    scrollbar-width: thin;
-  }
-  .filters { margin: 0; padding: 0; border: 0; }
-  .f-row {
-    position: relative;
-    grid-template-columns: 1fr; gap: 8px;
-    padding: 12px 0;
-    border-top: 1px dashed var(--rule);
-  }
-  .f-row:first-child { border-top: 0; padding-top: 0; }
-  .f-ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-  .sidebar .chip { min-width: 0; padding: 6px 8px 6px 9px; font-size: 12.5px; gap: 7px; }
-  .sidebar .chip > span:not(.n):not(.sw) { overflow: hidden; text-overflow: ellipsis; }
-  .sidebar .chip .n { margin-left: auto; }
-  .f-hint, .segmented { grid-column: 1 / -1; }
-  .f-hint { margin: 0; font-size: 11.5px; line-height: 1.35; }
-  .segmented { display: flex; }
-  .segmented button { flex: 1; padding: 7px 8px; }
-  .f-ctrl.mix { display: flex; flex-wrap: wrap; gap: 8px 12px; }
-  .mix input[type="range"] { width: 100%; }
-  .mix-out { font-size: 12px; }
-  #reset-mix { position: absolute; top: 9px; right: 0; padding: 4px 0; font-size: 12px; }
-  .f-bulk { position: absolute; top: 9px; right: 0; margin: 0; font-size: 12px; }
-  .f-bulk .link-btn { font-size: 12px; }
-  .f-foot { margin-top: 0; padding: 12px 0 0; }
-  .content .summary { margin-top: 0; }
-}
-@media (max-width: 900px) {
-  .app {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto;
-    grid-template-areas: "head" "intro" "side" "main";
-  }
-  .content { padding-top: 0; }
-}
 @media (max-width: 640px) {
   .f-row { grid-template-columns: 1fr; gap: 10px; }
   .f-hint { flex-basis: 100%; margin: 0; }
@@ -435,20 +333,21 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
   * { transition: none !important; }
 }
 </style>
+<link rel="stylesheet" href="site.css">
 </head>
 <body>
 <div class="app">
   <div class="masthead">
     <nav class="site-nav" aria-label="Pages">
-      <span class="brand"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.01 8.01 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Copilot pricing</span>
-      <div class="tabs">
-        <a href="./"><span class="tq">Which model should I use?</span><span class="ts">Start</span></a>
-        <a href="cost.html">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
-        <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
-        <a href="performance.html">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
-        <a href="compare.html">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>
-        <a href="timeline.html" aria-current="page">5 · <span class="tq">Is it getting cheaper?</span><span class="ts">Timeline</span></a>
-      </div>
+      <a class="brand" href="./"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.01 8.01 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg><span class="b-t"><span class="b-name">Copilot pricing</span><span class="q">Which model should I use?</span></span></a>
+      <button type="button" class="steps-btn" aria-expanded="false" aria-controls="steps"><span class="n">5</span>Timeline<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg></button>
+      <ol class="steps" id="steps">
+        <li><a href="cost.html"><span class="n">1</span><span class="t">Cost</span><span class="q">What does a model cost?</span></a></li>
+        <li><a href="tokens.html"><span class="n">2</span><span class="t">Budget</span><span class="q">What does my budget buy?</span></a></li>
+        <li><a href="performance.html"><span class="n">3</span><span class="t">Value</span><span class="q">Which model is worth it?</span></a></li>
+        <li><a href="compare.html"><span class="n">4</span><span class="t">Compare</span><span class="q">How do they compare?</span></a></li>
+        <li><a href="timeline.html" aria-current="page"><span class="n">5</span><span class="t">Timeline</span><span class="q">Is it getting cheaper?</span></a></li>
+      </ol>
     </nav>
     <button type="button" class="theme-btn" id="theme-toggle" aria-pressed="false">
       <svg class="moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z"/></svg>
@@ -463,73 +362,64 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
     <p class="lede" id="lede-score" hidden>Each dot is a Copilot model at its release date, by its <span class="m-label">Coding Index</span><button class="gl" data-gl="index"></button>.</p>
   </header>
 
-  <aside class="sidebar">
-    <section class="filters" aria-label="View, score, threshold, mix and filters">
-      <div class="f-row">
-        <span class="f-label" id="fl-view">View</span>
-        <div class="f-ctrl">
-          <div class="segmented" role="group" aria-labelledby="fl-view">
-            <button type="button" data-view="price" aria-pressed="true">Price</button>
-            <button type="button" data-view="score" aria-pressed="false">Score</button>
-          </div>
-          <span class="f-hint">Vertical axis: blended price or the score</span>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label"><span id="fl-metric">Score</span><button class="gl" data-gl="index"></button></span>
-        <div class="f-ctrl">
-          <div class="segmented" role="group" aria-labelledby="fl-metric">
-            <button type="button" data-metric="coding" aria-pressed="true">Coding</button>
-            <button type="button" data-metric="intelligence" aria-pressed="false">Intelligence</button>
-          </div>
-          <span class="f-hint">Artificial Analysis index used for the threshold</span>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label"><label for="min">Threshold</label></span>
-        <div class="f-ctrl">
+  <div class="fbar" role="group" aria-label="Assumptions and filters">
+    <div class="fb-item">
+      <button type="button" class="fb-btn" aria-expanded="false" aria-controls="pop-min" data-sum="min"><span class="fb-k">Threshold</span><span class="fb-v">≥ 70</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg></button>
+      <div class="fb-pop" id="pop-min" hidden>
+        <div class="fb-head"><label for="min">Score threshold</label></div>
+        <div class="fb-ctrl">
           <span class="thr"><span>Score ≥</span><input type="number" id="min" min="0" max="100" step="5" value="70" inputmode="numeric"></span>
-          <span class="f-hint" id="min-hint">Models scoring at least this count; the others are faded</span>
-          <button type="button" class="link-btn" id="reset-min" hidden>Back to 70</button>
         </div>
+        <p class="fb-hint" id="min-hint">Models scoring at least this count; the others are faded</p>
+        <button type="button" class="link-btn fb-reset" id="reset-min" hidden>Back to 70</button>
       </div>
-      <div class="f-row">
-        <span class="f-label"><label for="mix">Mix</label><button class="gl" data-gl="mix"></button></span>
-        <div class="f-ctrl mix">
+    </div>
+    <div class="fb-item">
+      <button type="button" class="fb-btn" aria-expanded="false" aria-controls="pop-mix" data-sum="mix"><span class="fb-k">Mix</span><span class="fb-v">90 / 10</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg></button>
+      <div class="fb-pop" id="pop-mix" hidden>
+        <div class="fb-head"><span class="gl-t"><label for="mix">Input / output mix</label><button class="gl" data-gl="mix"></button></span></div>
+        <div class="fb-ctrl mix">
           <input type="range" id="mix" min="0" max="100" step="5" value="90" aria-describedby="mix-out">
           <span class="mix-out" id="mix-out" aria-live="polite">
             <span><b id="mix-in">90%</b> input</span>
             <span><b id="mix-o">10%</b> output</span>
           </span>
-          <button type="button" class="link-btn" id="reset-mix" hidden>Back to 90/10</button>
         </div>
+        <p class="fb-hint">Coding agents re-read files and history at every step, so most of what they use is input.</p>
+        <button type="button" class="link-btn fb-reset" id="reset-mix" hidden>Back to 90/10</button>
       </div>
-      <div class="f-row">
-        <span class="f-label" id="fl-provider">Provider</span>
-        <div class="f-ctrl" role="group" aria-labelledby="fl-provider">
+    </div>
+    <span class="fb-sep" aria-hidden="true"></span>
+    <div class="fb-item">
+      <button type="button" class="fb-btn" aria-expanded="false" aria-controls="pop-provider" data-sum="chips:providers"><span class="fb-k">Provider</span><span class="fb-v">All</span><span class="sw-row" aria-hidden="true"></span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg></button>
+      <div class="fb-pop" id="pop-provider" hidden>
+        <div class="fb-head"><span id="fl-provider">Provider</span>
+          <span class="f-bulk"><button type="button" class="link-btn" id="all">All</button> · <button type="button" class="link-btn" id="none">None</button></span>
+        </div>
+        <div class="fb-ctrl" role="group" aria-labelledby="fl-provider">
           <div class="chips" id="providers"></div>
-          <span class="f-bulk">
-            <button type="button" class="link-btn" id="all">All</button> ·
-            <button type="button" class="link-btn" id="none">None</button>
-          </span>
         </div>
       </div>
-      <div class="f-row">
-        <span class="f-label"><span id="fl-class">Class</span><button class="gl" data-gl="class"></button></span>
-        <div class="f-ctrl" role="group" aria-labelledby="fl-class">
+    </div>
+    <div class="fb-item">
+      <button type="button" class="fb-btn" aria-expanded="false" aria-controls="pop-class" data-sum="chips:categories"><span class="fb-k">Class</span><span class="fb-v">All</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg></button>
+      <div class="fb-pop" id="pop-class" hidden>
+        <div class="fb-head"><span class="gl-t"><span id="fl-class">Class</span><button class="gl" data-gl="class"></button></span></div>
+        <div class="fb-ctrl" role="group" aria-labelledby="fl-class">
           <div class="chips" id="categories"></div>
-          <span class="f-hint">GitHub’s own grouping of models by capability</span>
         </div>
+        <p class="fb-hint">GitHub’s own capability tiers: Lightweight, Versatile, Powerful.</p>
       </div>
-      <div class="f-foot" aria-live="polite">
-        <span id="f-count"></span>
-        <button type="button" class="link-btn" id="reset" hidden>Reset filters</button>
-      </div>
-    </section>
-  </aside>
+    </div>
+    <span class="fb-count" aria-live="polite"><span id="f-count"></span><button type="button" class="link-btn" id="reset" hidden>Reset filters</button></span>
+  </div>
 
   <main class="content">
     <p class="takeaway" id="takeaway" aria-live="polite"></p>
+    <div class="toolbar" role="group" aria-label="Chart">
+      <div class="tb-group"><span class="tb-k"><span id="fl-view">Show</span></span><div class="segmented" role="group" aria-labelledby="fl-view"><button type="button" data-view="price" aria-pressed="true">Price</button><button type="button" data-view="score" aria-pressed="false">Score</button></div></div>
+      <div class="tb-group"><span class="tb-k"><span id="fl-metric">Score</span><button class="gl" data-gl="index"></button></span><div class="segmented" role="group" aria-labelledby="fl-metric"><button type="button" data-metric="coding" aria-pressed="true">Coding</button><button type="button" data-metric="intelligence" aria-pressed="false">Intelligence</button></div></div>
+    </div>
     <div class="summary" id="legend"></div>
 
     <section class="chart" id="chart" aria-label="Copilot models by release date">

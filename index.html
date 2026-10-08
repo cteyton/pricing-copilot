@@ -173,6 +173,33 @@ h1 {
 }
 .tasks { border: 0; margin: 0; padding: 0; min-width: 0; }
 .tasks legend { font: 500 18px/1.3 var(--font-sans); letter-spacing: -0.01em; padding: 0; margin-bottom: 14px; }
+.roles { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.roles-label { font-size: 13px; color: var(--ink-2); }
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+}
+.segmented button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 13px/1 var(--font-sans);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.segmented button:hover { color: var(--ink); }
+.segmented button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.segmented button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 0 0 1px var(--rule);
+}
 .task-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
 .task { border-bottom: 1px solid var(--rule); }
 .task label {
@@ -449,6 +476,10 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     <div class="picker">
       <fieldset class="tasks">
         <legend>What are you about to do?</legend>
+        <div class="roles">
+          <span class="roles-label" id="roles-label">I work as a</span>
+          <div class="segmented" role="group" aria-labelledby="roles-label" id="roles"></div>
+        </div>
         <ul class="task-list" id="tasks"></ul>
         <p class="tasks-note">Credits shown per <span class="gl-t">agent request<button class="gl" data-gl="request"></button></span> with the suggested model.</p>
       </fieldset>
@@ -532,16 +563,27 @@ Promise.all([
   document.getElementById('answer').replaceChildren(p);
 });
 
-// What people ask Copilot to do, from light to heavy. `index` is the benchmark that fits the task
-// best; `level` is the share of the top Copilot score a model needs to be suggested.
-const TASKS = [
-  { id: 'rewrite', name: 'Rewrite, summarize or translate', ex: 'Polish an email, sum up meeting notes, translate a spec.', index: 'intelligence', level: .6 },
-  { id: 'stories', name: 'Write user stories and acceptance criteria', ex: 'Turn a need into stories, Gherkin scenarios or test cases.', index: 'intelligence', level: .8 },
-  { id: 'analyze', name: 'Analyze specs and documents', ex: 'Spot gaps and contradictions, compare versions, assess the impact of a change.', index: 'intelligence', level: .9 },
-  { id: 'code-qa', name: 'Ask questions about the code', ex: 'Find where a business rule lives, explain what a screen or function does.', index: 'coding', level: .85 },
-  { id: 'sql', name: 'Write SQL, scripts or small fixes', ex: 'Query data, automate a spreadsheet chore, fix a label in the app.', index: 'coding', level: .92 },
-  { id: 'hard', name: 'Something hard that other models got wrong', ex: 'A tricky analysis or bug where a lighter model kept missing the point.', index: 'intelligence', level: .98 },
+// What people ask Copilot to do, by role, from light to heavy. `index` is the benchmark that fits
+// the task best; `level` is the share of the top Copilot score a model needs to be suggested.
+const ROLES = [
+  { id: 'ba', name: 'Business analyst', first: 'stories', tasks: [
+    { id: 'rewrite', name: 'Rewrite, summarize or translate', ex: 'Polish an email, sum up meeting notes, translate a spec.', index: 'intelligence', level: .6 },
+    { id: 'stories', name: 'Write user stories and acceptance criteria', ex: 'Turn a need into stories, Gherkin scenarios or test cases.', index: 'intelligence', level: .8 },
+    { id: 'analyze', name: 'Analyze specs and documents', ex: 'Spot gaps and contradictions, compare versions, assess the impact of a change.', index: 'intelligence', level: .9 },
+    { id: 'code-qa', name: 'Ask questions about the code', ex: 'Find where a business rule lives, explain what a screen or function does.', index: 'coding', level: .85 },
+    { id: 'sql', name: 'Write SQL, scripts or small fixes', ex: 'Query data, automate a spreadsheet chore, fix a label in the app.', index: 'coding', level: .92 },
+    { id: 'hard', name: 'Something hard that other models got wrong', ex: 'A tricky analysis or bug where a lighter model kept missing the point.', index: 'intelligence', level: .98 },
+  ] },
+  { id: 'dev', name: 'Developer', first: 'feature', tasks: [
+    { id: 'explain', name: 'Explain code, write docs or commit messages', ex: 'Walk through an unfamiliar module, write a docstring, a README section or a commit message.', index: 'coding', level: .75 },
+    { id: 'tests', name: 'Write tests', ex: 'Cover a function and its edge cases, fix a broken assertion, add a regression test.', index: 'coding', level: .85 },
+    { id: 'review', name: 'Review a change or refactor', ex: 'Spot bugs in a pull request; rename, extract or simplify without changing behavior.', index: 'coding', level: .9 },
+    { id: 'debug', name: 'Debug a failure', ex: 'Read a stack trace or a failing CI run, find the root cause, propose the fix.', index: 'coding', level: .92 },
+    { id: 'feature', name: 'Build a feature across several files', ex: 'Agent mode reads the codebase, edits several files, runs the build and the tests.', index: 'coding', level: .95 },
+    { id: 'dev-hard', name: 'Architecture, or a bug other models got wrong', ex: 'Plan a migration, untangle concurrency, crack a fix lighter models kept missing.', index: 'coding', level: .98 },
+  ] },
 ];
+const TASKS = ROLES.flatMap(r => r.tasks.map(t => ({ ...t, role: r.id })));
 const INDEX_LABEL = { intelligence: 'reasoning and writing', coding: 'coding' };
 const DEFAULT_CREDITS = 6000;
 const WORKDAYS = 21;
@@ -611,6 +653,10 @@ function init(ROWS, SCORES, meta) {
     credits: Number.isFinite(+q.get('credits')) && q.get('credits') !== null ? +q.get('credits') : Number.isFinite(saved.credits) ? saved.credits : DEFAULT_CREDITS,
   };
   state.credits = Math.min(Math.max(Math.round(state.credits) || 0, 0), 1e6);
+  // Last task per role, so switching back and forth keeps each choice.
+  const roleOf = id => TASKS.find(t => t.id === id).role;
+  state.lastTask = Object.fromEntries(ROLES.map(r => [r.id, r.tasks.some(t => t.id === saved.lastTask?.[r.id]) ? saved.lastTask[r.id] : r.first]));
+  state.lastTask[roleOf(state.task)] = state.task;
   state.showOld = saved.showOld === true;
   function save() {
     try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {}
@@ -636,30 +682,50 @@ function init(ROWS, SCORES, meta) {
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const swatch = m => { const s = el('span', 'sw'); s.style.setProperty('--c', colorOf(m.provider)); s.setAttribute('aria-hidden', 'true'); return s; };
 
-  // Task list (built once; the per-request hint is refreshed on render).
+  // Role switch and task list (built once; the per-request hint is refreshed on render).
   const hints = new Map();
-  TASKS.forEach(t => {
-    const li = el('li', 'task');
-    const input = el('input');
-    input.type = 'radio'; input.name = 'task'; input.id = 't-' + t.id; input.value = t.id;
-    input.checked = t.id === state.task;
-    input.addEventListener('change', () => {
-      state.task = t.id; save(); renderAnswer(true); renderBands();
-      if (matchMedia('(max-width: 960px)').matches) {
-        const a = $('answer'), top = a.getBoundingClientRect().top;
-        if (top > innerHeight * .6) a.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-      }
+  function pickTask(id) {
+    state.task = id; state.lastTask[roleOf(id)] = id;
+    save(); renderAnswer(true); renderBands();
+  }
+  function renderTasks() {
+    const role = ROLES.find(r => r.id === roleOf(state.task));
+    $('roles').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === role.id)));
+    hints.clear();
+    $('tasks').replaceChildren(...role.tasks.map(t => {
+      const li = el('li', 'task');
+      const input = el('input');
+      input.type = 'radio'; input.name = 'task'; input.id = 't-' + t.id; input.value = t.id;
+      input.checked = t.id === state.task;
+      input.addEventListener('change', () => {
+        pickTask(t.id);
+        if (matchMedia('(max-width: 960px)').matches) {
+          const a = $('answer'), top = a.getBoundingClientRect().top;
+          if (top > innerHeight * .6) a.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+        }
+      });
+      const label = el('label');
+      label.htmlFor = input.id;
+      const text = el('span');
+      text.append(el('span', 't-name', t.name), el('span', 't-ex', t.ex));
+      const hint = el('span', 't-cost');
+      hints.set(t.id, hint);
+      label.append(el('span', 'dot'), text, hint);
+      li.append(input, label);
+      return li;
+    }));
+  }
+  ROLES.forEach(r => {
+    const b = el('button', null, r.name);
+    b.type = 'button'; b.dataset.role = r.id;
+    b.addEventListener('click', () => {
+      if (roleOf(state.task) === r.id) return;
+      state.task = state.lastTask[r.id];
+      renderTasks(); pickTask(state.task);
     });
-    const label = el('label');
-    label.htmlFor = input.id;
-    const text = el('span');
-    text.append(el('span', 't-name', t.name), el('span', 't-ex', t.ex));
-    const hint = el('span', 't-cost');
-    hints.set(t.id, hint);
-    label.append(el('span', 'dot'), text, hint);
-    li.append(input, label);
-    $('tasks').append(li);
+    $('roles').append(b);
   });
+  renderTasks();
 
   function renderAnswer(animate) {
     const task = TASKS.find(t => t.id === state.task);
@@ -860,10 +926,10 @@ function init(ROWS, SCORES, meta) {
       if (window.glossaryBind) glossaryBind(g);
     });
     // Per-request hint next to each task.
-    TASKS.forEach(t => {
-      const x = suggest(t);
-      hints.get(t.id).textContent = x ? `≈ ${fmtPer(x.pick.perRequest)} cr` : '';
-      hints.get(t.id).setAttribute('aria-label', x ? `about ${fmtPer(x.pick.perRequest)} credits per request` : '');
+    hints.forEach((h, id) => {
+      const x = suggest(TASKS.find(t => t.id === id));
+      h.textContent = x ? `≈ ${fmtPer(x.pick.perRequest)} cr` : '';
+      h.setAttribute('aria-label', x ? `about ${fmtPer(x.pick.perRequest)} credits per request` : '');
     });
   }
   // General quality, 1 to 5, from the Intelligence Index next to the best Copilot model.

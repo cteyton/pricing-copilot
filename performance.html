@@ -14,7 +14,7 @@
   try { const t = localStorage.getItem('copilot-pricing-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch {}
 </script>
 <style>
-/* Same design language as index.html and tokens.html (tokens, nav, filters, tooltip, table):
+/* Same design language as cost.html and tokens.html (tokens, nav, filters, tooltip, table):
    one dot per model, blended price on a log x axis, Coding or Intelligence Index on a linear y axis,
    the Pareto frontier joined by a line. */
 :root {
@@ -102,7 +102,7 @@ body {
 .theme-btn .sun { display: none; }
 .is-dark .theme-btn .sun { display: block; }
 .is-dark .theme-btn .moon { display: none; }
-/* Site nav: one tab per page, shared by index.html, tokens.html, performance.html and compare.html */
+/* Site nav: one tab per page, shared by index.html, cost.html, tokens.html, performance.html and compare.html */
 .site-nav { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
 .site-nav .brand {
   display: inline-flex; align-items: center; gap: 8px; flex: none;
@@ -445,7 +445,8 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
     <nav class="site-nav" aria-label="Pages">
       <span class="brand"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.01 8.01 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Copilot pricing</span>
       <div class="tabs">
-        <a href="./">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
+        <a href="./"><span class="tq">Which model should I use?</span><span class="ts">Start</span></a>
+        <a href="cost.html">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
         <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
         <a href="performance.html" aria-current="page">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
         <a href="compare.html">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>

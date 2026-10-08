@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Copilot Token Budget</title>
-<meta name="description" content="How many input and output tokens a GitHub Copilot AI credit budget buys with each model, on a linear scale.">
+<title>GitHub Copilot Model Pricing</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%226%22 rx=%221%22 fill=%22%232a78d6%22/%3E%3Crect x=%226.5%22 y=%225%22 width=%223%22 height=%2210%22 rx=%221%22 fill=%22%23eb6834%22/%3E%3Crect x=%2212%22 y=%221%22 width=%223%22 height=%2214%22 rx=%221%22 fill=%22%231baf7a%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,9 +13,9 @@
   try { const t = localStorage.getItem('copilot-pricing-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch {}
 </script>
 <style>
-/* Same design language as cost.html (tokens, filters, chart, tooltip, table):
-   one stacked bar per model, input tokens in a light tint then output tokens solid,
-   on a shared linear scale in tokens. */
+/* Layout: a narrow column, a typographic header, a labeled filter panel,
+   then horizontal bars on a linear scale, grouped by family or ranked by price.
+   Color is reserved for the bars. */
 :root {
   --bg: #fafaf9;
   --surface: #ffffff;
@@ -38,10 +37,11 @@
   --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  --label-w: 15rem;
+  --label-w: 17rem;
   --plot-gap: 1.5rem;
-  --plot-right: 8rem;
-  --row-h: 26px;
+  --plot-right: 10rem;
+  --row-h: 30px;
+  --row-h-2: 26px;
   --ghead-h: 28px;
   color-scheme: light;
 }
@@ -158,39 +158,38 @@ h1 {
   margin: 0 0 12px;
   text-wrap: balance;
 }
-h1 .hl { font-variant-numeric: tabular-nums; }
+.lede + .lede { margin-top: 8px; }
+.source { margin: 12px 0 0; color: var(--ink-2); font-size: 13px; }
+.source a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.source a:hover { text-decoration-color: currentColor; }
+/* The basics: three cards for first-time readers, dismissable */
+.basics { margin-top: 20px; max-width: 60rem; }
+.b-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.b-head .eyebrow { margin: 0; }
+.b-head .link-btn { font-size: 12px; }
+.b-cards { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; counter-reset: b; }
+.b-cards li {
+  counter-increment: b; display: flex; flex-direction: column; gap: 6px;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px;
+  font-size: 13px; line-height: 1.45; color: var(--ink-2);
+}
+.b-cards li::before { content: counter(b); font: 500 11px/1 var(--font-mono); color: var(--ink-3); }
+.b-cards b { color: var(--ink); font-weight: 500; font-size: 14px; }
+.b-cards a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.b-cards a:hover { text-decoration-color: currentColor; }
+.source .link-btn { font-size: 13px; padding: 0; }
+@media (max-width: 900px) { .b-cards { grid-template-columns: minmax(0, 1fr); } }
+.row.focus-flash { animation: focus-flash 1.6s ease-out 2; border-radius: 6px; }
 .lede {
   color: var(--ink-2);
   font-size: 15px;
   max-width: 60ch;
   margin: 0;
 }
-.lede + .lede { margin-top: 8px; }
-.source { margin: 12px 0 0; color: var(--ink-2); font-size: 13px; }
-.source a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.source a:hover { text-decoration-color: currentColor; }
-
-/* Formula strip: credits → blended price in credits → tokens */
-.formula {
-  display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px;
-  margin-top: 28px;
-}
-.fx {
-  display: flex; flex-direction: column; justify-content: center; gap: 6px;
-  padding: 12px 14px;
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  background: var(--surface);
-  min-width: 0;
-}
-.fx-k { font: 500 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
-.fx-v { font: 500 15px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
-.fx-s { font-size: 12px; color: var(--ink-3); }
-.fx-op { align-self: center; font: 400 18px/1 var(--font-mono); color: var(--ink-3); padding: 0 2px; }
 
 /* Filters: one labeled row per dimension */
 .filters {
-  margin-top: 32px;
+  margin-top: 40px;
   padding: 6px 0 0;
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
@@ -219,23 +218,6 @@ h1 .hl { font-variant-numeric: tabular-nums; }
   color: var(--ink-3); font-size: 12px;
 }
 .f-foot b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.num-input {
-  width: 8.5rem;
-  padding: 7px 10px;
-  border: 1px solid var(--rule-strong);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--ink);
-  font: 500 14px/1 var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-.num-input:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
-.unit { color: var(--ink-2); font-size: 13px; margin-right: 8px; }
-.mix { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.mix input[type="range"] { width: min(240px, 60vw); margin: 0; accent-color: var(--ink); cursor: pointer; }
-.mix input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
-.mix-out { display: inline-flex; align-items: center; gap: 12px; font: 500 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
-.mix-out span { display: inline-flex; align-items: center; gap: 6px; }
 .segmented {
   display: inline-flex;
   padding: 3px;
@@ -282,17 +264,16 @@ h1 .hl { font-variant-numeric: tabular-nums; }
   box-shadow: 0 0 0 2px var(--bg);
 }
 .chip .n { font: 400 11px/1 var(--font-mono); color: var(--ink-3); }
-.chip.preset { font-family: var(--font-mono); font-size: 12px; padding: 7px 11px; }
 /* Off: dashed, muted, hollow swatch. A chip with no matching entry fades further. */
 .chip[aria-pressed="false"], .chip.check:not(:has(input:checked)) {
   background: transparent; color: var(--ink-3); border-color: var(--rule-strong); border-style: dashed;
 }
 .chip[aria-pressed="false"] .sw { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
 .chip.zero { opacity: .5; }
-.chip.preset[aria-pressed] { background: var(--surface); color: var(--ink-2); border-style: solid; }
-.chip.preset[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); box-shadow: inset 0 0 0 .5px var(--ink); }
 .chip.check { padding-left: 9px; }
 .chip.check input { margin: 0; width: 14px; height: 14px; accent-color: var(--ink); cursor: pointer; }
+.chip.check:has(input:disabled) { cursor: not-allowed; }
+.chip.check:has(input:disabled) input { cursor: not-allowed; }
 .chip.check:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
 .link-btn {
   appearance: none; border: 0; background: none; padding: 4px 2px;
@@ -301,6 +282,42 @@ h1 .hl { font-variant-numeric: tabular-nums; }
   text-underline-offset: 3px; cursor: pointer;
 }
 .link-btn:hover { color: var(--ink); }
+/* Sidebar (wide screens): compact stacked groups, sized to fit a laptop viewport (~800px)
+   without scrolling. Chips sit in a two-column grid; the sidebar scrolls only as a fallback. */
+@media (min-width: 901px) {
+  .app { grid-template-columns: 18rem minmax(0, 1fr); }
+  .sidebar {
+    position: sticky; top: 0; align-self: start;
+    max-height: 100vh; overflow-y: auto;
+    padding: 16px 20px 16px 0;
+    margin-top: 16px;
+    border-right: 1px solid var(--rule);
+    scrollbar-width: thin;
+  }
+  .filters { margin: 0; padding: 0; border: 0; }
+  .f-row {
+    position: relative;
+    grid-template-columns: 1fr; gap: 8px;
+    padding: 12px 0;
+    border-top: 1px dashed var(--rule);
+  }
+  .f-row:first-child { border-top: 0; padding-top: 0; }
+  .f-ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .sidebar .chip { min-width: 0; padding: 6px 8px 6px 9px; font-size: 12.5px; gap: 7px; }
+  .sidebar .chip > span:not(.n):not(.sw):not(.key-bar) { overflow: hidden; text-overflow: ellipsis; }
+  .sidebar .chip .n { margin-left: auto; }
+  .f-sep { display: none; }
+  .segmented, .f-hint, #long-chip { grid-column: 1 / -1; }
+  .segmented { display: flex; }
+  .segmented button { flex: 1; padding: 7px 8px; }
+  /* All · None moves up next to the Provider label */
+  .f-bulk { position: absolute; top: 9px; right: 0; margin: 0; font-size: 12px; }
+  .f-bulk .link-btn { font-size: 12px; }
+  .f-hint { margin: 0; font-size: 11.5px; line-height: 1.35; }
+  .f-foot { margin-top: 0; padding: 12px 0 0; }
+  .content .summary { margin-top: 0; }
+}
+
 button:focus-visible, .row:focus-visible, summary:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
@@ -315,19 +332,16 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
   color: var(--ink-2);
   font-size: 13px;
 }
-.summary b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.legend-key { display: inline-flex; align-items: center; gap: 8px; }
-.row.focus-flash { animation: focus-flash 1.6s ease-out 2; border-radius: 6px; }
 .takeaway { margin: 20px 0 0; max-width: 70ch; font-size: 17px; line-height: 1.45; color: var(--ink); text-wrap: pretty; }
 .takeaway b { font-weight: 600; }
 .takeaway .muted { color: var(--ink-2); }
-.takeaway a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.takeaway a:hover { color: var(--ink); }
 .content .takeaway { margin-top: 0; }
 .content .takeaway + .summary { margin-top: 14px; }
-.key-bar { display: inline-block; width: 18px; height: 10px; border-radius: 0 3px 3px 0; background: var(--ink-2); }
+.summary b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.legend-key { display: inline-flex; align-items: center; gap: 8px; }
+.key-bar { width: 18px; height: 10px; border-radius: 0 3px 3px 0; background: var(--ink-2); }
 .key-bar.long { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-2); }
-.key-bar.in { border-radius: 0; background: color-mix(in srgb, var(--ink-2) 50%, transparent); }
+.key-bar.in { background: color-mix(in srgb, var(--ink-2) 50%, transparent); }
 
 /* Chart */
 .chart { position: relative; }
@@ -341,6 +355,8 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 .axis span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+/* The unit, in the label column just left of 0: the axis title is far below on a long chart. */
+.axis .unit { left: auto; right: calc(100% + var(--plot-gap)); transform: none; font-family: var(--font-sans); }
 .axis.bottom { margin-top: 8px; }
 .axis-title {
   margin: 6px 0 0 calc(var(--label-w) + var(--plot-gap));
@@ -378,19 +394,25 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
   min-width: 0; text-align: right;
 }
 .lbl .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lbl .sfx { font: 400 11px/1 var(--font-mono); color: var(--ink-3); white-space: nowrap; }
-.track { position: relative; height: 100%; margin-right: var(--plot-right); }
-/* Stacked: input segment from 0, output segment right after it. */
-.bar {
-  position: absolute; top: 50%;
-  height: 12px; margin-top: -6px;
-  background: var(--c);
-  transition: left .45s cubic-bezier(.3,.7,.2,1), width .45s cubic-bezier(.3,.7,.2,1), filter .15s;
+.lbl .sfx {
+  font: 400 11px/1 var(--font-mono); color: var(--ink-3); white-space: nowrap;
 }
-.bar.in { left: 0; min-width: 2px; background: color-mix(in srgb, var(--c) 55%, transparent); }
-.bar.out { border-radius: 0 4px 4px 0; }
+.track { position: relative; height: 100%; margin-right: var(--plot-right); }
+.bar {
+  position: absolute; left: 0; top: 50%;
+  height: 12px; margin-top: -6px;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--c);
+  transition: width .45s cubic-bezier(.3,.7,.2,1), filter .15s;
+}
+.bar.long { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
+/* Input in a light tint, output in solid color: same provider, two prices. */
+.bar.in { background: color-mix(in srgb, var(--c) 55%, transparent); }
 .bar.long.in { background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 55%, transparent); }
-.bar.long.out { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
+.two .bar { height: 7px; }
+.two .bar.in { margin-top: -7.5px; }
+.two .bar.out { margin-top: .5px; }
 .row:hover .bar, .row.active .bar { filter: brightness(1.08) saturate(1.1); }
 .val {
   position: absolute; top: 50%;
@@ -402,13 +424,16 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
   transition: left .45s cubic-bezier(.3,.7,.2,1);
 }
 .val .mult { color: var(--ink-3); margin-left: 8px; }
+.val .tag { color: var(--ink-3); margin-right: 4px; }
+.val .tag.sep { margin-left: 10px; }
+.two .val { font-size: 11px; }
 
 /* Family headers */
 .ghead {
   position: absolute; left: 0; right: 0; top: 0;
   height: var(--ghead-h);
   display: flex; align-items: flex-end; gap: 10px;
-  padding-bottom: 8px;
+  padding-bottom: 5px;
   border-top: 1px solid var(--rule);
   font: 500 11px/1 var(--font-mono);
   letter-spacing: .06em;
@@ -418,12 +443,14 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
 }
 .ghead.first { border-top-color: transparent; }
 .ghead .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
-.empty { padding: 48px 0; text-align: center; color: var(--ink-3); }
+.empty {
+  padding: 48px 0; text-align: center; color: var(--ink-3);
+}
 
 /* Tooltip */
 .tip {
   position: absolute; z-index: 5;
-  min-width: 240px; max-width: 300px;
+  min-width: 220px; max-width: 280px;
   background: var(--surface);
   border: 1px solid var(--rule-strong);
   border-radius: 10px;
@@ -439,19 +466,12 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
 .tip dt { color: var(--ink-3); }
 .tip dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
 .tip dd.on { color: var(--ink); font-weight: 500; }
-.tip dt.sep, .tip dd.sep { padding-top: 6px; border-top: 1px solid var(--rule); }
 .tip .t-note { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 12px; }
 
-/* Explainer and table */
+/* Table */
 details { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
-details + details { margin-top: 0; }
-summary { cursor: pointer; color: var(--ink-2); font-size: 13px; width: max-content; max-width: 100%; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 13px; width: max-content; }
 summary:hover { color: var(--ink); }
-.explain { max-width: 64ch; color: var(--ink-2); font-size: 14px; margin-top: 12px; }
-.explain p { margin: 0 0 12px; }
-.explain code, .explain .m { font: 400 13px/1.5 var(--font-mono); color: var(--ink); }
-.explain ul { margin: 0 0 12px; padding-left: 20px; }
-.explain li { margin-bottom: 6px; }
 .table-wrap { overflow-x: auto; margin-top: 16px; }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 th, td { padding: 9px 12px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
@@ -466,52 +486,6 @@ footer {
 }
 footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
 
-/* Sidebar (wide screens): compact stacked groups, sized to fit a laptop viewport (~800px)
-   without scrolling. Chips sit in a two-column grid; the sidebar scrolls only as a fallback. */
-@media (min-width: 901px) {
-  .app { grid-template-columns: 18rem minmax(0, 1fr); }
-  .sidebar {
-    position: sticky; top: 0; align-self: start;
-    max-height: 100vh; overflow-y: auto;
-    padding: 16px 20px 16px 0;
-    margin-top: 16px;
-    border-right: 1px solid var(--rule);
-    scrollbar-width: thin;
-  }
-  .filters { margin: 0; padding: 0; border: 0; }
-  .f-row {
-    position: relative;
-    grid-template-columns: 1fr; gap: 8px;
-    padding: 12px 0;
-    border-top: 1px dashed var(--rule);
-  }
-  .f-row:first-child { border-top: 0; padding-top: 0; }
-  .f-ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-  .sidebar .chip { min-width: 0; padding: 6px 8px 6px 9px; font-size: 12.5px; gap: 7px; }
-  .sidebar .chip > span:not(.n):not(.sw):not(.key-bar) { overflow: hidden; text-overflow: ellipsis; }
-  .sidebar .chip .n { margin-left: auto; }
-  .sidebar .chip.preset { justify-content: center; padding: 6px 2px; font-size: 11px; }
-  .f-sep { display: none; }
-  .segmented, .f-hint, #long-chip { grid-column: 1 / -1; }
-  .segmented { display: flex; }
-  .segmented button { flex: 1; padding: 7px 8px; }
-  /* Budget: input + unit on one line, the five presets on the next */
-  .f-ctrl.budget { grid-template-columns: repeat(5, 1fr); align-items: center; }
-  .f-ctrl.budget .num-input { grid-column: span 3; width: 100%; }
-  .f-ctrl.budget .unit { grid-column: span 2; margin: 0; }
-  /* Mix: full-width slider, readout and reset below */
-  .f-ctrl.mix { display: flex; flex-wrap: wrap; gap: 8px 12px; }
-  .mix input[type="range"] { width: 100%; }
-  .mix-out { font-size: 12px; }
-  #reset-budget { position: absolute; top: 9px; right: 0; padding: 4px 0; font-size: 12px; }
-  /* All · None and the budget reset move up next to their group label */
-  .f-bulk { position: absolute; top: 9px; right: 0; margin: 0; font-size: 12px; }
-  .f-bulk .link-btn { font-size: 12px; }
-  .f-hint { margin: 0; font-size: 11.5px; line-height: 1.35; }
-  .f-foot { margin-top: 0; padding: 12px 0 0; }
-  .content .summary { margin-top: 0; }
-}
-
 /* Narrow screens: one column, filters back to a horizontal panel between intro and chart. */
 @media (max-width: 900px) {
   .app {
@@ -522,9 +496,9 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
   .content { padding-top: 0; }
 }
 
-/* Mobile: the name moves above the bar */
+/* Mobile: the name moves above the price line */
 @media (max-width: 640px) {
-  :root { --label-w: 0px; --plot-gap: 0px; --plot-right: 6.5rem; --row-h: 48px; }
+  :root { --label-w: 0px; --plot-gap: 0px; --plot-right: 10rem; --row-h: 48px; --row-h-2: 48px; }
   .row { grid-template-columns: 1fr; grid-template-rows: 22px 22px; align-content: center; }
   .lbl { justify-content: flex-start; text-align: left; }
   .row::before { inset: 0 -6px; }
@@ -532,8 +506,10 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
   .f-sep { display: none; }
   .f-hint { flex-basis: 100%; margin: 0; }
   .axis span.minor { display: none; }
-  .fx-op { display: none; }
-  .fx { flex: 1 1 40%; }
+  /* No label column: the unit sits above the top axis instead. */
+  #axis-top { margin-top: 26px; }
+  .axis .unit { right: auto; left: 0; top: -20px; }
+  .axis.bottom .unit { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -549,8 +525,8 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
       <span class="brand"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.01 8.01 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Copilot pricing</span>
       <div class="tabs">
         <a href="./"><span class="tq">Which model should I use?</span><span class="ts">Start</span></a>
-        <a href="cost.html">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
-        <a href="tokens.html" aria-current="page">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
+        <a href="cost.html" aria-current="page">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
+        <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
         <a href="performance.html">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
         <a href="compare.html">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>
       </div>
@@ -563,66 +539,33 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
   </div>
 
   <header class="intro">
-    <h1>What <span class="hl" id="h-credits">6,000</span> AI credits a month buy<span id="h-day" hidden> per working day</span></h1>
-    <p class="lede">How much work the same budget buys with each model. Each bar is split into <span class="gl-t">input<button class="gl" data-gl="input"></button></span> (what you send) and <span class="gl-t">output<button class="gl" data-gl="output"></button></span> (what the model writes). The default <span class="gl-t">mix<button class="gl" data-gl="mix"></button></span> is 90% input, typical of coding agents.</p>
-
-    <div class="formula" aria-label="How the budget is computed">
-      <div class="fx"><span class="fx-k">Budget</span><span class="fx-v" id="fx-credits">6,000 credits</span><span class="fx-s">a month · <span id="fx-usd">$60.00</span></span></div>
-      <span class="fx-op" aria-hidden="true" id="fx-day-op" hidden>÷</span>
-      <div class="fx" id="fx-day" hidden><span class="fx-k"><span class="gl-t">Working days<button class="gl" data-gl="workday"></button></span></span><span class="fx-v">21</span><span class="fx-s" id="fx-day-credits">286 credits a day</span></div>
-      <span class="fx-op" aria-hidden="true">÷</span>
-      <div class="fx"><span class="fx-k">Blended price / 1M <span class="gl-t">tokens<button class="gl" data-gl="blended"></button></span></span><span class="fx-v" id="fx-mix">0.9 × input + 0.1 × output</span><span class="fx-s">in credits, weighted by the mix</span></div>
-      <span class="fx-op" aria-hidden="true">=</span>
-      <div class="fx"><span class="fx-k">Tokens</span><span class="fx-v" id="fx-range">—</span><span class="fx-s" id="fx-gap">depending on the model</span></div>
-    </div>
+    <h1>Copilot model pricing</h1>
+    <p class="lede">What each model charges per million <span class="gl-t">tokens<button class="gl" data-gl="token"></button>,</span> about 750,000 words. You pay separately for what you send, the <span class="gl-t">input<button class="gl" data-gl="input"></button>,</span> and for what the model writes, the <span class="gl-t">output<button class="gl" data-gl="output"></button>.</span> Prices are in AI <span class="gl-t">credits<button class="gl" data-gl="credit"></button>,</span> the unit your Copilot budget is counted in: 1 credit = $0.01.</p>
+    <section class="basics" id="basics" aria-labelledby="basics-title">
+      <div class="b-head">
+        <h2 class="eyebrow" id="basics-title">New here? The basics</h2>
+        <button type="button" class="link-btn" id="basics-hide">Hide</button>
+      </div>
+      <ol class="b-cards">
+        <li><b>Prices are per token</b><span>A token is about ¾ of a word. One coding-agent step sends roughly 50,000 of them: open files, history and your prompt.</span></li>
+        <li><b>Reading is cheap, writing is not</b><span>Output costs 3–8× more than input, but agents send far more than they write. <a href="tokens.html">See what a budget buys →</a></span></li>
+        <li><b>Pricier isn’t always better</b><span>Some low-cost models score close to the best on coding benchmarks. <a href="performance.html">Compare price with scores →</a> or <a href="compare.html">put models side by side →</a></span></li>
+      </ol>
+    </section>
+    <p class="source">Source: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">GitHub Docs ↗</a><span id="basics-show" hidden> · <button type="button" class="link-btn" id="basics-open">Show the basics</button></span></p>
   </header>
 
   <aside class="sidebar">
-    <section class="filters" aria-label="Budget and filters">
+    <section class="filters" aria-label="Filters">
       <div class="f-row">
-        <span class="f-label"><label for="credits">Budget</label><button class="gl" data-gl="credit"></button></span>
-        <div class="f-ctrl budget">
-          <input class="num-input" type="number" id="credits" min="0" max="10000000" step="100" inputmode="numeric" value="6000">
-          <span class="unit">credits / month</span>
-          <span class="chips" id="presets" role="group" aria-label="Preset budgets"></span>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label"><span id="fl-period">Period</span><button class="gl" data-gl="workday"></button></span>
-        <div class="f-ctrl">
-          <div class="segmented" role="group" aria-labelledby="fl-period">
-            <button type="button" data-period="month" aria-pressed="true">Per month</button>
-            <button type="button" data-period="day" aria-pressed="false">Per working day</button>
-          </div>
-          <span class="f-hint">21 working days a month</span>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label"><label for="mix">Mix</label><button class="gl" data-gl="mix"></button></span>
-        <div class="f-ctrl mix">
-          <input type="range" id="mix" min="0" max="100" step="5" value="90" aria-describedby="mix-out">
-          <span class="mix-out" id="mix-out" aria-live="polite">
-            <span><span class="key-bar in" aria-hidden="true"></span><b id="mix-in">90%</b> input</span>
-            <span><span class="key-bar" aria-hidden="true"></span><b id="mix-o">10%</b> output</span>
-          </span>
-          <button type="button" class="link-btn" id="reset-budget" hidden>Back to 6,000 · 90/10</button>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label"><span id="fl-unit">Count in</span><button class="gl" data-gl="request"></button></span>
-        <div class="f-ctrl">
-          <div class="segmented" role="group" aria-labelledby="fl-unit">
-            <button type="button" data-unit="tokens" aria-pressed="true">Tokens</button>
-            <button type="button" data-unit="requests" aria-pressed="false">Agent requests</button>
-          </div>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label" id="fl-view">Order</span>
-        <div class="f-ctrl">
-          <div class="segmented" role="group" aria-labelledby="fl-view">
-            <button type="button" data-view="tokens" aria-pressed="true">By tokens</button>
-            <button type="button" data-view="family" aria-pressed="false">By family</button>
+        <span class="f-label" id="fl-view">View</span>
+        <div class="f-ctrl" role="group" aria-labelledby="fl-view">
+          <label class="chip check"><input type="checkbox" id="m-input" data-metric="input" checked><span class="key-bar in"></span>Input</label>
+          <label class="chip check"><input type="checkbox" id="m-output" data-metric="output" checked><span class="key-bar"></span>Output</label>
+          <span class="f-sep" aria-hidden="true"></span>
+          <div class="segmented" role="group" aria-label="Order">
+            <button type="button" id="v-price" data-view="price" aria-pressed="true">By price</button>
+            <button type="button" id="v-family" data-view="family" aria-pressed="false">By family</button>
           </div>
         </div>
       </div>
@@ -660,13 +603,13 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
   <main class="content">
     <p class="takeaway" id="takeaway" aria-live="polite"></p>
     <div class="summary">
-      <span class="legend-key"><span class="key-bar in"></span>Input tokens</span>
-      <span class="legend-key"><span class="key-bar"></span>Output tokens</span>
+      <span class="legend-key"><span class="key-bar in"></span>Input</span>
+      <span class="legend-key"><span class="key-bar"></span>Output</span>
       <span class="legend-key" id="legend-long"><span class="key-bar long"></span>Long context</span>
-      <span class="legend-key"><b>N× more</b><span class="gl-t">tokens than the priciest model in view<button class="gl" data-gl="moreTokens"></button></span></span>
+      <span class="legend-key"><b>×N</b><span id="legend-mult">times the cheapest in view</span><button class="gl" data-gl="multCheap"></button></span>
     </div>
 
-    <section class="chart" id="chart" aria-label="Tokens per model">
+    <section class="chart" id="chart" aria-label="Model prices">
       <div class="axis" id="axis-top" aria-hidden="true"></div>
       <div class="plot">
         <div class="grid" id="grid" aria-hidden="true"></div>
@@ -677,27 +620,11 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
       <div class="tip" id="tip" hidden></div>
     </section>
 
-    <details id="explain">
-      <summary>How is this calculated?</summary>
-      <div class="explain">
-        <p>GitHub Copilot bills models in AI credits: <span class="m">1 credit = $0.01</span>. Each model has a price in credits per million input tokens and per million output tokens. With a share <span class="m">r</span> of input tokens:</p>
-        <p><code>blended price = r × input price + (1 − r) × output price</code><br>
-           <code>tokens = budget in credits ÷ blended price × 1,000,000</code></p>
-        <p id="example"></p>
-        <ul>
-          <li><b>Caching is not included.</b> Cached input tokens are billed about 10× cheaper than fresh input, so agent sessions that resend the same context get more out of the budget than shown here.</li>
-          <li><b>Per working day</b> divides the monthly budget by 21 working days (5 days a week). Weekends and holidays are not counted.</li>
-          <li><b>Long-context tiers</b> apply to requests whose prompt passes the model’s threshold. They are hidden by default; turn them on above to see how much they cut the budget.</li>
-          <li><b>A request</b> is counted as 50,000 tokens in the tooltip, a rough size for one agent step that sends files and conversation history. Actual sizes vary widely.</li>
-        </ul>
-      </div>
-    </details>
-
     <details id="details">
-      <summary>Show tokens as a table</summary>
+      <summary>Show prices as a table</summary>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Model</th><th>Provider</th><th>Class</th><th class="num">Blended credits / 1M</th><th class="num">Input tokens</th><th class="num">Output tokens</th><th class="num">Total tokens</th></tr></thead>
+          <thead><tr><th>Model</th><th>Family</th><th>Provider</th><th>Category</th><th class="num">Input (credits / 1M)</th><th class="num">Output (credits / 1M)</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -706,7 +633,7 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
     <footer>
       <span>Source: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">Models and pricing for GitHub Copilot</a></span>
       <span id="updated"></span>
-      <span>List prices, no caching</span>
+      <span>Cached input and cache writes not shown</span>
     </footer>
   </main>
 </div>
@@ -714,7 +641,7 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
 <script src="shared.js"></script>
 <script>
 // Data: data/models.csv, regenerated daily by scripts/update-pricing.mjs.
-// Prices in USD per million tokens; cachedInput / cacheWrite are ignored here.
+// Prices in USD per million tokens. cachedInput / cacheWrite are not displayed yet.
 const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output'];
 
 function parseCSV(text) {
@@ -741,6 +668,21 @@ function parseCSV(text) {
     });
     return m;
   });
+}
+
+// The basics strip, hidden once dismissed (per viewer).
+{
+  const BASICS = 'copilot-basics-hidden';
+  const setBasics = hidden => {
+    document.getElementById('basics').hidden = hidden;
+    document.getElementById('basics-show').hidden = !hidden;
+    try { hidden ? localStorage.setItem(BASICS, '1') : localStorage.removeItem(BASICS); } catch {}
+  };
+  let hidden = false;
+  try { hidden = localStorage.getItem(BASICS) === '1'; } catch {}
+  setBasics(hidden);
+  document.getElementById('basics-hide').addEventListener('click', () => setBasics(true));
+  document.getElementById('basics-open').addEventListener('click', () => setBasics(false));
 }
 
 Promise.all([
@@ -772,28 +714,16 @@ function init(MODELS, meta) {
 
   if (meta.updated) {
     const d = new Date(meta.updated + 'T00:00:00');
-    document.getElementById('updated').textContent = 'Prices updated ' + d.toLocaleDateString('en-US', { dateStyle: 'long' });
+    document.getElementById('updated').textContent = 'Updated ' + d.toLocaleDateString('en-US', { dateStyle: 'long' });
   }
   const colorOf = p => `var(${PROVIDERS.find(x => x.name === p).color})`;
   const provIdx = p => PROVIDERS.findIndex(x => x.name === p);
 
   // Prices are held in USD and shown in AI credits; USD only as a secondary figure.
   const { credits, usd } = CopilotShared;
-  const int = v => Math.round(v).toLocaleString('en-US');
   const mult = r => '×' + (r < 10 ? String(Math.round(r * 10) / 10) : Math.round(r));
   const times = r => mult(r).slice(1) + '×'; // in sentences: "5×" reads better than "×5"
-  // Page 2 compares with the priciest model (fewest tokens), so it says "N× more" rather than ×N,
-  // which means "N times the cheapest price" on page 1.
-  const moreThanPriciest = r => (r < 1.05 ? 'fewest' : times(r) + ' more');
   const suffix = m => m.tier === 'long' ? `long context ${m.threshold}` : '';
-  // 428.6M, 21.4M, 950K, 1.2B
-  function tokens(n) {
-    const f = (v, u) => (v >= 100 ? Math.round(v) : Math.round(v * 10) / 10) + u;
-    if (n >= 1e9) return f(n / 1e9, 'B');
-    if (n >= 1e6) return f(n / 1e6, 'M');
-    if (n >= 1e3) return f(n / 1e3, 'K');
-    return String(Math.round(n));
-  }
 
   // "Round" linear ticks: steps of 1, 2, 2.5 or 5 × 10^k, at most 6 intervals.
   function niceScale(max) {
@@ -802,36 +732,29 @@ function init(MODELS, meta) {
     const step = [1, 2, 2.5, 5, 10].map(k => k * pow).find(s => s >= raw);
     const top = Math.ceil(max / step) * step;
     const ticks = [];
-    for (let t = 0; t <= top * (1 + 1e-9); t += step) ticks.push(t);
+    for (let t = 0; t <= top + 1e-9; t += step) ticks.push(Math.round(t * 1000) / 1000);
     return { top, ticks };
   }
 
-  const CREDIT_USD = 0.01;
-  const WORK_DAYS = 21;
-  const REQUEST_TOKENS = CopilotShared.REQUEST_TOKENS;
-  const DEFAULTS = { credits: 6000, inPct: 90 };
-  const PRESETS = [1000, 3000, 6000, 10000, 30000];
-  const MAX_CREDITS = 10000000;
-  const STORE = 'copilot-tokens-view';
+  const STORE = 'copilot-pricing-view';
+  const METRICS = ['input', 'output'];
+  const METRIC_TAG = { input: 'in', output: 'out' };
+  // Classes in GitHub's order, then any new one from the source.
   const CAT_ORDER = ['Lightweight', 'Versatile', 'Powerful'];
   const presentCats = new Set(MODELS.map(m => m.category));
   const CATEGORIES = [...CAT_ORDER.filter(c => presentCats.has(c)), ...[...presentCats].filter(c => !CAT_ORDER.includes(c))];
 
   const state = {
-    credits: DEFAULTS.credits, inPct: DEFAULTS.inPct, view: 'tokens', unit: 'tokens', period: 'month',
+    metrics: { input: true, output: true }, view: 'price',
     active: new Set(PROVIDERS.map(p => p.name)), cats: new Set(CATEGORIES), long: false,
   };
-  const validCredits = v => Number.isFinite(v) && v >= 0 && v <= MAX_CREDITS;
-  const validPct = v => Number.isFinite(v) && v >= 0 && v <= 100;
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     if (saved) {
-      if (validCredits(saved.credits)) state.credits = saved.credits;
-      if (validPct(saved.inPct)) state.inPct = saved.inPct;
-      if (saved.view === 'family' || saved.view === 'tokens') state.view = saved.view;
-      if (saved.unit === 'tokens' || saved.unit === 'requests') state.unit = saved.unit;
-      if (saved.period === 'month' || saved.period === 'day') state.period = saved.period;
-      // A provider or class that appeared since the last visit stays active.
+      if (saved.metrics && METRICS.some(k => saved.metrics[k] === true))
+        METRICS.forEach(k => { state.metrics[k] = saved.metrics[k] === true; });
+      if (saved.view === 'family' || saved.view === 'price') state.view = saved.view;
+      // A provider that appeared since the last visit (missing from saved.known) stays active.
       if (Array.isArray(saved.active)) state.active = new Set(PROVIDERS.map(p => p.name)
         .filter(n => saved.active.includes(n) || (Array.isArray(saved.known) && !saved.known.includes(n))));
       if (Array.isArray(saved.cats)) state.cats = new Set(CATEGORIES
@@ -839,45 +762,18 @@ function init(MODELS, meta) {
       if (typeof saved.long === 'boolean') state.long = saved.long;
     }
   } catch {}
-  // Mix, providers and classes follow the reader across pages.
+  // Providers and classes follow the reader across pages.
   const shared = CopilotShared.read();
-  if (validPct(shared.inPct)) state.inPct = shared.inPct;
   const sharedActive = CopilotShared.restore(PROVIDERS.map(p => p.name), shared.active, shared.known);
   const sharedCats = CopilotShared.restore(CATEGORIES, shared.cats, shared.knownCats);
   if (sharedActive) state.active = sharedActive;
   if (sharedCats) state.cats = sharedCats;
   const focusModel = CopilotShared.takeFocus();
-  // A shared link (?credits=6000&in=90&period=day) wins over the saved state.
-  const query = new URLSearchParams(location.search);
-  if (query.has('credits') && validCredits(Number(query.get('credits')))) state.credits = Number(query.get('credits'));
-  if (query.has('in') && validPct(Number(query.get('in')))) state.inPct = Number(query.get('in'));
-  if (query.get('period') === 'day' || query.get('period') === 'month') state.period = query.get('period');
-
   const save = () => {
-    CopilotShared.write({ inPct: state.inPct, active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES });
-    try { localStorage.setItem(STORE, JSON.stringify({ credits: state.credits, inPct: state.inPct, view: state.view, unit: state.unit, period: state.period,
-      active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES, long: state.long })); } catch {}
-    const q = new URLSearchParams(location.search);
-    const isDefault = state.credits === DEFAULTS.credits && state.inPct === DEFAULTS.inPct;
-    if (isDefault) { q.delete('credits'); q.delete('in'); }
-    else { q.set('credits', state.credits); q.set('in', state.inPct); }
-    if (state.period === 'day') q.set('period', 'day'); else q.delete('period');
-    const s = q.toString();
-    try { history.replaceState(null, '', s ? '?' + s : location.pathname); } catch {}
+    try { localStorage.setItem(STORE, JSON.stringify({ metrics: state.metrics, view: state.view, active: [...state.active], known: PROVIDERS.map(p => p.name),
+      cats: [...state.cats], knownCats: CATEGORIES, long: state.long })); } catch {}
+    CopilotShared.write({ active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES });
   };
-
-  // Credits spent in the period in view: the monthly budget, or its share of one working day.
-  const isDay = () => state.period === 'day';
-  const spend = () => state.credits / (isDay() ? WORK_DAYS : 1);
-  const perPeriod = () => isDay() ? 'a day' : 'a month';
-
-  // Budget for one model: blended price weights the two prices by the mix.
-  function budget(m) {
-    const r = state.inPct / 100;
-    const blended = r * m.input + (1 - r) * m.output;
-    const total = blended > 0 ? spend() * CREDIT_USD / blended * 1e6 : 0;
-    return { blended, total, in: total * r, out: total * (1 - r) };
-  }
 
   const $ = id => document.getElementById(id);
   const el = (tag, cls, text) => {
@@ -887,22 +783,12 @@ function init(MODELS, meta) {
     return n;
   };
 
-
-  // Budget presets
-  const presetChips = new Map();
-  PRESETS.forEach(v => {
-    const b = el('button', 'chip preset', int(v));
-    b.type = 'button';
-    b.addEventListener('click', () => { state.credits = v; render(); });
-    presetChips.set(v, b);
-    $('presets').append(b);
-  });
-
   // Provider chips
   const chips = new Map();
   PROVIDERS.forEach(p => {
     const b = el('button', 'chip');
     b.type = 'button';
+    b.id = 'p-' + p.name.toLowerCase().replace(/\W+/g, '-');
     b.style.setProperty('--c', colorOf(p.name));
     const n = el('span', 'n');
     b.append(el('span', 'sw'), el('span', null, p.name), n);
@@ -919,6 +805,7 @@ function init(MODELS, meta) {
   CATEGORIES.forEach(c => {
     const b = el('button', 'chip');
     b.type = 'button';
+    b.id = 'c-' + c.toLowerCase().replace(/\W+/g, '-');
     const n = el('span', 'n');
     b.append(el('span', null, c), n);
     b.addEventListener('click', () => {
@@ -929,6 +816,8 @@ function init(MODELS, meta) {
     $('categories').append(b);
   });
 
+  // An entry is shown when it passes every filter; `skip` ignores one so a chip can count
+  // what it would show if toggled on.
   const passes = (m, skip) =>
     (skip === 'provider' || state.active.has(m.provider))
     && (skip === 'cat' || state.cats.has(m.category))
@@ -966,67 +855,71 @@ function init(MODELS, meta) {
     lbl.append(el('span', 'name', m.model));
     if (m.tier === 'long') lbl.append(el('span', 'sfx', suffix(m)));
     const track = el('div', 'track');
-    const long = m.tier === 'long' ? ' long' : '';
-    const barIn = el('span', 'bar in' + long), barOut = el('span', 'bar out' + long);
-    const val = el('span', 'val'), amount = el('span'), x = el('span', 'mult');
-    val.append(amount, x);
-    track.append(barIn, barOut, val);
+    const parts = {};
+    METRICS.forEach(k => {
+      const bar = el('span', `bar ${METRIC_TAG[k]}` + (m.tier === 'long' ? ' long' : ''));
+      const val = el('span', `val ${METRIC_TAG[k]}`);
+      const price = el('span'), x = el('span', 'mult');
+      // In+out view: one label per row, "in $in  out $out ×N", on the output value.
+      const pre = el('span'), inPrice = el('span');
+      pre.append(el('span', 'tag', 'in'), inPrice, el('span', 'tag sep', 'out'));
+      val.append(pre, price, x);
+      track.append(bar, val);
+      parts[k] = { bar, val, pre, inPrice, price, x };
+    });
     r.append(lbl, track);
-    const parts = { barIn, barOut, val, amount, x };
     pins.attach(r, { m, r, parts });
     rows.set(m.id, { r, parts });
     $('rows').append(r);
   });
 
-  const empty = el('p', 'empty');
+  const empty = el('p', 'empty', 'No entry matches these filters. ');
+  const emptyReset = el('button', 'link-btn', 'Reset filters');
+  emptyReset.type = 'button';
+  emptyReset.addEventListener('click', resetFilters);
+  empty.append(emptyReset);
   empty.hidden = true;
   $('rows').after(empty);
 
-  // Most tokens first. Within a family, by default-tier budget, long context right below its model.
-  function layout(B) {
+  // Order within a family: by default-tier price, long context right below its model.
+  const basePrice = (m, metric) =>
+    (MODELS.find(o => o.model === m.model && o.tier === 'default') || m)[metric];
+
+  function layout(metric) { // metric: sort key
     const list = MODELS.filter(m => passes(m));
-    const base = m => B.get((MODELS.find(o => o.model === m.model && o.tier === 'default') || m).id)?.total ?? B.get(m.id).total;
-    const byName = (a, b) => a.model.localeCompare(b.model, 'en', { numeric: true }) || (a.tier === 'long') - (b.tier === 'long');
-    if (state.view === 'tokens') {
+    if (state.view === 'price') {
       return list
-        .sort((a, b) => B.get(b.id).total - B.get(a.id).total || provIdx(a.provider) - provIdx(b.provider) || byName(a, b))
+        .sort((a, b) => b[metric] - a[metric] || provIdx(a.provider) - provIdx(b.provider)
+          || a.model.localeCompare(b.model, 'en', { numeric: true }) || (a.tier === 'long') - (b.tier === 'long'))
         .map(m => ({ m }));
     }
     const groups = new Map();
     list.forEach(m => { if (!groups.has(m.family)) groups.set(m.family, []); groups.get(m.family).push(m); });
     const ordered = [...groups.entries()]
-      .map(([f, ms]) => ({ f, ms, max: Math.max(...ms.map(m => B.get(m.id).total)) }))
+      .map(([f, ms]) => ({ f, ms, max: Math.max(...ms.map(m => m[metric])) }))
       .sort((a, b) => b.max - a.max || provIdx(a.ms[0].provider) - provIdx(b.ms[0].provider)
         || b.f.localeCompare(a.f, 'en', { numeric: true }));
     const items = [];
     ordered.forEach(({ f, ms }) => {
       items.push({ head: f, ms });
-      ms.sort((a, b) => base(b) - base(a) || byName(a, b)).forEach(m => items.push({ m }));
+      ms.sort((a, b) => basePrice(b, metric) - basePrice(a, metric)
+        || a.model.localeCompare(b.model, 'en', { numeric: true }) || (a.tier === 'long') - (b.tier === 'long'))
+        .forEach(m => items.push({ m }));
     });
     return items;
   }
 
-  // Amounts in the chosen unit: tokens, or agent requests of REQUEST_TOKENS each.
-  const amount = n => state.unit === 'requests' ? tokens(n / REQUEST_TOKENS) : tokens(n);
-
-  const qualityLink = () => { const a = el('a', null, 'compare quality on page 3 →'); a.href = 'performance.html'; return a; };
-
-  let B = new Map(), minTotal = 1;
   function render() {
-    const r = state.inPct / 100;
-    B = new Map(MODELS.map(m => [m.id, budget(m)]));
-
-    // Controls
-    if (document.activeElement !== $('credits')) $('credits').value = state.credits;
-    $('mix').value = state.inPct;
-    $('mix-in').textContent = state.inPct + '%';
-    $('mix-o').textContent = (100 - state.inPct) + '%';
-    $('mix').setAttribute('aria-valuetext', `${state.inPct}% input, ${100 - state.inPct}% output`);
-    presetChips.forEach((b, v) => b.setAttribute('aria-pressed', String(v === state.credits)));
-    $('reset-budget').hidden = state.credits === DEFAULTS.credits && state.inPct === DEFAULTS.inPct;
+    const shownMetrics = METRICS.filter(k => state.metrics[k]);
+    const two = shownMetrics.length === 2;
+    // Sort by output when shown: it's the longest bar, so the visual order stays consistent.
+    const metric = state.metrics.output ? 'output' : 'input';
+    document.querySelectorAll('[data-metric]').forEach(b => {
+      b.checked = state.metrics[b.dataset.metric];
+      b.disabled = b.checked && !two;
+    });
+    $('chart').classList.toggle('two', two);
     document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
-    document.querySelectorAll('[data-unit]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.unit === state.unit)));
-    document.querySelectorAll('[data-period]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.period === state.period)));
     const syncChip = ({ b, n }, on, count) => {
       b.setAttribute('aria-pressed', String(on));
       n.textContent = count;
@@ -1036,62 +929,58 @@ function init(MODELS, meta) {
     catChips.forEach((c, name) => syncChip(c, state.cats.has(name), MODELS.filter(m => m.category === name && passes(m, 'cat')).length));
     $('long').checked = state.long;
     $('long-n').textContent = MODELS.filter(m => m.tier === 'long' && passes(m, 'long')).length;
-    $('legend-long').hidden = !state.long;
 
-    // Header and formula
-    $('h-credits').textContent = int(state.credits);
-    $('fx-credits').textContent = int(state.credits) + ' credits';
-    $('fx-usd').textContent = '$' + (state.credits * CREDIT_USD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const spent = spend().toLocaleString('en-US', { maximumFractionDigits: 1 });
-    $('h-day').hidden = $('fx-day').hidden = $('fx-day-op').hidden = !isDay();
-    $('fx-day-credits').textContent = int(spend()) + ' credits a day';
-    const k = v => String(Math.round(v * 100) / 100);
-    $('fx-mix').textContent = `${k(r)} × input + ${k(1 - r)} × output`;
-
-    const items = layout(B);
+    const items = layout(metric);
     const list = items.filter(i => i.m).map(i => i.m);
-    const ok = list.length && state.credits > 0;
     const css = getComputedStyle(document.documentElement);
-    const rowH = parseFloat(css.getPropertyValue('--row-h')) || 30;
+    const rowH = parseFloat(css.getPropertyValue(two ? '--row-h-2' : '--row-h')) || 30;
     const headH = parseFloat(css.getPropertyValue('--ghead-h')) || 44;
 
-    // Shared linear scale from 0 to the largest budget in view. ×N compares with the smallest.
-    const totals = list.map(m => B.get(m.id).total);
-    minTotal = ok ? Math.min(...totals) : 1;
-    const maxTotal = ok ? Math.max(...totals) : 1;
-    const { top, ticks } = niceScale(maxTotal);
+    // Shared linear scale from 0 to the highest price shown, across all metrics.
+    // ×N compares each price with the cheapest of the same metric.
+    const lo = {}, hiOf = {};
+    METRICS.forEach(k => {
+      lo[k] = list.length ? Math.min(...list.map(m => m[k])) : 1;
+      hiOf[k] = list.length ? Math.max(...list.map(m => m[k])) : 1;
+    });
+    const hi = Math.max(...shownMetrics.map(k => hiOf[k]));
+    const { top, ticks } = niceScale(hi);
     const pos = v => (v / top) * 100;
 
     for (const id of ['axis-top', 'axis-bottom']) {
-      $(id).replaceChildren(...ticks.map((t, i) => {
-        const s = el('span', i % 2 && ticks.length > 5 ? 'minor' : null, t ? amount(t) : '0');
+      $(id).replaceChildren(el('span', 'unit', 'credits / 1M tokens'), ...ticks.map((t, i) => {
+        const s = el('span', i % 2 && ticks.length > 5 ? 'minor' : null, credits(t));
         s.style.left = pos(t) + '%';
         return s;
       }));
     }
     $('grid').replaceChildren(...ticks.map(t => { const i = el('i'); i.style.left = pos(t) + '%'; return i; }));
 
-    const visible = new Set(ok ? list.map(m => m.id) : []);
+    const visible = new Set(list.map(m => m.id));
     MODELS.forEach(m => {
-      const { r: row, parts } = rows.get(m.id);
-      const b = B.get(m.id);
-      row.hidden = !visible.has(m.id);
-      parts.barIn.style.width = pos(b.in) + '%';
-      parts.barIn.hidden = b.in <= 0;
-      parts.barOut.style.left = pos(b.in) + '%';
-      parts.barOut.style.width = pos(b.out) + '%';
-      parts.barOut.hidden = b.out <= 0;
-      parts.val.style.left = pos(b.total) + '%';
-      parts.amount.textContent = amount(b.total);
-      parts.x.textContent = moreThanPriciest(b.total / minTotal);
-      row.setAttribute('aria-label',
-        `${m.model}${m.tier === 'long' ? ', ' + suffix(m) : ''}, ${m.provider}: ${tokens(b.total)} tokens, `
-        + `${tokens(b.in)} input and ${tokens(b.out)} output, ${moreThanPriciest(b.total / minTotal)} tokens than the priciest model in view`);
+      const { r, parts } = rows.get(m.id);
+      r.hidden = !visible.has(m.id);
+      METRICS.forEach(k => {
+        const { bar, val, pre, inPrice, price, x } = parts[k];
+        const v = m[k];
+        const merged = two && k === 'output';
+        bar.hidden = !state.metrics[k];
+        val.hidden = !state.metrics[k] || (two && k === 'input');
+        pre.hidden = !merged;
+        bar.style.width = pos(v) + '%';
+        val.style.left = pos(merged ? Math.max(m.input, m.output) : v) + '%';
+        inPrice.textContent = credits(m.input);
+        price.textContent = credits(v);
+        x.textContent = mult(m[metric] / lo[metric]);
+      });
+      r.setAttribute('aria-label',
+        `${m.model}${m.tier === 'long' ? ', ' + suffix(m) : ''}, ${m.provider}, `
+        + shownMetrics.map(k => `${k}: ${credits(m[k])} credits per million tokens, ${mult(m[k] / lo[k])} vs. cheapest`).join(' ; '));
     });
 
     const shown = new Set();
     let y = 0, first = true;
-    if (ok) items.forEach(it => {
+    items.forEach(it => {
       if (it.head) {
         const { h } = heads.get(it.head);
         h.classList.toggle('first', first);
@@ -1105,71 +994,47 @@ function init(MODELS, meta) {
     });
     heads.forEach(({ h }, f) => { h.hidden = !shown.has(f); });
     $('rows').style.height = y + 'px';
-    ['grid', 'axis-top', 'axis-bottom', 'axis-title'].forEach(id => { $(id).hidden = !ok; });
+    ['grid', 'axis-top', 'axis-bottom', 'axis-title'].forEach(id => { $(id).hidden = !list.length; });
+    empty.hidden = !!list.length;
 
-    empty.hidden = !!ok;
-    if (!ok) {
-      if (state.credits <= 0) empty.replaceChildren('Enter a budget above 0 credits.');
-      else {
-        const btn = el('button', 'link-btn', 'Reset filters');
-        btn.type = 'button';
-        btn.addEventListener('click', resetFilters);
-        empty.replaceChildren('No entry matches these filters. ', btn);
-      }
-    }
-
+    // Takeaway: the spread for the sorting metric, then how much output costs vs input.
     const name = m => m.model + (m.tier === 'long' ? ' (long context)' : '');
-    if (ok) {
-      const lo = list.reduce((a, b) => (B.get(b.id).total < B.get(a.id).total ? b : a));
-      const hi = list.reduce((a, b) => (B.get(b.id).total > B.get(a.id).total ? b : a));
-      $('fx-gap').textContent = maxTotal > minTotal ? `${times(maxTotal / minTotal)} gap between models` : 'for every model';
-      // Takeaway in agent requests, a more concrete unit than millions of tokens.
-      const req = m => int(B.get(m.id).total / REQUEST_TOKENS);
-      const reqBtn = el('button', 'gl');
-      reqBtn.dataset.gl = 'request';
-      const lead = isDay() ? `${int(state.credits)} credits a month (about ${int(spend())} a working day) buy about ` : `${int(state.credits)} credits a month buy about `;
-      if (maxTotal > minTotal) {
-        $('takeaway').replaceChildren(lead, el('b', null, `${req(hi)} agent requests ${perPeriod()}`),
-          reqBtn, ' with ', el('b', null, name(hi)), ', but only ', el('b', null, req(lo)), ' with ', el('b', null, name(lo)), '. ',
-          el('span', 'muted', `${times(maxTotal / minTotal)} more tokens for the same budget, not ${times(maxTotal / minTotal)} better work: `), qualityLink());
-      } else {
-        $('takeaway').replaceChildren(lead, el('b', null, `${req(hi)} agent requests ${perPeriod()}`), reqBtn, ' with every model in view.');
-      }
-      window.glossaryBind?.(reqBtn);
-      $('fx-range').title = `${name(lo)} – ${name(hi)}`;
-      $('fx-range').textContent = minTotal === maxTotal ? tokens(minTotal) : `${tokens(minTotal)} – ${tokens(maxTotal)}`;
-
-      // Worked example: the median model in view.
-      const byTotal = [...list].sort((a, b) => B.get(a.id).total - B.get(b.id).total);
-      const ex = byTotal[Math.floor(byTotal.length / 2)], eb = B.get(ex.id);
-      $('example').replaceChildren('Example with ', el('b', null, name(ex)), ` (${credits(ex.input)} credits input, ${credits(ex.output)} output per 1M tokens): `,
-        el('span', 'm', `${k(r)} × ${credits(ex.input)} + ${k(1 - r)} × ${credits(ex.output)} = ${credits(eb.blended)}`), ' credits per 1M tokens, so ',
-        el('span', 'm', `${spent} ÷ ${credits(eb.blended)} × 1M = ${tokens(eb.total)}`),
-        ` tokens ${perPeriod()}: ${tokens(eb.in)} input and ${tokens(eb.out)} output`
-        + (isDay() ? ` (${int(state.credits)} credits ÷ ${WORK_DAYS} working days = ${spent} credits).` : '.'));
+    const metricWord = metric === 'output' ? 'output' : 'input';
+    if (list.length > 1 && hiOf[metric] > lo[metric]) {
+      const cheap = list.reduce((a, b) => (b[metric] < a[metric] ? b : a));
+      const dear = list.reduce((a, b) => (b[metric] > a[metric] ? b : a));
+      const ratios = list.map(m => m.output / m.input).sort((a, b) => a - b);
+      const median = ratios[Math.floor(ratios.length / 2)];
+      // Several models can share the top or bottom price: name one and count the others.
+      const others = v => list.filter(m => m[metric] === v).length - 1;
+      const tie = n => (n ? ` (and ${n} other${n > 1 ? 's' : ''} at the same price)` : '');
+      $('takeaway').replaceChildren(
+        'The priciest model in view, ', el('b', null, name(dear)), tie(others(hiOf[metric])), `, charges `, el('b', null, times(hiOf[metric] / lo[metric])),
+        ` more per ${metricWord} token than the cheapest, `, el('b', null, name(cheap)), tie(others(lo[metric])),
+        ` (${credits(hiOf[metric])} vs ${credits(lo[metric])} credits per million). `,
+        el('span', 'muted', `For a typical model, output costs ${times(median)} as much as input.`));
+    } else if (list.length) {
+      $('takeaway').replaceChildren(el('b', null, name(list[0])), ` costs ${credits(list[0].input)} credits input / ${credits(list[0].output)} output per million tokens.`);
     } else {
-      $('fx-gap').textContent = 'no model in view';
-      $('takeaway').textContent = '';
-      $('fx-range').textContent = '—';
-      $('example').textContent = '';
+      $('takeaway').textContent = 'No model matches these filters.';
     }
-    $('f-count').replaceChildren('Showing ', el('b', null, String(ok ? list.length : 0)), ` of ${MODELS.length} entries`);
+    $('legend-mult').textContent = `times the cheapest ${two ? 'output price' : metricWord + ' price'} in view`;
+    $('legend-long').hidden = !state.long;
+    $('f-count').replaceChildren('Showing ', el('b', null, String(list.length)), ` of ${MODELS.length} entries`);
     $('reset').hidden = !isFiltered();
-    $('axis-title').textContent = state.unit === 'requests'
-      ? `Agent requests of ${tokens(REQUEST_TOKENS)} tokens ${isDay() ? 'per working day' : 'per month'}, ${state.inPct}/${100 - state.inPct} input/output mix`
-      : `Tokens ${isDay() ? 'per working day' : 'per month'}, ${state.inPct}/${100 - state.inPct} input/output mix`;
+    $('axis-title').textContent = 'AI credits per million tokens' + (two && state.view === 'price' ? ', sorted by output' : '');
 
     // Table, in display order
-    $('tbody').replaceChildren(...(ok ? list : []).map(m => {
-      const b = B.get(m.id);
+    $('tbody').replaceChildren(...list.map(m => {
       const tr = el('tr');
-      const cell = el('td');
-      cell.style.setProperty('--c', colorOf(m.provider));
-      cell.append(el('span', 'sw'), m.model + (m.tier === 'long' ? ` (${suffix(m)})` : ''));
-      tr.append(cell, el('td', null, m.provider), el('td', null, m.category), el('td', 'num', credits(b.blended)),
-        el('td', 'num', int(b.in)), el('td', 'num', int(b.out)), el('td', 'num', int(b.total)));
+      const name = el('td');
+      name.style.setProperty('--c', colorOf(m.provider));
+      name.append(el('span', 'sw'), m.model + (m.tier === 'long' ? ` (${suffix(m)})` : ''));
+      tr.append(name, el('td', null, m.family), el('td', null, m.provider), el('td', null, m.category),
+        el('td', 'num', credits(m.input)), el('td', 'num', credits(m.output)));
       return tr;
     }));
+    state.lo = lo;
 
     pins.reset();
     save();
@@ -1181,31 +1046,37 @@ function init(MODELS, meta) {
   function showTip({ m, r, parts }, pinned) {
     if (activeRow) activeRow.classList.remove('active');
     activeRow = r; r.classList.add('active');
-    const b = B.get(m.id);
     tip.style.setProperty('--c', colorOf(m.provider));
     const head = el('div', 't-head');
     head.append(el('span', 't-line'), el('span', null, `${m.provider} · ${m.category}`));
     const dl = el('dl');
-    const add = (key, v, cls) => { dl.append(el('dt', cls === 'sep' ? 'sep' : null, key), el('dd', cls || null, v)); };
-    add(isDay() ? 'Tokens / day' : 'Tokens / month', tokens(b.total), 'on');
-    add(`Input (${state.inPct}%)`, tokens(b.in));
-    add(`Output (${100 - state.inPct}%)`, tokens(b.out));
-    add('Vs. priciest model', moreThanPriciest(b.total / minTotal));
-    add(`≈ Requests of 50K`, int(b.total / REQUEST_TOKENS));
-    add('Price in / out', `${credits(m.input)} / ${credits(m.output)} credits`, 'sep');
-    add('Blended / 1M', `${credits(b.blended)} credits (${usd(b.blended)})`);
-    if (m.threshold) add('Input threshold', m.threshold + ' tokens');
+    const add = (k, v, on) => { dl.append(el('dt', null, k), el('dd', on ? 'on' : null, v)); };
+    const shownMetrics = METRICS.filter(k => state.metrics[k]);
+    const two = shownMetrics.length === 2;
+    const lbl = k => (k === 'input' ? 'Input' : 'Output');
+    if (m.status) add('Release status', m.status, false);
+    add('Input / 1M', `${credits(m.input)} credits (${usd(m.input)})`, state.metrics.input);
+    add('Output / 1M', `${credits(m.output)} credits (${usd(m.output)})`, state.metrics.output);
+    add('Output / input', mult(m.output / m.input), two);
+    shownMetrics.forEach(k => add(two ? `${lbl(k)} vs. cheapest` : 'Vs. cheapest', mult(m[k] / state.lo[k]), false));
+    if (m.threshold) add('Input threshold', m.threshold + ' tokens', false);
+    // One agent request at the reader's mix (set on the other pages, 90/10 by default).
+    const pct = Number.isFinite(CopilotShared.read().inPct) ? CopilotShared.read().inPct : 90;
+    const req = (pct / 100 * m.input + (1 - pct / 100) * m.output) * CopilotShared.REQUEST_TOKENS / 1e6;
+    add(`1 agent request (${pct}/${100 - pct})`, `${credits(req)} credits`, false);
     tip.replaceChildren(head, el('div', 't-name', m.model + (m.tier === 'long' ? ' · long context' : '')), dl);
     if (m.note) tip.append(el('div', 't-note', m.note));
-    tip.append(pinned ? CopilotShared.pageLinks('budget', m.model) : CopilotShared.hint('Click to compare it on the other pages'));
+    tip.append(pinned ? CopilotShared.pageLinks('cost', m.model) : CopilotShared.hint('Click to compare it on the other pages'));
     tip.classList.toggle('pinned', !!pinned);
     tip.hidden = false;
 
     const c = $('chart').getBoundingClientRect();
-    const d = (parts.barOut.hidden ? parts.barIn : parts.barOut).getBoundingClientRect();
+    // Anchor on the longest bar shown
+    const k = state.metrics.output && (!state.metrics.input || m.output >= m.input) ? 'output' : 'input';
+    const d = parts[k].bar.getBoundingClientRect();
     const rr = r.getBoundingClientRect();
     const tw = tip.offsetWidth, th = tip.offsetHeight;
-    let left = d.right - c.left + 130;
+    let left = d.right - c.left + 150;
     if (left + tw > c.width) left = d.right - c.left - tw - 16;
     if (left < 0) left = Math.max(0, c.width - tw);
     let topY = rr.top - c.top + rr.height / 2 - th / 2;
@@ -1220,20 +1091,14 @@ function init(MODELS, meta) {
   }
 
   // Controls
-  $('credits').addEventListener('input', e => {
-    const v = e.target.value === '' ? 0 : Number(e.target.value);
-    state.credits = Number.isFinite(v) ? Math.min(Math.max(v, 0), MAX_CREDITS) : 0;
-    render();
-  });
-  $('credits').addEventListener('change', () => { $('credits').value = state.credits; });
-  $('mix').addEventListener('input', e => { state.inPct = Number(e.target.value); render(); });
-  $('reset-budget').addEventListener('click', () => { state.credits = DEFAULTS.credits; state.inPct = DEFAULTS.inPct; render(); });
+  document.querySelectorAll('[data-metric]').forEach(b =>
+    b.addEventListener('change', () => {
+      state.metrics[b.dataset.metric] = b.checked;
+      if (!METRICS.some(k => state.metrics[k])) state.metrics[b.dataset.metric] = true;
+      render();
+    }));
   document.querySelectorAll('[data-view]').forEach(b =>
     b.addEventListener('click', () => { state.view = b.dataset.view; render(); }));
-  document.querySelectorAll('[data-unit]').forEach(b =>
-    b.addEventListener('click', () => { state.unit = b.dataset.unit; render(); }));
-  document.querySelectorAll('[data-period]').forEach(b =>
-    b.addEventListener('click', () => { state.period = b.dataset.period; render(); }));
   $('all').addEventListener('click', () => { PROVIDERS.forEach(p => state.active.add(p.name)); render(); });
   $('none').addEventListener('click', () => { state.active.clear(); render(); });
   $('long').addEventListener('change', e => { state.long = e.target.checked; render(); });
@@ -1245,7 +1110,7 @@ function init(MODELS, meta) {
     if (h !== lastH) { lastH = h; render(); }
   });
 
-  // Theme: shared with cost.html, follows the system until the user picks one.
+  // Theme: follows the system until the user picks one, then remembers the choice.
   const THEME = 'copilot-pricing-theme';
   const darkMQ = matchMedia('(prefers-color-scheme: dark)');
   const isDark = () => {

@@ -22,6 +22,7 @@
     cachewrite: ['Cache write', 'What some providers charge to store a prompt prefix the first time, so later requests can read it at the cached price. Empty when GitHub lists no such charge.'],
     perdollar: ['Coding points per 100 credits', 'Coding Index divided by the blended price per million tokens, in hundreds of credits: how much benchmark score 100 credits ($1) buy. Higher is better value, not a better model.'],
     log: ['Log scale', 'Each step right multiplies the price (×2, ×10) instead of adding to it, so cheap and pricey models fit on one axis.'],
+    quality: ['Quality', 'A model\u2019s benchmark score (Artificial Analysis) next to the best Copilot model on the same benchmark: 5 dots means within 5% of the best, 1 dot means under 60%. Benchmarks are a guide, not a measure of your own tasks.'],
   };
 
   const css = `

@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GitHub Copilot Model Pricing</title>
+<title>Which Copilot model should I use?</title>
+<meta name="description" content="Pick what you are about to do and get a GitHub Copilot model that does it well without burning through your monthly AI credits.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%226%22 rx=%221%22 fill=%22%232a78d6%22/%3E%3Crect x=%226.5%22 y=%225%22 width=%223%22 height=%2210%22 rx=%221%22 fill=%22%23eb6834%22/%3E%3Crect x=%2212%22 y=%221%22 width=%223%22 height=%2214%22 rx=%221%22 fill=%22%231baf7a%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,9 +14,10 @@
   try { const t = localStorage.getItem('copilot-pricing-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch {}
 </script>
 <style>
-/* Layout: a narrow column, a typographic header, a labeled filter panel,
-   then horizontal bars on a linear scale, grouped by family or ranked by price.
-   Color is reserved for the bars. */
+/* Start page: the simple view for people who don't follow LLM news.
+   Same design language as cost.html (tokens, nav, theme), fewer controls:
+   pick a task on the left, the answer on the right, then the whole menu priced
+   in what a monthly budget buys. Color is reserved for providers and the bars. */
 :root {
   --bg: #fafaf9;
   --surface: #ffffff;
@@ -36,13 +38,7 @@
 
   --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
-  --label-w: 17rem;
-  --plot-gap: 1.5rem;
-  --plot-right: 10rem;
-  --row-h: 30px;
-  --row-h-2: 26px;
-  --ghead-h: 28px;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -72,24 +68,14 @@ body {
   font: 400 14px/1.5 var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
-/* Full-width app: masthead on top, filters in a sticky left sidebar, chart on the right. */
 .app {
-  max-width: 110rem;
+  max-width: 76rem;
   margin: 0 auto;
   padding-inline: clamp(16px, 3vw, 40px);
   padding-block: 24px 48px;
-  display: grid;
-  grid-template-columns: 17rem minmax(0, 1fr);
-  grid-template-rows: auto auto 1fr;
-  grid-template-areas: "head head" "side intro" "side main";
-  column-gap: clamp(24px, 3vw, 48px);
 }
-.app > .masthead { grid-area: head; }
-.intro { grid-area: intro; padding-top: 24px; }
-.sidebar { grid-area: side; }
-.content { grid-area: main; min-width: 0; padding-top: 32px; }
 
-/* Header */
+/* Header and site nav: same as the other pages (keep the copies in sync) */
 .masthead { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
 .theme-btn {
   appearance: none;
@@ -109,7 +95,7 @@ body {
 .theme-btn .sun { display: none; }
 .is-dark .theme-btn .sun { display: block; }
 .is-dark .theme-btn .moon { display: none; }
-/* Site nav: one tab per page, shared by index.html, tokens.html, performance.html and compare.html */
+/* Site nav: one tab per page, shared by index.html, cost.html, tokens.html, performance.html and compare.html */
 .site-nav { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
 .site-nav .brand {
   display: inline-flex; align-items: center; gap: 8px; flex: none;
@@ -143,138 +129,239 @@ body {
   .theme-btn { padding: 7px; }
   #theme-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
-.eyebrow {
-  font: 500 11px/1 var(--font-mono);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  margin: 0 0 16px;
-}
+
+/* Intro */
+.intro { padding-top: 40px; max-width: 46rem; }
 h1 {
   font-weight: 500;
-  font-size: clamp(28px, 4.2vw, 40px);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
-  margin: 0 0 12px;
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  margin: 0 0 14px;
   text-wrap: balance;
 }
-.lede + .lede { margin-top: 8px; }
-.source { margin: 12px 0 0; color: var(--ink-2); font-size: 13px; }
-.source a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.source a:hover { text-decoration-color: currentColor; }
-/* The basics: three cards for first-time readers, dismissable */
-.basics { margin-top: 20px; max-width: 60rem; }
-.b-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-.b-head .eyebrow { margin: 0; }
-.b-head .link-btn { font-size: 12px; }
-.b-cards { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; counter-reset: b; }
-.b-cards li {
-  counter-increment: b; display: flex; flex-direction: column; gap: 6px;
-  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px;
-  font-size: 13px; line-height: 1.45; color: var(--ink-2);
+.lede { color: var(--ink-2); font-size: 16px; line-height: 1.55; max-width: 60ch; margin: 0; text-wrap: pretty; }
+.lede b { color: var(--ink); font-weight: 500; }
+.budget {
+  display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 20px; font-size: 14px; color: var(--ink-2);
 }
-.b-cards li::before { content: counter(b); font: 500 11px/1 var(--font-mono); color: var(--ink-3); }
-.b-cards b { color: var(--ink); font-weight: 500; font-size: 14px; }
-.b-cards a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.b-cards a:hover { text-decoration-color: currentColor; }
-.source .link-btn { font-size: 13px; padding: 0; }
-@media (max-width: 900px) { .b-cards { grid-template-columns: minmax(0, 1fr); } }
-.row.focus-flash { animation: focus-flash 1.6s ease-out 2; border-radius: 6px; }
-.lede {
-  color: var(--ink-2);
-  font-size: 15px;
-  max-width: 60ch;
-  margin: 0;
+.budget label { color: var(--ink-2); }
+.num {
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--surface);
+  transition: border-color .15s;
 }
+.num:focus-within { border-color: var(--ink-2); }
+.num input {
+  appearance: textfield; -moz-appearance: textfield;
+  width: 6.5ch; border: 0; background: transparent; color: var(--ink);
+  font: 500 14px/1 var(--font-mono); padding: 8px 4px 8px 10px; text-align: right;
+}
+.num input::-webkit-outer-spin-button, .num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num input:focus { outline: none; }
+.num span { padding: 0 10px 0 4px; color: var(--ink-3); font-size: 13px; }
+.budget .reset { font-size: 13px; }
 
-/* Filters: one labeled row per dimension */
-.filters {
+/* Picker: tasks on the left, the answer on the right */
+.picker {
   margin-top: 40px;
-  padding: 6px 0 0;
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-}
-.f-row {
   display: grid;
-  grid-template-columns: 6.5rem 1fr;
-  gap: 16px;
-  align-items: center;
-  padding: 10px 0;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(24px, 3.5vw, 48px);
+  align-items: start;
 }
-.f-label {
-  font: 500 11px/1 var(--font-mono);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+.tasks { border: 0; margin: 0; padding: 0; min-width: 0; }
+.tasks legend { font: 500 18px/1.3 var(--font-sans); letter-spacing: -0.01em; padding: 0; margin-bottom: 14px; }
+.task-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.task { border-bottom: 1px solid var(--rule); }
+.task label {
+  position: relative;
+  display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; column-gap: 14px; align-items: start;
+  padding: 14px 12px 14px 10px; margin-inline: -10px -12px;
+  border-radius: 10px; cursor: pointer;
+  transition: background .15s;
 }
-.f-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
-.f-sep { width: 1px; height: 22px; background: var(--rule); margin: 0 8px; }
-.f-hint { color: var(--ink-3); font-size: 12px; margin-left: 4px; }
-.f-bulk { display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; color: var(--ink-3); }
-.f-foot {
-  display: flex; justify-content: space-between; align-items: center; gap: 16px;
-  margin-top: 6px; padding: 12px 0;
-  border-top: 1px dashed var(--rule);
-  color: var(--ink-3); font-size: 12px;
+.task label:hover { background: var(--hover); }
+.task input { position: absolute; opacity: 0; pointer-events: none; }
+.task .dot {
+  margin-top: 2px; width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid var(--rule-strong); background: var(--surface);
+  display: grid; place-items: center;
+  transition: border-color .2s, background .2s;
 }
-.f-foot b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.segmented {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 8px;
-  background: var(--hover);
+.task .dot::after {
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--bg);
+  transform: scale(0); transition: transform .3s var(--ease-out);
+}
+.task input:checked + label .dot { border-color: var(--ink); background: var(--ink); }
+.task input:checked + label .dot::after { transform: scale(1); }
+.task input:checked + label { background: var(--surface); box-shadow: 0 1px 2px rgb(0 0 0 / .05), 0 4px 16px rgb(0 0 0 / .04); }
+.task input:focus-visible + label { outline: 2px solid var(--ink); outline-offset: 2px; }
+.task .t-name { display: block; font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.35; }
+.task .t-ex { display: block; margin-top: 3px; font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.task .t-cost {
+  align-self: center; white-space: nowrap;
+  font: 400 12px/1 var(--font-mono); color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.task input:checked + label .t-cost { color: var(--ink); }
+.tasks-note { margin: 12px 0 0; font-size: 12.5px; color: var(--ink-3); }
+
+/* The answer */
+.answer {
+  position: sticky; top: 16px;
+  background: var(--surface);
   border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: clamp(20px, 3vw, 32px);
+  min-width: 0;
 }
-.segmented button {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--ink-2);
-  font: 500 13px/1 var(--font-sans);
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background .15s, color .15s, box-shadow .15s;
+.a-lead { margin: 0; font-size: 14px; color: var(--ink-2); }
+.a-model {
+  display: flex; align-items: center; gap: 12px;
+  margin: 6px 0 0;
+  font-weight: 500; font-size: clamp(28px, 3.6vw, 40px); line-height: 1.08; letter-spacing: -0.03em;
+  text-wrap: balance;
 }
-.segmented button[aria-pressed="true"] {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 0 0 1px var(--rule);
+.a-model .sw { flex: none; width: 14px; height: 14px; border-radius: 4px; background: var(--c, var(--s-other)); }
+.facts { margin: 22px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.fact { margin: 0; min-width: 0; }
+.fact dt { font-size: 12.5px; color: var(--ink-3); margin-bottom: 8px; }
+.fact dd { margin: 0; }
+.meter { display: flex; gap: 4px; height: 28px; align-items: center; }
+.meter i { flex: 1; max-width: 34px; height: 12px; border-radius: 4px; background: var(--hover); box-shadow: inset 0 0 0 1px var(--rule-strong); }
+.meter i.on { background: var(--ink); box-shadow: none; }
+.f-big { font-size: 14px; color: var(--ink-2); height: 28px; display: flex; align-items: baseline; gap: 6px; }
+.f-big b { font-size: 26px; line-height: 1; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.f-sub { margin-top: 6px !important; font-size: 13px; color: var(--ink-2); }
+.opt .o-name .pips { margin-left: 4px; }
+.a-why { margin: 12px 0 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; text-wrap: pretty; }
+.a-why b { color: var(--ink); font-weight: 500; }
+.promo {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
+  font-size: 12.5px; color: var(--ink-2);
+  padding: 5px 10px; border-radius: 999px; background: var(--hover);
 }
-.chips { display: contents; }
-.chip {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid var(--rule-strong);
-  background: var(--surface);
-  color: var(--ink);
-  font: 400 13px/1 var(--font-sans);
-  padding: 7px 12px 7px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: opacity .15s, border-color .15s, background .15s;
+.promo svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.a-month {
+  margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--rule);
+  font-size: 15px; line-height: 1.45; letter-spacing: -0.01em; color: var(--ink-2); text-wrap: pretty;
 }
-.chip:hover { background: var(--hover); }
-.chip .sw {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--c);
-  box-shadow: 0 0 0 2px var(--bg);
+.a-month b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* Options: the pick, a cheaper and a stronger model, each with its month in requests */
+.opts { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 4px; }
+.opt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "role role" "name cost" "bar bar";
+  column-gap: 12px;
+  padding: 12px 0;
 }
-.chip .n { font: 400 11px/1 var(--font-mono); color: var(--ink-3); }
-/* Off: dashed, muted, hollow swatch. A chip with no matching entry fades further. */
-.chip[aria-pressed="false"], .chip.check:not(:has(input:checked)) {
-  background: transparent; color: var(--ink-3); border-color: var(--rule-strong); border-style: dashed;
+.opt + .opt { border-top: 1px solid var(--rule); }
+.opt .o-role { grid-area: role; font-size: 12.5px; color: var(--ink-3); margin-bottom: 2px; }
+.opt .o-name { grid-area: name; font-size: 15px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.opt .o-name .sw { flex: none; width: 9px; height: 9px; border-radius: 3px; background: var(--c, var(--s-other)); }
+.opt .o-cost { grid-area: cost; align-self: baseline; font: 400 12.5px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+.opt .o-bar { grid-area: bar; margin-top: 10px; display: flex; align-items: center; gap: 12px; }
+.track { flex: 1; height: 10px; border-radius: 999px; background: var(--hover); overflow: hidden; }
+.fill {
+  display: block; height: 100%; border-radius: inherit; background: var(--c, var(--s-other));
+  width: 100%; transform-origin: left center;
+  transform: scaleX(max(var(--w, 0), .008));
+  transition: transform .7s var(--ease-out);
 }
-.chip[aria-pressed="false"] .sw { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
-.chip.zero { opacity: .5; }
-.chip.check { padding-left: 9px; }
-.chip.check input { margin: 0; width: 14px; height: 14px; accent-color: var(--ink); cursor: pointer; }
-.chip.check:has(input:disabled) { cursor: not-allowed; }
-.chip.check:has(input:disabled) input { cursor: not-allowed; }
-.chip.check:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.opt .o-n { flex: none; min-width: 9.5em; text-align: right; font: 400 12.5px/1 var(--font-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.opt .o-n b { color: var(--ink); font-weight: 500; }
+.opt.is-pick {
+  margin-inline: -14px; padding: 14px;
+  background: var(--hover); border-radius: 12px;
+}
+.opt.is-pick + .opt { border-top: 0; }
+.opt.is-pick .o-role {
+  justify-self: start; margin-bottom: 8px;
+  font-size: 11.5px; font-weight: 500; line-height: 1;
+  padding: 4px 8px; border-radius: 999px; background: var(--ink); color: var(--bg);
+}
+.opt.is-pick .o-name { font-size: 16px; }
+.opt.is-pick .o-cost { color: var(--ink); }
+.opt.is-pick .track { height: 14px; background: var(--surface); }
+.a-foot { margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; }
+.a-foot a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.a-foot a:hover { text-decoration-color: currentColor; }
+
+/* The menu: every model, priced in what the budget buys */
+section.menu, section.habits { margin-top: 72px; }
+h2 {
+  font-weight: 500; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.15; letter-spacing: -0.02em;
+  margin: 0 0 10px; text-wrap: balance;
+}
+.sub { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 64ch; text-wrap: pretty; }
+.more { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.more a, .why-list a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.more a:hover, .why-list a:hover { text-decoration-color: currentColor; }
+.band { margin-top: 32px; }
+.band-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-strong); }
+.band-head h3 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.005em; }
+.band-head p { margin: 0; font-size: 13px; color: var(--ink-3); text-align: right; }
+.m-head, .m-row {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) 5.5rem 7rem minmax(0, 1fr);
+  column-gap: 20px; align-items: center;
+}
+.m-head {
+  padding: 14px 0 6px; font-size: 12px; color: var(--ink-3);
+}
+.m-head span:nth-child(3) { text-align: right; }
+.m-list { list-style: none; margin: 0; padding: 0; }
+.m-row { padding: 9px 0; border-bottom: 1px solid var(--rule); scroll-margin-top: 80px; }
+.m-row .m-name { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; min-width: 0; }
+.m-row .m-name .sw { flex: none; width: 9px; height: 9px; border-radius: 3px; background: var(--c, var(--s-other)); }
+.m-row .m-name span:not(.sw):not(.tag) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m-row .m-cost { text-align: right; font: 400 13px/1 var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.m-row .m-bar { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.m-row .track { height: 8px; }
+.m-row .m-n { flex: none; min-width: 11.5em; font: 400 12.5px/1 var(--font-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.m-row .m-n b { color: var(--ink); font-weight: 500; }
+.m-row .tag {
+  flex: none; font-size: 11.5px; line-height: 1; padding: 4px 7px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); font-weight: 500;
+}
+.m-row.is-pick { background: linear-gradient(var(--hover), var(--hover)) no-repeat; background-size: calc(100% + 24px) 100%; background-position: -12px 0; }
+@supports (background-size: calc(100% + 24px) 100%) {
+  .m-row.is-pick { box-shadow: -12px 0 0 var(--hover), 12px 0 0 var(--hover); }
+}
+.m-row.is-old .m-name, .m-row.is-old .m-cost, .m-row.is-old .m-n, .m-row.is-old .m-n b { color: var(--ink-3); }
+.m-row.is-old .sw, .m-row.is-old .fill, .m-row.is-old .pips { opacity: .45; }
+.old-tag {
+  flex: none; font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 999px;
+  border: 1px solid var(--rule-strong); color: var(--ink-3);
+}
+.old-toggle { margin-top: 10px; font-size: 12.5px; color: var(--ink-3); text-align: left; line-height: 1.4; }
+.pips { display: inline-flex; gap: 3px; }
+.pips i { width: 7px; height: 7px; border-radius: 50%; background: var(--rule-strong); }
+.pips i.on { background: var(--ink); }
+.pips-na { font-size: 12px; color: var(--ink-3); }
+
+/* Habits */
+.h-list { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.h-list li { border-top: 2px solid var(--ink); padding-top: 14px; }
+.h-list b { display: block; font-size: 16px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.3; }
+.h-list p { margin: 8px 0 0; color: var(--ink-2); font-size: 14px; line-height: 1.55; text-wrap: pretty; }
+
+/* Why this model (inside the answer panel) */
+details.why { margin-top: 16px; }
+details.why summary {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
+  font-size: 13.5px; font-weight: 500; color: var(--ink); padding: 4px 0;
+}
+details.why summary::-webkit-details-marker { display: none; }
+details.why summary svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--ease-out); }
+details.why[open] summary svg { transform: rotate(90deg); }
+.why-list { margin: 8px 0 0; padding: 0 0 0 19px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 62ch; }
+.why-list b { color: var(--ink); font-weight: 500; }
+
 .link-btn {
   appearance: none; border: 0; background: none; padding: 4px 2px;
   font: 400 13px/1 var(--font-sans); color: var(--ink-2);
@@ -282,249 +369,60 @@ h1 {
   text-underline-offset: 3px; cursor: pointer;
 }
 .link-btn:hover { color: var(--ink); }
-/* Sidebar (wide screens): compact stacked groups, sized to fit a laptop viewport (~800px)
-   without scrolling. Chips sit in a two-column grid; the sidebar scrolls only as a fallback. */
-@media (min-width: 901px) {
-  .app { grid-template-columns: 18rem minmax(0, 1fr); }
-  .sidebar {
-    position: sticky; top: 0; align-self: start;
-    max-height: 100vh; overflow-y: auto;
-    padding: 16px 20px 16px 0;
-    margin-top: 16px;
-    border-right: 1px solid var(--rule);
-    scrollbar-width: thin;
-  }
-  .filters { margin: 0; padding: 0; border: 0; }
-  .f-row {
-    position: relative;
-    grid-template-columns: 1fr; gap: 8px;
-    padding: 12px 0;
-    border-top: 1px dashed var(--rule);
-  }
-  .f-row:first-child { border-top: 0; padding-top: 0; }
-  .f-ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-  .sidebar .chip { min-width: 0; padding: 6px 8px 6px 9px; font-size: 12.5px; gap: 7px; }
-  .sidebar .chip > span:not(.n):not(.sw):not(.key-bar) { overflow: hidden; text-overflow: ellipsis; }
-  .sidebar .chip .n { margin-left: auto; }
-  .f-sep { display: none; }
-  .segmented, .f-hint, #long-chip { grid-column: 1 / -1; }
-  .segmented { display: flex; }
-  .segmented button { flex: 1; padding: 7px 8px; }
-  /* All · None moves up next to the Provider label */
-  .f-bulk { position: absolute; top: 9px; right: 0; margin: 0; font-size: 12px; }
-  .f-bulk .link-btn { font-size: 12px; }
-  .f-hint { margin: 0; font-size: 11.5px; line-height: 1.35; }
-  .f-foot { margin-top: 0; padding: 12px 0 0; }
-  .content .summary { margin-top: 0; }
-}
+.gl-t { white-space: nowrap; }
 
-button:focus-visible, .row:focus-visible, summary:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-
-/* Summary */
-.summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 32px;
-  margin: 20px 0 28px;
-  color: var(--ink-2);
-  font-size: 13px;
-}
-.takeaway { margin: 20px 0 0; max-width: 70ch; font-size: 17px; line-height: 1.45; color: var(--ink); text-wrap: pretty; }
-.takeaway b { font-weight: 600; }
-.takeaway .muted { color: var(--ink-2); }
-.content .takeaway { margin-top: 0; }
-.content .takeaway + .summary { margin-top: 14px; }
-.summary b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.legend-key { display: inline-flex; align-items: center; gap: 8px; }
-.key-bar { width: 18px; height: 10px; border-radius: 0 3px 3px 0; background: var(--ink-2); }
-.key-bar.long { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-2); }
-.key-bar.in { background: color-mix(in srgb, var(--ink-2) 50%, transparent); }
-
-/* Chart */
-.chart { position: relative; }
-.axis {
-  position: relative;
-  height: 20px;
-  margin-left: calc(var(--label-w) + var(--plot-gap));
-  margin-right: var(--plot-right);
-  font: 400 11px/1 var(--font-mono);
-  color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-}
-.axis span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
-/* The unit, in the label column just left of 0: the axis title is far below on a long chart. */
-.axis .unit { left: auto; right: calc(100% + var(--plot-gap)); transform: none; font-family: var(--font-sans); }
-.axis.bottom { margin-top: 8px; }
-.axis-title {
-  margin: 6px 0 0 calc(var(--label-w) + var(--plot-gap));
-  font-size: 12px; color: var(--ink-3);
-}
-.plot { position: relative; }
-.grid {
-  position: absolute;
-  inset: 0 var(--plot-right) 0 calc(var(--label-w) + var(--plot-gap));
-  pointer-events: none;
-}
-.grid i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--rule); }
-.rows { position: relative; transition: height .4s ease; }
-.row {
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  height: var(--row-h);
-  display: grid;
-  grid-template-columns: var(--label-w) 1fr;
-  column-gap: var(--plot-gap);
-  align-items: center;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: transform .45s cubic-bezier(.3,.7,.2,1), opacity .25s;
-  outline: none;
-}
-.row::before {
-  content: ""; position: absolute; inset: 0 -8px; border-radius: 6px;
-  background: var(--hover); opacity: 0; transition: opacity .12s;
-  z-index: -1;
-}
-.row:hover::before, .row.active::before { opacity: 1; }
-.lbl {
-  display: flex; align-items: baseline; justify-content: flex-end; gap: 8px;
-  min-width: 0; text-align: right;
-}
-.lbl .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lbl .sfx {
-  font: 400 11px/1 var(--font-mono); color: var(--ink-3); white-space: nowrap;
-}
-.track { position: relative; height: 100%; margin-right: var(--plot-right); }
-.bar {
-  position: absolute; left: 0; top: 50%;
-  height: 12px; margin-top: -6px;
-  min-width: 2px;
-  border-radius: 0 4px 4px 0;
-  background: var(--c);
-  transition: width .45s cubic-bezier(.3,.7,.2,1), filter .15s;
-}
-.bar.long { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
-/* Input in a light tint, output in solid color: same provider, two prices. */
-.bar.in { background: color-mix(in srgb, var(--c) 55%, transparent); }
-.bar.long.in { background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 55%, transparent); }
-.two .bar { height: 7px; }
-.two .bar.in { margin-top: -7.5px; }
-.two .bar.out { margin-top: .5px; }
-.row:hover .bar, .row.active .bar { filter: brightness(1.08) saturate(1.1); }
-.val {
-  position: absolute; top: 50%;
-  transform: translate(10px, -50%);
-  font: 400 12px/1 var(--font-mono);
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  transition: left .45s cubic-bezier(.3,.7,.2,1);
-}
-.val .mult { color: var(--ink-3); margin-left: 8px; }
-.val .tag { color: var(--ink-3); margin-right: 4px; }
-.val .tag.sep { margin-left: 10px; }
-.two .val { font-size: 11px; }
-
-/* Family headers */
-.ghead {
-  position: absolute; left: 0; right: 0; top: 0;
-  height: var(--ghead-h);
-  display: flex; align-items: flex-end; gap: 10px;
-  padding-bottom: 5px;
-  border-top: 1px solid var(--rule);
-  font: 500 11px/1 var(--font-mono);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  transition: transform .45s cubic-bezier(.3,.7,.2,1);
-}
-.ghead.first { border-top-color: transparent; }
-.ghead .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
-.empty {
-  padding: 48px 0; text-align: center; color: var(--ink-3);
-}
-
-/* Tooltip */
-.tip {
-  position: absolute; z-index: 5;
-  min-width: 220px; max-width: 280px;
-  background: var(--surface);
-  border: 1px solid var(--rule-strong);
-  border-radius: 10px;
-  padding: 14px 16px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / .08);
-  pointer-events: none;
-  font-size: 13px;
-}
-.tip .t-head { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 12px; margin-bottom: 4px; }
-.tip .t-line { width: 12px; height: 2px; border-radius: 1px; background: var(--c); }
-.tip .t-name { font-weight: 500; color: var(--ink); margin-bottom: 12px; }
-.tip dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
-.tip dt { color: var(--ink-3); }
-.tip dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
-.tip dd.on { color: var(--ink); font-weight: 500; }
-.tip .t-note { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 12px; }
-
-/* Table */
-details { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
-summary { cursor: pointer; color: var(--ink-2); font-size: 13px; width: max-content; }
-summary:hover { color: var(--ink); }
-.table-wrap { overflow-x: auto; margin-top: 16px; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; }
-th, td { padding: 9px 12px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
-th { font-weight: 500; color: var(--ink-3); font-size: 12px; }
-td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-td .sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-right: 8px; }
-
+/* Footer */
 footer {
   margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule);
   color: var(--ink-3); font-size: 12px;
   display: flex; flex-wrap: wrap; gap: 6px 24px;
 }
 footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.empty { color: var(--ink-2); padding: 24px 0; }
 
-/* Narrow screens: one column, filters back to a horizontal panel between intro and chart. */
-@media (max-width: 900px) {
-  .app {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto;
-    grid-template-areas: "head" "intro" "side" "main";
-  }
-  .content { padding-top: 0; }
+button:focus-visible, summary:focus-visible, a:focus-visible, .num:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 
-/* Mobile: the name moves above the price line */
-@media (max-width: 640px) {
-  :root { --label-w: 0px; --plot-gap: 0px; --plot-right: 10rem; --row-h: 48px; --row-h-2: 48px; }
-  .row { grid-template-columns: 1fr; grid-template-rows: 22px 22px; align-content: center; }
-  .lbl { justify-content: flex-start; text-align: left; }
-  .row::before { inset: 0 -6px; }
-  .f-row { grid-template-columns: 1fr; gap: 10px; }
-  .f-sep { display: none; }
-  .f-hint { flex-basis: 100%; margin: 0; }
-  .axis span.minor { display: none; }
-  /* No label column: the unit sits above the top axis instead. */
-  #axis-top { margin-top: 26px; }
-  .axis .unit { right: auto; left: 0; top: -20px; }
-  .axis.bottom .unit { display: none; }
+@media (max-width: 960px) {
+  .picker { grid-template-columns: minmax(0, 1fr); }
+  .answer { position: static; }
+  .m-head, .m-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; }
+  .m-head { display: none; }
+  .m-row .m-q { justify-self: end; }
+  .m-row .m-cost { display: none; }
+  .m-row .m-bar { grid-column: 1 / -1; }
+  .h-list { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 }
-
+@media (max-width: 520px) {
+  .intro { padding-top: 28px; }
+  .opt .o-n, .m-row .m-n { min-width: 0; }
+  .band-head { flex-direction: column; gap: 2px; }
+  .band-head p { text-align: left; }
+}
 @media (prefers-reduced-motion: reduce) {
-  *, *::before { transition: none !important; }
+  *, *::before, *::after { transition: none !important; }
 }
-.chart:not(.ready) * { transition: none !important; }
+.no-anim .fill { transition: none; }
 </style>
 </head>
 <body>
+<!--
+THESIS: the answer before the vocabulary. Name the task, get one model and what a month of it costs; refuses the price-chart-first dashboard.
+OWN-WORLD: the site's own Geist on warm neutrals, provider swatches, round-capped bars; a bordered answer panel is the only raised surface.
+STORY: a business analyst learns which model fits the task, how many agent requests their 6,000 credits buy with it, and that pricier is rarely needed; they leave with a model name.
+FIRST VIEWPORT: question as H1, one-line lede with the editable budget; tasks list left (5/12), answer panel right (7/12) with model name at display size and three month bars.
+FORM: established-world surface, task picker + answer panel (structure chosen in-thread; seed script returned no output).
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
 <div class="app">
   <div class="masthead">
     <nav class="site-nav" aria-label="Pages">
       <span class="brand"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.01 8.01 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Copilot pricing</span>
       <div class="tabs">
-        <a href="./" aria-current="page">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
+        <a href="./" aria-current="page"><span class="tq">Which model should I use?</span><span class="ts">Start</span></a>
+        <a href="cost.html">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
         <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
         <a href="performance.html">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
         <a href="compare.html">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>
@@ -538,110 +436,61 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
   </div>
 
   <header class="intro">
-    <h1>Copilot model pricing</h1>
-    <p class="lede">What each model charges per million <span class="gl-t">tokens<button class="gl" data-gl="token"></button>,</span> about 750,000 words. You pay separately for what you send, the <span class="gl-t">input<button class="gl" data-gl="input"></button>,</span> and for what the model writes, the <span class="gl-t">output<button class="gl" data-gl="output"></button>.</span> Prices are in AI <span class="gl-t">credits<button class="gl" data-gl="credit"></button>,</span> the unit your Copilot budget is counted in: 1 credit = $0.01.</p>
-    <section class="basics" id="basics" aria-labelledby="basics-title">
-      <div class="b-head">
-        <h2 class="eyebrow" id="basics-title">New here? The basics</h2>
-        <button type="button" class="link-btn" id="basics-hide">Hide</button>
-      </div>
-      <ol class="b-cards">
-        <li><b>Prices are per token</b><span>A token is about ¾ of a word. One coding-agent step sends roughly 50,000 of them: open files, history and your prompt.</span></li>
-        <li><b>Reading is cheap, writing is not</b><span>Output costs 3–8× more than input, but agents send far more than they write. <a href="tokens.html">See what a budget buys →</a></span></li>
-        <li><b>Pricier isn’t always better</b><span>Some low-cost models score close to the best on coding benchmarks. <a href="performance.html">Compare price with scores →</a> or <a href="compare.html">put models side by side →</a></span></li>
-      </ol>
-    </section>
-    <p class="source">Source: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">GitHub Docs ↗</a><span id="basics-show" hidden> · <button type="button" class="link-btn" id="basics-open">Show the basics</button></span></p>
+    <h1>Which Copilot model should I use?</h1>
+    <p class="lede">Tell us what you are about to do. We suggest the <b>cheapest model that does it well</b>, and show how far your monthly <span class="gl-t">AI credits<button class="gl" data-gl="credit"></button></span> go with it.</p>
+    <div class="budget">
+      <label for="credits">Your budget</label>
+      <span class="num"><input id="credits" type="number" inputmode="numeric" min="0" max="1000000" step="500" value="6000"><span>credits a month</span></span>
+      <button type="button" class="link-btn reset" id="credits-reset" hidden>Back to 6,000</button>
+    </div>
   </header>
 
-  <aside class="sidebar">
-    <section class="filters" aria-label="Filters">
-      <div class="f-row">
-        <span class="f-label" id="fl-view">View</span>
-        <div class="f-ctrl" role="group" aria-labelledby="fl-view">
-          <label class="chip check"><input type="checkbox" id="m-input" data-metric="input" checked><span class="key-bar in"></span>Input</label>
-          <label class="chip check"><input type="checkbox" id="m-output" data-metric="output" checked><span class="key-bar"></span>Output</label>
-          <span class="f-sep" aria-hidden="true"></span>
-          <div class="segmented" role="group" aria-label="Order">
-            <button type="button" id="v-price" data-view="price" aria-pressed="true">By price</button>
-            <button type="button" id="v-family" data-view="family" aria-pressed="false">By family</button>
-          </div>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label" id="fl-provider">Provider</span>
-        <div class="f-ctrl" role="group" aria-labelledby="fl-provider">
-          <div class="chips" id="providers"></div>
-          <span class="f-bulk">
-            <button type="button" class="link-btn" id="all">All</button> ·
-            <button type="button" class="link-btn" id="none">None</button>
-          </span>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label"><span id="fl-class">Class</span><button class="gl" data-gl="class"></button></span>
-        <div class="f-ctrl" role="group" aria-labelledby="fl-class">
-          <div class="chips" id="categories"></div>
-          <span class="f-hint">GitHub’s capability tiers</span>
-        </div>
-      </div>
-      <div class="f-row">
-        <span class="f-label"><span id="fl-context">Context</span><button class="gl" data-gl="long"></button></span>
-        <div class="f-ctrl" role="group" aria-labelledby="fl-context">
-          <label class="chip check" id="long-chip"><input type="checkbox" id="long"><span class="key-bar long"></span>Long-context tiers <span class="n" id="long-n"></span></label>
-          <span class="f-hint">Higher rate past a prompt size (e.g. 272K)</span>
-        </div>
-      </div>
-      <div class="f-foot" aria-live="polite">
-        <span id="f-count"></span>
-        <button type="button" class="link-btn" id="reset" hidden>Reset filters</button>
-      </div>
-    </section>
-  </aside>
+  <main>
+    <div class="picker">
+      <fieldset class="tasks">
+        <legend>What are you about to do?</legend>
+        <ul class="task-list" id="tasks"></ul>
+        <p class="tasks-note">Credits shown per <span class="gl-t">agent request<button class="gl" data-gl="request"></button></span> with the suggested model.</p>
+      </fieldset>
 
-  <main class="content">
-    <p class="takeaway" id="takeaway" aria-live="polite"></p>
-    <div class="summary">
-      <span class="legend-key"><span class="key-bar in"></span>Input</span>
-      <span class="legend-key"><span class="key-bar"></span>Output</span>
-      <span class="legend-key" id="legend-long"><span class="key-bar long"></span>Long context</span>
-      <span class="legend-key"><b>×N</b><span id="legend-mult">times the cheapest in view</span><button class="gl" data-gl="multCheap"></button></span>
+      <section class="answer" id="answer" aria-live="polite" aria-labelledby="a-model">
+        <p class="empty">Loading prices…</p>
+      </section>
     </div>
 
-    <section class="chart" id="chart" aria-label="Model prices">
-      <div class="axis" id="axis-top" aria-hidden="true"></div>
-      <div class="plot">
-        <div class="grid" id="grid" aria-hidden="true"></div>
-        <div class="rows" id="rows"></div>
-      </div>
-      <div class="axis bottom" id="axis-bottom" aria-hidden="true"></div>
-      <p class="axis-title" id="axis-title"></p>
-      <div class="tip" id="tip" hidden></div>
+    <section class="habits" aria-labelledby="habits-title">
+      <h2 id="habits-title">Three habits that make credits last</h2>
+      <ul class="h-list">
+        <li><b>Start small, step up if needed</b><p>Try the suggested model first. Switch to a stronger one only when the answer isn’t good enough, not by default.</p></li>
+        <li><b>New topic, new chat</b><p>Every message re-sends the whole conversation to the model. A long thread makes each new question more expensive.</p></li>
+        <li><b>Share only what’s needed</b><p>Each file or document in the context is read again at every step. Attach the spec you are working on, not the whole folder.</p></li>
+      </ul>
     </section>
 
-    <details id="details">
-      <summary>Show prices as a table</summary>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Model</th><th>Family</th><th>Provider</th><th>Category</th><th class="num">Input (credits / 1M)</th><th class="num">Output (credits / 1M)</th></tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-    </details>
+    <section class="menu" aria-labelledby="menu-title">
+      <h2 id="menu-title">What your credits buy with each model</h2>
+      <p class="sub" id="menu-sub">Every Copilot model, grouped by how hungry it is. Longer bar, more work for the same budget.</p>
+      <p class="more"><span>Prices per million tokens: <a href="cost.html">1 · What does a model cost? →</a></span><span>With your own input/output mix: <a href="tokens.html">2 · What does my budget buy? →</a></span></p>
+      <div id="bands"></div>
+    </section>
+
+
+
 
     <footer>
-      <span>Source: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">Models and pricing for GitHub Copilot</a></span>
+      <span>Prices: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">GitHub Docs</a></span>
+      <span>Scores: <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a></span>
       <span id="updated"></span>
-      <span>Cached input and cache writes not shown</span>
+      <span>List prices, no caching</span>
     </footer>
   </main>
 </div>
 
 <script src="shared.js"></script>
 <script>
-// Data: data/models.csv, regenerated daily by scripts/update-pricing.mjs.
-// Prices in USD per million tokens. cachedInput / cacheWrite are not displayed yet.
-const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output'];
+// Data: data/models.csv (prices, USD per 1M tokens) and data/scores.csv (Artificial Analysis).
+// Every suggestion is computed here from those files; no model name is hard-coded.
+const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output', 'coding', 'intelligence'];
 
 function parseCSV(text) {
   const out = [];
@@ -659,8 +508,8 @@ function parseCSV(text) {
   }
   if (field || row.length) { row.push(field); out.push(row); }
   const [head, ...data] = out;
-  return data.map((r, id) => {
-    const m = { id };
+  return data.filter(r => r.length > 1).map(r => {
+    const m = {};
     head.forEach((h, i) => {
       const v = r[i] ?? '';
       m[h] = v === '' ? null : NUMERIC.includes(h) ? Number(v) : v;
@@ -669,447 +518,383 @@ function parseCSV(text) {
   });
 }
 
-// The basics strip, hidden once dismissed (per viewer).
-{
-  const BASICS = 'copilot-basics-hidden';
-  const setBasics = hidden => {
-    document.getElementById('basics').hidden = hidden;
-    document.getElementById('basics-show').hidden = !hidden;
-    try { hidden ? localStorage.setItem(BASICS, '1') : localStorage.removeItem(BASICS); } catch {}
-  };
-  let hidden = false;
-  try { hidden = localStorage.getItem(BASICS) === '1'; } catch {}
-  setBasics(hidden);
-  document.getElementById('basics-hide').addEventListener('click', () => setBasics(true));
-  document.getElementById('basics-open').addEventListener('click', () => setBasics(false));
-}
-
+const getText = url => fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(url + ' ' + r.status); return r.text(); });
+const getJSON = url => fetch(url, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
 Promise.all([
-  fetch('data/models.csv', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); }),
-  fetch('data/meta.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : {})).catch(() => ({})),
-]).then(([csv, meta]) => init(parseCSV(csv), meta), err => {
+  getText('data/models.csv'),
+  getText('data/scores.csv').catch(() => ''),
+  getJSON('data/meta.json'),
+]).then(([csv, scores, meta]) => init(parseCSV(csv), scores ? parseCSV(scores) : [], meta), err => {
   console.error(err);
   const p = document.createElement('p');
   p.className = 'empty';
-  p.textContent = 'Couldn’t load data/models.csv. Serve the page over HTTP (python3 -m http.server).';
-  document.getElementById('chart').replaceChildren(p);
+  p.textContent = 'Couldn’t load the price list. Serve the site over HTTP (python3 -m http.server).';
+  document.getElementById('answer').replaceChildren(p);
 });
 
-function init(MODELS, meta) {
-  const KNOWN = [
-    { name: 'OpenAI', color: '--s-openai' },
-    { name: 'Anthropic', color: '--s-anthropic' },
-    { name: 'Google', color: '--s-google' },
-    { name: 'Microsoft', color: '--s-microsoft' },
-    { name: 'xAI', color: '--s-xai' },
-    { name: 'Moonshot AI', color: '--s-moonshot' },
-  ];
-  // Known providers in their order, then any that appeared in the source since, in grey.
-  const present = new Set(MODELS.map(m => m.provider));
-  const PROVIDERS = [
-    ...KNOWN.filter(p => present.has(p.name)),
-    ...[...present].filter(n => !KNOWN.some(p => p.name === n)).map(name => ({ name, color: '--s-other' })),
-  ];
+// What people ask Copilot to do, from light to heavy. `index` is the benchmark that fits the task
+// best; `level` is the share of the top Copilot score a model needs to be suggested.
+const TASKS = [
+  { id: 'rewrite', name: 'Rewrite, summarize or translate', ex: 'Polish an email, sum up meeting notes, translate a spec.', index: 'intelligence', level: .6 },
+  { id: 'stories', name: 'Write user stories and acceptance criteria', ex: 'Turn a need into stories, Gherkin scenarios or test cases.', index: 'intelligence', level: .8 },
+  { id: 'analyze', name: 'Analyze specs and documents', ex: 'Spot gaps and contradictions, compare versions, assess the impact of a change.', index: 'intelligence', level: .9 },
+  { id: 'code-qa', name: 'Ask questions about the code', ex: 'Find where a business rule lives, explain what a screen or function does.', index: 'coding', level: .85 },
+  { id: 'sql', name: 'Write SQL, scripts or small fixes', ex: 'Query data, automate a spreadsheet chore, fix a label in the app.', index: 'coding', level: .92 },
+  { id: 'hard', name: 'Something hard that other models got wrong', ex: 'A tricky analysis or bug where a lighter model kept missing the point.', index: 'intelligence', level: .98 },
+];
+const INDEX_LABEL = { intelligence: 'reasoning and writing', coding: 'coding' };
+const DEFAULT_CREDITS = 6000;
+const WORKDAYS = 21;
+const STORE = 'copilot-start';
 
-  if (meta.updated) {
-    const d = new Date(meta.updated + 'T00:00:00');
-    document.getElementById('updated').textContent = 'Updated ' + d.toLocaleDateString('en-US', { dateStyle: 'long' });
-  }
-  const colorOf = p => `var(${PROVIDERS.find(x => x.name === p).color})`;
-  const provIdx = p => PROVIDERS.findIndex(x => x.name === p);
-
-  // Prices are held in USD and shown in AI credits; USD only as a secondary figure.
-  const { credits, usd } = CopilotShared;
-  const mult = r => '×' + (r < 10 ? String(Math.round(r * 10) / 10) : Math.round(r));
-  const times = r => mult(r).slice(1) + '×'; // in sentences: "5×" reads better than "×5"
-  const suffix = m => m.tier === 'long' ? `long context ${m.threshold}` : '';
-
-  // "Round" linear ticks: steps of 1, 2, 2.5 or 5 × 10^k, at most 6 intervals.
-  function niceScale(max) {
-    const raw = max / 6;
-    const pow = 10 ** Math.floor(Math.log10(raw));
-    const step = [1, 2, 2.5, 5, 10].map(k => k * pow).find(s => s >= raw);
-    const top = Math.ceil(max / step) * step;
-    const ticks = [];
-    for (let t = 0; t <= top + 1e-9; t += step) ticks.push(Math.round(t * 1000) / 1000);
-    return { top, ticks };
-  }
-
-  const STORE = 'copilot-pricing-view';
-  const METRICS = ['input', 'output'];
-  const METRIC_TAG = { input: 'in', output: 'out' };
-  // Classes in GitHub's order, then any new one from the source.
-  const CAT_ORDER = ['Lightweight', 'Versatile', 'Powerful'];
-  const presentCats = new Set(MODELS.map(m => m.category));
-  const CATEGORIES = [...CAT_ORDER.filter(c => presentCats.has(c)), ...[...presentCats].filter(c => !CAT_ORDER.includes(c))];
-
-  const state = {
-    metrics: { input: true, output: true }, view: 'price',
-    active: new Set(PROVIDERS.map(p => p.name)), cats: new Set(CATEGORIES), long: false,
-  };
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
-    if (saved) {
-      if (saved.metrics && METRICS.some(k => saved.metrics[k] === true))
-        METRICS.forEach(k => { state.metrics[k] = saved.metrics[k] === true; });
-      if (saved.view === 'family' || saved.view === 'price') state.view = saved.view;
-      // A provider that appeared since the last visit (missing from saved.known) stays active.
-      if (Array.isArray(saved.active)) state.active = new Set(PROVIDERS.map(p => p.name)
-        .filter(n => saved.active.includes(n) || (Array.isArray(saved.known) && !saved.known.includes(n))));
-      if (Array.isArray(saved.cats)) state.cats = new Set(CATEGORIES
-        .filter(c => saved.cats.includes(c) || (Array.isArray(saved.knownCats) && !saved.knownCats.includes(c))));
-      if (typeof saved.long === 'boolean') state.long = saved.long;
-    }
-  } catch {}
-  // Providers and classes follow the reader across pages.
-  const shared = CopilotShared.read();
-  const sharedActive = CopilotShared.restore(PROVIDERS.map(p => p.name), shared.active, shared.known);
-  const sharedCats = CopilotShared.restore(CATEGORIES, shared.cats, shared.knownCats);
-  if (sharedActive) state.active = sharedActive;
-  if (sharedCats) state.cats = sharedCats;
-  const focusModel = CopilotShared.takeFocus();
-  const save = () => {
-    try { localStorage.setItem(STORE, JSON.stringify({ metrics: state.metrics, view: state.view, active: [...state.active], known: PROVIDERS.map(p => p.name),
-      cats: [...state.cats], knownCats: CATEGORIES, long: state.long })); } catch {}
-    CopilotShared.write({ active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES });
-  };
-
+function init(ROWS, SCORES, meta) {
   const $ = id => document.getElementById(id);
-  const el = (tag, cls, text) => {
-    const n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+  const { REQUEST_TOKENS, CREDIT_USD } = CopilotShared;
+  const shared = CopilotShared.read();
+  const inPct = Number.isFinite(shared.inPct) ? shared.inPct : 90;
+  const r = inPct / 100;
+
+  const COLORS = { OpenAI: '--s-openai', Anthropic: '--s-anthropic', Google: '--s-google', Microsoft: '--s-microsoft', xAI: '--s-xai', 'Moonshot AI': '--s-moonshot' };
+  const colorOf = p => `var(${COLORS[p] || '--s-other'})`;
+  const scoreOf = new Map(SCORES.map(s => [s.model, s]));
+  const num = v => (Number.isFinite(v) ? v : null);
+
+  // One entry per model, default tier: credits per agent request at the reader's mix.
+  const MODELS = ROWS.filter(m => m.tier === 'default' && m.input != null && m.output != null).map(m => {
+    const s = scoreOf.get(m.model) || {};
+    const blendedUSD = r * m.input + (1 - r) * m.output;
+    const promo = /promotion/i.test(m.note || '') ? (m.note.match(/through ([A-Z][a-z]+ \d{1,2}, \d{4})/) || [])[1] || '' : null;
+    return {
+      name: m.model, provider: m.provider, promo,
+      perRequest: blendedUSD * REQUEST_TOKENS / 1e6 / CREDIT_USD,
+      coding: num(s.coding), intelligence: num(s.intelligence),
+    };
+  });
+  // Older versions: a model is superseded when the same provider ships the same line
+  // (its name without the version number or a parenthesised variant) in a higher version,
+  // e.g. Claude Sonnet 4.6 → Claude Sonnet 5.5, GPT-5.6 Luna → GPT-6 Luna.
+  const versionOf = n => { const v = n.match(/\d+(?:\.\d+)?/); return v ? parseFloat(v[0]) : null; };
+  const lineOf = n => n.replace(/\s*\(.*\)\s*/g, ' ').replace(/\d+(?:\.\d+)?/, '#').trim();
+  MODELS.forEach(m => {
+    const v = versionOf(m.name);
+    const newer = v == null ? [] : MODELS.filter(o => o.provider === m.provider && !/\(/.test(o.name)
+      && lineOf(o.name) === lineOf(m.name) && versionOf(o.name) > v);
+    m.newer = newer.sort((a, b) => versionOf(b.name) - versionOf(a.name))[0] || null;
+  });
+  const CURRENT = MODELS.filter(m => !m.newer);
+  const TOP = {
+    coding: Math.max(...CURRENT.map(m => m.coding ?? -Infinity)),
+    intelligence: Math.max(...CURRENT.map(m => m.intelligence ?? -Infinity)),
   };
 
-  // Provider chips
-  const chips = new Map();
-  PROVIDERS.forEach(p => {
-    const b = el('button', 'chip');
-    b.type = 'button';
-    b.id = 'p-' + p.name.toLowerCase().replace(/\W+/g, '-');
-    b.style.setProperty('--c', colorOf(p.name));
-    const n = el('span', 'n');
-    b.append(el('span', 'sw'), el('span', null, p.name), n);
-    b.addEventListener('click', () => {
-      state.active.has(p.name) ? state.active.delete(p.name) : state.active.add(p.name);
-      render();
-    });
-    chips.set(p.name, { b, n });
-    $('providers').append(b);
-  });
-
-  // Class chips
-  const catChips = new Map();
-  CATEGORIES.forEach(c => {
-    const b = el('button', 'chip');
-    b.type = 'button';
-    b.id = 'c-' + c.toLowerCase().replace(/\W+/g, '-');
-    const n = el('span', 'n');
-    b.append(el('span', null, c), n);
-    b.addEventListener('click', () => {
-      state.cats.has(c) ? state.cats.delete(c) : state.cats.add(c);
-      render();
-    });
-    catChips.set(c, { b, n });
-    $('categories').append(b);
-  });
-
-  // An entry is shown when it passes every filter; `skip` ignores one so a chip can count
-  // what it would show if toggled on.
-  const passes = (m, skip) =>
-    (skip === 'provider' || state.active.has(m.provider))
-    && (skip === 'cat' || state.cats.has(m.category))
-    && (skip === 'long' || state.long || m.tier !== 'long');
-  const isFiltered = () => state.active.size < PROVIDERS.length || state.cats.size < CATEGORIES.length || state.long;
-  function resetFilters() {
-    PROVIDERS.forEach(p => state.active.add(p.name));
-    CATEGORIES.forEach(c => state.cats.add(c));
-    state.long = false;
-    render();
+  // Suggestion for a task: the cheapest model that reaches the level (ties: the higher score).
+  // Cheaper: the best scorer below that price that still reaches level − 15 points.
+  // Stronger: the best scorer above the pick (ties: the cheaper one).
+  function suggest(task) {
+    const k = task.index, top = TOP[k];
+    const pool = CURRENT.filter(m => m[k] != null);
+    const byCost = (a, b) => a.perRequest - b.perRequest || b[k] - a[k];
+    const byScore = (a, b) => b[k] - a[k] || a.perRequest - b.perRequest;
+    const pick = pool.filter(m => m[k] >= task.level * top).sort(byCost)[0];
+    if (!pick) return null;
+    const cheaper = pool.filter(m => m.perRequest < pick.perRequest && m[k] >= (task.level - .15) * top).sort(byScore)[0] || null;
+    const stronger = pool.filter(m => m[k] > pick[k]).sort(byScore)[0] || null;
+    return { pick, cheaper, stronger, k, top };
   }
 
-  // Family headers (created once)
-  const FAMILIES = [...new Set(MODELS.map(m => m.family))];
-  const heads = new Map();
-  FAMILIES.forEach(f => {
-    const prov = MODELS.find(m => m.family === f).provider;
-    const h = el('div', 'ghead');
-    h.style.setProperty('--c', colorOf(prov));
-    h.append(el('span', 'sw'), el('span', null, f));
-    h.setAttribute('aria-hidden', 'true');
-    heads.set(f, { h });
-    $('rows').append(h);
-  });
-
-  const pins = CopilotShared.pinnable({ tip: $('tip'), open: (it, pinned) => showTip(it, pinned), close: () => hideTip() });
-
-  // Rows (created once, repositioned on every render)
-  const rows = new Map();
-  MODELS.forEach(m => {
-    const r = el('div', 'row');
-    r.tabIndex = 0;
-    r.style.setProperty('--c', colorOf(m.provider));
-    const lbl = el('div', 'lbl');
-    lbl.append(el('span', 'name', m.model));
-    if (m.tier === 'long') lbl.append(el('span', 'sfx', suffix(m)));
-    const track = el('div', 'track');
-    const parts = {};
-    METRICS.forEach(k => {
-      const bar = el('span', `bar ${METRIC_TAG[k]}` + (m.tier === 'long' ? ' long' : ''));
-      const val = el('span', `val ${METRIC_TAG[k]}`);
-      const price = el('span'), x = el('span', 'mult');
-      // In+out view: one label per row, "in $in  out $out ×N", on the output value.
-      const pre = el('span'), inPrice = el('span');
-      pre.append(el('span', 'tag', 'in'), inPrice, el('span', 'tag sep', 'out'));
-      val.append(pre, price, x);
-      track.append(bar, val);
-      parts[k] = { bar, val, pre, inPrice, price, x };
-    });
-    r.append(lbl, track);
-    pins.attach(r, { m, r, parts });
-    rows.set(m.id, { r, parts });
-    $('rows').append(r);
-  });
-
-  const empty = el('p', 'empty', 'No entry matches these filters. ');
-  const emptyReset = el('button', 'link-btn', 'Reset filters');
-  emptyReset.type = 'button';
-  emptyReset.addEventListener('click', resetFilters);
-  empty.append(emptyReset);
-  empty.hidden = true;
-  $('rows').after(empty);
-
-  // Order within a family: by default-tier price, long context right below its model.
-  const basePrice = (m, metric) =>
-    (MODELS.find(o => o.model === m.model && o.tier === 'default') || m)[metric];
-
-  function layout(metric) { // metric: sort key
-    const list = MODELS.filter(m => passes(m));
-    if (state.view === 'price') {
-      return list
-        .sort((a, b) => b[metric] - a[metric] || provIdx(a.provider) - provIdx(b.provider)
-          || a.model.localeCompare(b.model, 'en', { numeric: true }) || (a.tier === 'long') - (b.tier === 'long'))
-        .map(m => ({ m }));
-    }
-    const groups = new Map();
-    list.forEach(m => { if (!groups.has(m.family)) groups.set(m.family, []); groups.get(m.family).push(m); });
-    const ordered = [...groups.entries()]
-      .map(([f, ms]) => ({ f, ms, max: Math.max(...ms.map(m => m[metric])) }))
-      .sort((a, b) => b.max - a.max || provIdx(a.ms[0].provider) - provIdx(b.ms[0].provider)
-        || b.f.localeCompare(a.f, 'en', { numeric: true }));
-    const items = [];
-    ordered.forEach(({ f, ms }) => {
-      items.push({ head: f, ms });
-      ms.sort((a, b) => basePrice(b, metric) - basePrice(a, metric)
-        || a.model.localeCompare(b.model, 'en', { numeric: true }) || (a.tier === 'long') - (b.tier === 'long'))
-        .forEach(m => items.push({ m }));
-    });
-    return items;
+  // Saved state, then the URL (?task=sql&credits=8000) on top.
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch {}
+  const q = new URLSearchParams(location.search);
+  const state = {
+    task: TASKS.some(t => t.id === q.get('task')) ? q.get('task') : TASKS.some(t => t.id === saved.task) ? saved.task : 'stories',
+    credits: Number.isFinite(+q.get('credits')) && q.get('credits') !== null ? +q.get('credits') : Number.isFinite(saved.credits) ? saved.credits : DEFAULT_CREDITS,
+  };
+  state.credits = Math.min(Math.max(Math.round(state.credits) || 0, 0), 1e6);
+  state.showOld = saved.showOld === true;
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {}
+    const p = new URLSearchParams(location.search);
+    p.delete('task'); p.delete('credits');
+    if (state.task !== 'stories') p.set('task', state.task);
+    if (state.credits !== DEFAULT_CREDITS) p.set('credits', state.credits);
+    const s = p.toString();
+    try { history.replaceState(null, '', s ? '?' + s : location.pathname); } catch {}
   }
 
-  function render() {
-    const shownMetrics = METRICS.filter(k => state.metrics[k]);
-    const two = shownMetrics.length === 2;
-    // Sort by output when shown: it's the longest bar, so the visual order stays consistent.
-    const metric = state.metrics.output ? 'output' : 'input';
-    document.querySelectorAll('[data-metric]').forEach(b => {
-      b.checked = state.metrics[b.dataset.metric];
-      b.disabled = b.checked && !two;
-    });
-    $('chart').classList.toggle('two', two);
-    document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
-    const syncChip = ({ b, n }, on, count) => {
-      b.setAttribute('aria-pressed', String(on));
-      n.textContent = count;
-      b.classList.toggle('zero', !count);
-    };
-    chips.forEach((c, name) => syncChip(c, state.active.has(name), MODELS.filter(m => m.provider === name && passes(m, 'provider')).length));
-    catChips.forEach((c, name) => syncChip(c, state.cats.has(name), MODELS.filter(m => m.category === name && passes(m, 'cat')).length));
-    $('long').checked = state.long;
-    $('long-n').textContent = MODELS.filter(m => m.tier === 'long' && passes(m, 'long')).length;
+  // Formats
+  const fmtInt = n => Math.round(n).toLocaleString('en-US');
+  const fmtPer = c => (c < 0.95 ? c.toFixed(1) : c < 9.95 ? c.toFixed(1).replace(/\.0$/, '') : fmtInt(c));
+  // Requests a month, rounded so they don't read as exact: 3 significant digits above 1,000.
+  const fmtReq = n => (n >= 1000 ? fmtInt(Math.round(n / 10) * 10) : fmtInt(n));
+  const perDay = n => {
+    const d = n / WORKDAYS;
+    return d >= 1.5 ? `${fmtInt(d)} a day` : d >= 0.75 ? 'about 1 a day' : 'less than 1 a day';
+  };
+  const monthOf = m => (m.perRequest > 0 ? state.credits / m.perRequest : 0);
+  const pct = (m, k) => Math.round(m[k] / TOP[k] * 100);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const swatch = m => { const s = el('span', 'sw'); s.style.setProperty('--c', colorOf(m.provider)); s.setAttribute('aria-hidden', 'true'); return s; };
 
-    const items = layout(metric);
-    const list = items.filter(i => i.m).map(i => i.m);
-    const css = getComputedStyle(document.documentElement);
-    const rowH = parseFloat(css.getPropertyValue(two ? '--row-h-2' : '--row-h')) || 30;
-    const headH = parseFloat(css.getPropertyValue('--ghead-h')) || 44;
-
-    // Shared linear scale from 0 to the highest price shown, across all metrics.
-    // ×N compares each price with the cheapest of the same metric.
-    const lo = {}, hiOf = {};
-    METRICS.forEach(k => {
-      lo[k] = list.length ? Math.min(...list.map(m => m[k])) : 1;
-      hiOf[k] = list.length ? Math.max(...list.map(m => m[k])) : 1;
-    });
-    const hi = Math.max(...shownMetrics.map(k => hiOf[k]));
-    const { top, ticks } = niceScale(hi);
-    const pos = v => (v / top) * 100;
-
-    for (const id of ['axis-top', 'axis-bottom']) {
-      $(id).replaceChildren(el('span', 'unit', 'credits / 1M tokens'), ...ticks.map((t, i) => {
-        const s = el('span', i % 2 && ticks.length > 5 ? 'minor' : null, credits(t));
-        s.style.left = pos(t) + '%';
-        return s;
-      }));
-    }
-    $('grid').replaceChildren(...ticks.map(t => { const i = el('i'); i.style.left = pos(t) + '%'; return i; }));
-
-    const visible = new Set(list.map(m => m.id));
-    MODELS.forEach(m => {
-      const { r, parts } = rows.get(m.id);
-      r.hidden = !visible.has(m.id);
-      METRICS.forEach(k => {
-        const { bar, val, pre, inPrice, price, x } = parts[k];
-        const v = m[k];
-        const merged = two && k === 'output';
-        bar.hidden = !state.metrics[k];
-        val.hidden = !state.metrics[k] || (two && k === 'input');
-        pre.hidden = !merged;
-        bar.style.width = pos(v) + '%';
-        val.style.left = pos(merged ? Math.max(m.input, m.output) : v) + '%';
-        inPrice.textContent = credits(m.input);
-        price.textContent = credits(v);
-        x.textContent = mult(m[metric] / lo[metric]);
-      });
-      r.setAttribute('aria-label',
-        `${m.model}${m.tier === 'long' ? ', ' + suffix(m) : ''}, ${m.provider}, `
-        + shownMetrics.map(k => `${k}: ${credits(m[k])} credits per million tokens, ${mult(m[k] / lo[k])} vs. cheapest`).join(' ; '));
-    });
-
-    const shown = new Set();
-    let y = 0, first = true;
-    items.forEach(it => {
-      if (it.head) {
-        const { h } = heads.get(it.head);
-        h.classList.toggle('first', first);
-        h.style.transform = `translateY(${y}px)`;
-        shown.add(it.head);
-        y += headH; first = false;
-      } else {
-        rows.get(it.m.id).r.style.transform = `translateY(${y}px)`;
-        y += rowH;
+  // Task list (built once; the per-request hint is refreshed on render).
+  const hints = new Map();
+  TASKS.forEach(t => {
+    const li = el('li', 'task');
+    const input = el('input');
+    input.type = 'radio'; input.name = 'task'; input.id = 't-' + t.id; input.value = t.id;
+    input.checked = t.id === state.task;
+    input.addEventListener('change', () => {
+      state.task = t.id; save(); renderAnswer(true); renderBands();
+      if (matchMedia('(max-width: 960px)').matches) {
+        const a = $('answer'), top = a.getBoundingClientRect().top;
+        if (top > innerHeight * .6) a.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
       }
     });
-    heads.forEach(({ h }, f) => { h.hidden = !shown.has(f); });
-    $('rows').style.height = y + 'px';
-    ['grid', 'axis-top', 'axis-bottom', 'axis-title'].forEach(id => { $(id).hidden = !list.length; });
-    empty.hidden = !!list.length;
-
-    // Takeaway: the spread for the sorting metric, then how much output costs vs input.
-    const name = m => m.model + (m.tier === 'long' ? ' (long context)' : '');
-    const metricWord = metric === 'output' ? 'output' : 'input';
-    if (list.length > 1 && hiOf[metric] > lo[metric]) {
-      const cheap = list.reduce((a, b) => (b[metric] < a[metric] ? b : a));
-      const dear = list.reduce((a, b) => (b[metric] > a[metric] ? b : a));
-      const ratios = list.map(m => m.output / m.input).sort((a, b) => a - b);
-      const median = ratios[Math.floor(ratios.length / 2)];
-      // Several models can share the top or bottom price: name one and count the others.
-      const others = v => list.filter(m => m[metric] === v).length - 1;
-      const tie = n => (n ? ` (and ${n} other${n > 1 ? 's' : ''} at the same price)` : '');
-      $('takeaway').replaceChildren(
-        'The priciest model in view, ', el('b', null, name(dear)), tie(others(hiOf[metric])), `, charges `, el('b', null, times(hiOf[metric] / lo[metric])),
-        ` more per ${metricWord} token than the cheapest, `, el('b', null, name(cheap)), tie(others(lo[metric])),
-        ` (${credits(hiOf[metric])} vs ${credits(lo[metric])} credits per million). `,
-        el('span', 'muted', `For a typical model, output costs ${times(median)} as much as input.`));
-    } else if (list.length) {
-      $('takeaway').replaceChildren(el('b', null, name(list[0])), ` costs ${credits(list[0].input)} credits input / ${credits(list[0].output)} output per million tokens.`);
-    } else {
-      $('takeaway').textContent = 'No model matches these filters.';
-    }
-    $('legend-mult').textContent = `times the cheapest ${two ? 'output price' : metricWord + ' price'} in view`;
-    $('legend-long').hidden = !state.long;
-    $('f-count').replaceChildren('Showing ', el('b', null, String(list.length)), ` of ${MODELS.length} entries`);
-    $('reset').hidden = !isFiltered();
-    $('axis-title').textContent = 'AI credits per million tokens' + (two && state.view === 'price' ? ', sorted by output' : '');
-
-    // Table, in display order
-    $('tbody').replaceChildren(...list.map(m => {
-      const tr = el('tr');
-      const name = el('td');
-      name.style.setProperty('--c', colorOf(m.provider));
-      name.append(el('span', 'sw'), m.model + (m.tier === 'long' ? ` (${suffix(m)})` : ''));
-      tr.append(name, el('td', null, m.family), el('td', null, m.provider), el('td', null, m.category),
-        el('td', 'num', credits(m.input)), el('td', 'num', credits(m.output)));
-      return tr;
-    }));
-    state.lo = lo;
-
-    pins.reset();
-    save();
-  }
-
-  // Tooltip
-  const tip = $('tip');
-  let activeRow = null;
-  function showTip({ m, r, parts }, pinned) {
-    if (activeRow) activeRow.classList.remove('active');
-    activeRow = r; r.classList.add('active');
-    tip.style.setProperty('--c', colorOf(m.provider));
-    const head = el('div', 't-head');
-    head.append(el('span', 't-line'), el('span', null, `${m.provider} · ${m.category}`));
-    const dl = el('dl');
-    const add = (k, v, on) => { dl.append(el('dt', null, k), el('dd', on ? 'on' : null, v)); };
-    const shownMetrics = METRICS.filter(k => state.metrics[k]);
-    const two = shownMetrics.length === 2;
-    const lbl = k => (k === 'input' ? 'Input' : 'Output');
-    if (m.status) add('Release status', m.status, false);
-    add('Input / 1M', `${credits(m.input)} credits (${usd(m.input)})`, state.metrics.input);
-    add('Output / 1M', `${credits(m.output)} credits (${usd(m.output)})`, state.metrics.output);
-    add('Output / input', mult(m.output / m.input), two);
-    shownMetrics.forEach(k => add(two ? `${lbl(k)} vs. cheapest` : 'Vs. cheapest', mult(m[k] / state.lo[k]), false));
-    if (m.threshold) add('Input threshold', m.threshold + ' tokens', false);
-    // One agent request at the reader's mix (set on the other pages, 90/10 by default).
-    const pct = Number.isFinite(CopilotShared.read().inPct) ? CopilotShared.read().inPct : 90;
-    const req = (pct / 100 * m.input + (1 - pct / 100) * m.output) * CopilotShared.REQUEST_TOKENS / 1e6;
-    add(`1 agent request (${pct}/${100 - pct})`, `${credits(req)} credits`, false);
-    tip.replaceChildren(head, el('div', 't-name', m.model + (m.tier === 'long' ? ' · long context' : '')), dl);
-    if (m.note) tip.append(el('div', 't-note', m.note));
-    tip.append(pinned ? CopilotShared.pageLinks('cost', m.model) : CopilotShared.hint('Click to compare it on the other pages'));
-    tip.classList.toggle('pinned', !!pinned);
-    tip.hidden = false;
-
-    const c = $('chart').getBoundingClientRect();
-    // Anchor on the longest bar shown
-    const k = state.metrics.output && (!state.metrics.input || m.output >= m.input) ? 'output' : 'input';
-    const d = parts[k].bar.getBoundingClientRect();
-    const rr = r.getBoundingClientRect();
-    const tw = tip.offsetWidth, th = tip.offsetHeight;
-    let left = d.right - c.left + 150;
-    if (left + tw > c.width) left = d.right - c.left - tw - 16;
-    if (left < 0) left = Math.max(0, c.width - tw);
-    let topY = rr.top - c.top + rr.height / 2 - th / 2;
-    topY = Math.max(0, Math.min(topY, c.height - th));
-    tip.style.left = left + 'px';
-    tip.style.top = topY + 'px';
-  }
-  function hideTip() {
-    tip.hidden = true;
-    tip.classList.remove('pinned');
-    if (activeRow) { activeRow.classList.remove('active'); activeRow = null; }
-  }
-
-  // Controls
-  document.querySelectorAll('[data-metric]').forEach(b =>
-    b.addEventListener('change', () => {
-      state.metrics[b.dataset.metric] = b.checked;
-      if (!METRICS.some(k => state.metrics[k])) state.metrics[b.dataset.metric] = true;
-      render();
-    }));
-  document.querySelectorAll('[data-view]').forEach(b =>
-    b.addEventListener('click', () => { state.view = b.dataset.view; render(); }));
-  $('all').addEventListener('click', () => { PROVIDERS.forEach(p => state.active.add(p.name)); render(); });
-  $('none').addEventListener('click', () => { state.active.clear(); render(); });
-  $('long').addEventListener('change', e => { state.long = e.target.checked; render(); });
-  $('reset').addEventListener('click', resetFilters);
-
-  let lastH = null;
-  addEventListener('resize', () => {
-    const h = getComputedStyle(document.documentElement).getPropertyValue('--row-h');
-    if (h !== lastH) { lastH = h; render(); }
+    const label = el('label');
+    label.htmlFor = input.id;
+    const text = el('span');
+    text.append(el('span', 't-name', t.name), el('span', 't-ex', t.ex));
+    const hint = el('span', 't-cost');
+    hints.set(t.id, hint);
+    label.append(el('span', 'dot'), text, hint);
+    li.append(input, label);
+    $('tasks').append(li);
   });
 
-  // Theme: follows the system until the user picks one, then remembers the choice.
+  function renderAnswer(animate) {
+    const task = TASKS.find(t => t.id === state.task);
+    const s = suggest(task);
+    const box = $('answer');
+    if (!s) { box.replaceChildren(el('p', 'empty', 'No scored model for this task yet.')); return; }
+    const { pick, cheaper, stronger, k } = s;
+
+    const lead = el('p', 'a-lead', 'For this, use');
+    const name = el('h2', 'a-model');
+    name.id = 'a-model';
+    name.append(swatch(pick), el('span', null, pick.name));
+
+    // Two facts side by side: quality as a 5-step meter, cost per request.
+    const best = CURRENT.filter(m => m[k] === TOP[k]).sort((a, b) => a.perRequest - b.perRequest)[0];
+    const facts = el('dl', 'facts');
+    const fq = el('div', 'fact');
+    const meter = el('span', 'meter');
+    const lv = qualityLevel(pick, k);
+    meter.setAttribute('role', 'img');
+    meter.setAttribute('aria-label', `Quality ${lv} out of 5`);
+    for (let i = 1; i <= 5; i++) meter.append(el('i', i <= lv ? 'on' : ''));
+    const qdd = el('dd');
+    qdd.append(meter);
+    const qsub = el('dd', 'f-sub', pick[k] === TOP[k] ? `Best at ${INDEX_LABEL[k]}` : `${pct(pick, k)}% of the best at ${INDEX_LABEL[k]}`);
+    fq.append(el('dt', null, 'Quality'), qdd, qsub);
+    const fc = el('div', 'fact');
+    const cdd = el('dd', 'f-big');
+    cdd.append(el('b', null, fmtPer(pick.perRequest)), ' credits / request');
+    const ratio = best.perRequest / pick.perRequest;
+    const csub = el('dd', 'f-sub', pick[k] === TOP[k] ? 'The priciest choice here' : ratio >= 1.5 ? `${ratio >= 10 ? fmtInt(ratio) : ratio.toFixed(1).replace(/\.0$/, '')}× cheaper than the best` : 'Priced like the best');
+    fc.append(el('dt', null, 'Cost'), cdd, csub);
+    facts.append(fq, fc);
+    const parts = [lead, name, facts];
+    if (pick.promo != null) {
+      const p = el('p', 'promo');
+      p.innerHTML = '<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.2l2 1.3"/></svg>';
+      p.append(pick.promo ? `Promotional price until ${pick.promo}` : 'Promotional price, may go up');
+      parts.push(p);
+    }
+
+    // Why this model: the rule applied to this task, in plain words. Stays open across re-renders.
+    const why = el('details', 'why');
+    why.open = whyOpen;
+    why.addEventListener('toggle', () => { whyOpen = why.open; });
+    const sum = el('summary');
+    sum.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>';
+    sum.append('Why this model?');
+    const ul = el('ul', 'why-list');
+    const li = (...xs) => { const l = el('li'); l.append(...xs); ul.append(l); };
+    li('For this task we look for at least ', el('b', null, Math.round(task.level * 100) + '%'), ` of the best Copilot score at ${INDEX_LABEL[k]}.`);
+    const below = CURRENT.filter(m => m[k] != null && m.perRequest < pick.perRequest).sort((a, b) => b[k] - a[k])[0];
+    li(el('b', null, pick.name), ` is the cheapest model that clears it (${pct(pick, k)}%).`, below ? ` The best cheaper one, ${below.name}, reaches ${pct(below, k)}%.` : '');
+    li('A request is about 50,000 ', el('b', null, 'tokens'), `: one agent step reading your files, history and prompt, ${inPct}% read and ${100 - inPct}% written. Short questions cost less, long tasks more.`);
+    const val = el('a', null, 'Every model’s price against its score →');
+    val.href = 'performance.html' + (k === 'intelligence' ? '?score=intelligence' : '');
+    li('Scores come from ', el('b', null, 'Artificial Analysis'), ' benchmarks: a guide, not a test of your own work. ', val);
+    why.append(sum, ul);
+    parts.push(why);
+
+    const n = monthOf(pick);
+    const month = el('p', 'a-month');
+    if (state.credits <= 0) month.append('Set a budget above to see how far it goes.');
+    else month.append(`With ${fmtInt(state.credits)} credits: `, el('b', null, fmtReq(n) + ' requests a month'), ` · ${perDay(n).replace('a day', 'per working day')}`);
+    parts.push(month);
+
+    const opts = [
+      { m: pick, role: 'Suggested', cls: 'is-pick' },
+      cheaper && { m: cheaper, role: `Cheaper, ${pct(cheaper, k) >= pct(pick, k) - 3 ? 'about as good' : 'a bit less sharp'}` },
+      stronger && { m: stronger, role: 'Stronger, for when it gets stuck' },
+    ].filter(Boolean);
+    const max = Math.max(...opts.map(o => monthOf(o.m)), 1);
+    const list = el('ul', 'opts');
+    list.setAttribute('aria-label', 'Your month with each option');
+    opts.forEach(o => {
+      const li = el('li', 'opt ' + (o.cls || ''));
+      li.style.setProperty('--c', colorOf(o.m.provider));
+      const nm = el('span', 'o-name');
+      nm.append(swatch(o.m), el('span', null, o.m.name));
+      const ol = qualityLevel(o.m, k), op = el('span', 'pips');
+      op.setAttribute('role', 'img'); op.setAttribute('aria-label', `Quality ${ol} out of 5`);
+      for (let i = 1; i <= 5; i++) op.append(el('i', i <= ol ? 'on' : ''));
+      nm.append(op);
+      const cost = el('span', 'o-cost', `${fmtPer(o.m.perRequest)} credits / request`);
+      const bar = el('span', 'o-bar');
+      const track = el('span', 'track'), fill = el('span', 'fill');
+      fill.style.setProperty('--w', animate ? prevWidth(o.m.name) : monthOf(o.m) / max);
+      track.append(fill);
+      const nn = el('span', 'o-n');
+      const mm = monthOf(o.m);
+      nn.append(el('b', null, fmtReq(mm)), ' a month');
+      bar.append(track, nn);
+      li.append(el('span', 'o-role', o.role), nm, cost, bar);
+      list.append(li);
+      if (animate) requestAnimationFrame(() => requestAnimationFrame(() => fill.style.setProperty('--w', mm / max)));
+      widths.set(o.m.name, mm / max);
+    });
+    parts.push(list);
+
+    const foot = el('p', 'a-foot');
+    const cmp = el('a', null, 'Compare them side by side →');
+    cmp.href = 'compare.html?' + opts.map(o => 'm=' + encodeURIComponent(o.m.name)).join('&');
+    foot.append(cmp);
+    parts.push(foot);
+    box.replaceChildren(...parts);
+  }
+  // Bars grow from their previous width when the task changes, so the eye follows the change.
+  const widths = new Map();
+  let whyOpen = false;
+  const prevWidth = name => widths.get(name) ?? 0;
+
+  // The menu: three bands by credits per request.
+  const BANDS = [
+    { name: 'Easy on credits', note: 'Under 5 credits per request', test: c => c < 5 },
+    { name: 'Moderate', note: '5 to 25 credits per request', test: c => c >= 5 && c <= 25 },
+    { name: 'Credit-hungry', note: 'Over 25 credits per request', test: c => c > 25 },
+  ];
+  function renderBands() {
+    const task = TASKS.find(t => t.id === state.task);
+    const s = suggest(task);
+    const max = Math.max(...MODELS.map(monthOf), 1);
+    const nodes = [];
+    BANDS.forEach(b => {
+      const all = MODELS.filter(m => b.test(m.perRequest)).sort((a, c) => a.perRequest - c.perRequest || a.name.localeCompare(c.name));
+      if (!all.length) return;
+      const old = all.filter(m => m.newer);
+      const ms = state.showOld ? all : all.filter(m => !m.newer);
+      const band = el('div', 'band');
+      const head = el('div', 'band-head');
+      head.append(el('h3', null, b.name), el('p', null, b.note));
+      const cols = el('div', 'm-head');
+      cols.setAttribute('aria-hidden', 'true');
+      const qh = el('span');
+      qh.append('Quality');
+      cols.append(el('span', null, 'Model'), qh, el('span', null, 'Credits / request'), el('span', null, `Requests with ${fmtInt(state.credits)} credits`));
+      const list = el('ul', 'm-list');
+      ms.forEach(m => {
+        const li = el('li', 'm-row');
+        li.style.setProperty('--c', colorOf(m.provider));
+        const nm = el('span', 'm-name');
+        nm.append(swatch(m), el('span', null, m.name));
+        nm.title = m.name;
+        const ql = el('span', 'm-q');
+        const level = qualityLevel(m);
+        if (level) {
+          const p = el('span', 'pips');
+          p.setAttribute('role', 'img');
+          p.setAttribute('aria-label', `Quality ${level} out of 5`);
+          for (let i = 1; i <= 5; i++) p.append(el('i', i <= level ? 'on' : ''));
+          ql.append(p);
+        } else ql.append(el('span', 'pips-na', 'Not rated yet'));
+        const cost = el('span', 'm-cost', fmtPer(m.perRequest));
+        cost.setAttribute('aria-label', `${fmtPer(m.perRequest)} credits per request`);
+        const bar = el('span', 'm-bar');
+        const track = el('span', 'track'), fill = el('span', 'fill');
+        fill.style.setProperty('--w', monthOf(m) / max);
+        track.append(fill);
+        const n = monthOf(m);
+        const nn = el('span', 'm-n');
+        nn.append(el('b', null, fmtReq(n)), ` · ${perDay(n)}`);
+        bar.append(track, nn);
+        if (s && m === s.pick) { li.classList.add('is-pick'); nm.append(el('span', 'tag', 'Suggested')); }
+        if (m.newer) {
+          li.classList.add('is-old');
+          const o = el('span', 'old-tag', 'Older');
+          o.title = `Replaced by ${m.newer.name}`;
+          nm.append(o);
+          li.title = `Older version, replaced by ${m.newer.name}`;
+        }
+        li.append(nm, ql, cost, bar);
+        list.append(li);
+      });
+      band.append(head, cols, list);
+      if (old.length) {
+        const t = el('button', 'link-btn old-toggle', state.showOld
+          ? `Hide ${old.length} older version${old.length > 1 ? 's' : ''}`
+          : `Show ${old.length} older version${old.length > 1 ? 's' : ''}`);
+        t.type = 'button';
+        t.title = old.map(m => `${m.name} → ${m.newer.name}`).join('\n');
+        t.setAttribute('aria-expanded', String(!!state.showOld));
+        t.addEventListener('click', () => {
+          state.showOld = !state.showOld; save(); renderBands();
+          const again = [...$('bands').querySelectorAll('.old-toggle')].find(x => x.dataset.band === b.name);
+          if (again) again.focus({ preventScroll: true });
+        });
+        t.dataset.band = b.name;
+        band.append(t);
+      }
+      nodes.push(band);
+    });
+    $('bands').replaceChildren(...nodes);
+    // Glossary button on the Quality column header of every band (created at render time).
+    $('bands').querySelectorAll('.m-head span:nth-child(2)').forEach(h => {
+      h.parentElement.removeAttribute('aria-hidden');
+      const g = el('button', 'gl');
+      g.type = 'button'; g.dataset.gl = 'quality';
+      h.append(g);
+      if (window.glossaryBind) glossaryBind(g);
+    });
+    // Per-request hint next to each task.
+    TASKS.forEach(t => {
+      const x = suggest(t);
+      hints.get(t.id).textContent = x ? `≈ ${fmtPer(x.pick.perRequest)} cr` : '';
+      hints.get(t.id).setAttribute('aria-label', x ? `about ${fmtPer(x.pick.perRequest)} credits per request` : '');
+    });
+  }
+  // General quality, 1 to 5, from the Intelligence Index next to the best Copilot model.
+  function qualityLevel(m, k = 'intelligence') {
+    const v = m[k] ?? null;
+    if (v == null) return 0;
+    const f = v / TOP[k];
+    return f >= .95 ? 5 : f >= .85 ? 4 : f >= .75 ? 3 : f >= .6 ? 2 : 1;
+  }
+
+  // Budget
+  const input = $('credits');
+  input.value = state.credits;
+  const syncReset = () => { $('credits-reset').hidden = state.credits === DEFAULT_CREDITS; };
+  input.addEventListener('input', () => {
+    const v = Number(input.value);
+    state.credits = Number.isFinite(v) ? Math.min(Math.max(Math.round(v), 0), 1e6) : 0;
+    save(); syncReset(); renderAnswer(true); renderBands();
+  });
+  $('credits-reset').addEventListener('click', () => {
+    state.credits = DEFAULT_CREDITS; input.value = DEFAULT_CREDITS;
+    save(); syncReset(); renderAnswer(true); renderBands();
+  });
+  syncReset();
+
+  if (meta.updated) {
+    const d = new Date(meta.updated + 'T00:00:00Z');
+    $('updated').textContent = 'Prices updated ' + d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+  }
+
+  // Theme: shared with the other pages, follows the system until the user picks one.
   const THEME = 'copilot-pricing-theme';
   const darkMQ = matchMedia('(prefers-color-scheme: dark)');
   const isDark = () => {
@@ -1131,20 +916,8 @@ function init(MODELS, meta) {
   darkMQ.addEventListener('change', syncTheme);
   syncTheme();
 
-  render();
-  requestAnimationFrame(() => requestAnimationFrame(() => $('chart').classList.add('ready')));
-
-  // Arriving from another page (?focus=<model>): make sure its row is shown, scroll to it, pin its tooltip.
-  const focused = focusModel && MODELS.find(m => m.model === focusModel && m.tier === 'default');
-  if (focused) {
-    state.active.add(focused.provider);
-    state.cats.add(focused.category);
-    render();
-    const { r, parts } = rows.get(focused.id);
-    r.scrollIntoView({ block: 'center' });
-    r.classList.add('focus-flash');
-    requestAnimationFrame(() => pins.pin({ m: focused, r, parts }));
-  }
+  renderAnswer(true);
+  renderBands();
 }
 </script>
 <script src="glossary.js"></script>

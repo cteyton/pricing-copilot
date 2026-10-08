@@ -17,7 +17,7 @@ window.CopilotShared = (() => {
   // Secondary USD figure next to a credit value.
   const usd = v => '$' + (v < 1 && Math.round(v * 1e4) % 100 ? v.toFixed(3) : v.toFixed(2));
   const PAGES = [
-    { id: 'cost', href: './', label: '1 · Cost' },
+    { id: 'cost', href: 'cost.html', label: '1 · Cost' },
     { id: 'budget', href: 'tokens.html', label: '2 · Budget' },
     { id: 'value', href: 'performance.html', label: '3 · Value' },
     { id: 'compare', href: 'compare.html', label: '4 · Compare' },

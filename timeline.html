@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Copilot Price vs Coding</title>
-<meta name="description" content="GitHub Copilot models plotted by blended price per million tokens against the Artificial Analysis Coding or Intelligence Index, with the Pareto frontier.">
+<title>Copilot Models Over Time</title>
+<meta name="description" content="GitHub Copilot models placed by release date: how the cheapest model reaching a given Artificial Analysis score gets cheaper over time, and how the best score rises.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%226%22 rx=%221%22 fill=%22%232a78d6%22/%3E%3Crect x=%226.5%22 y=%225%22 width=%223%22 height=%2210%22 rx=%221%22 fill=%22%23eb6834%22/%3E%3Crect x=%2212%22 y=%221%22 width=%223%22 height=%2214%22 rx=%221%22 fill=%22%231baf7a%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,9 +14,23 @@
   try { const t = localStorage.getItem('copilot-pricing-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch {}
 </script>
 <style>
-/* Same design language as cost.html and tokens.html (tokens, nav, filters, tooltip, table):
-   one dot per model, blended price on a log x axis, Coding or Intelligence Index on a linear y axis,
-   the Pareto frontier joined by a line. */
+/* Same design language as performance.html (tokens, nav, filters, tooltip, table):
+   one dot per model at its release date, blended price or an Artificial Analysis index on y. */
+/* Timeline: threshold, faded and unscored dots */
+.chart .thr-line { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.chart .thr-lbl { font: 500 11px var(--font-mono); fill: var(--ink-3); }
+.chart .pt.below .dot { opacity: .4; }
+.chart .pt.unscored .dot { fill: var(--surface); stroke: var(--c); stroke-width: 1.5; }
+.key-dot.below { opacity: .4; }
+.key-dot.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.key-thr { width: 18px; height: 0; border-top: 1px dashed var(--ink-3); }
+.thr { display: inline-flex; align-items: center; gap: 8px; }
+.thr input {
+  width: 5.5rem; padding: 7px 10px; border: 1px solid var(--rule-strong); border-radius: 8px;
+  background: var(--surface); color: var(--ink); font: 500 13px/1 var(--font-mono); font-variant-numeric: tabular-nums;
+}
+.thr input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.sidebar .thr, .sidebar #reset-min { grid-column: 1 / -1; justify-self: start; }
 :root {
   --bg: #fafaf9;
   --surface: #ffffff;
@@ -271,28 +285,6 @@ button:focus-visible, summary:focus-visible {
 .takeaway .link-btn:hover { color: var(--ink); }
 .content .takeaway { margin-top: 0; }
 .content .takeaway + .summary { margin-top: 14px; }
-/* Picks: three frontier models chosen by a stated rule */
-.picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; max-width: 60rem; }
-.picks:empty { display: none; }
-.pick {
-  appearance: none; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px;
-  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px;
-  font: 400 12px/1.4 var(--font-sans); color: var(--ink-3); transition: border-color .15s;
-}
-.pick:hover { border-color: var(--rule-strong); }
-.pick .k { font: 500 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
-.pick .nm { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: var(--ink); }
-.pick .nm::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
-.pick .v { font: 400 12px/1.3 var(--font-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.pick .promo { align-self: flex-start; margin-top: 2px; padding: 3px 7px; border-radius: 999px; border: 1px dashed var(--ink-3); font-size: 11px; color: var(--ink-2); }
-@media (max-width: 640px) {
-  .picks { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .pick { padding: 10px 12px; }
-  .pick .r { display: none; }
-}
-.picks + .summary, .picks-cmp + .summary { margin-top: 16px; }
-.picks-cmp { display: inline-block; margin-top: 10px; font-size: 13px; color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.picks-cmp:hover { color: var(--ink); }
 .chart .zone { fill: var(--ink); opacity: .045; }
 .chart .zone-lbl { font-size: 11px; fill: var(--ink-3); }
 .chart .pt { cursor: pointer; }
@@ -453,9 +445,9 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
         <a href="./"><span class="tq">Which model should I use?</span><span class="ts">Start</span></a>
         <a href="cost.html">1 · <span class="tq">What does a model cost?</span><span class="ts">Cost</span></a>
         <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
-        <a href="performance.html" aria-current="page">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
+        <a href="performance.html">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
         <a href="compare.html">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>
-        <a href="timeline.html">5 · <span class="tq">Is it getting cheaper?</span><span class="ts">Timeline</span></a>
+        <a href="timeline.html" aria-current="page">5 · <span class="tq">Is it getting cheaper?</span><span class="ts">Timeline</span></a>
       </div>
     </nav>
     <button type="button" class="theme-btn" id="theme-toggle" aria-pressed="false">
@@ -466,13 +458,23 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
   </div>
 
   <header class="intro">
-    <h1>Which models give the most <span id="h-metric">coding ability</span> per credit?</h1>
-    <p class="lede">Each dot is a Copilot model. Further left is cheaper: blended <span class="gl-t">price<button class="gl" data-gl="blended"></button></span> in AI <span class="gl-t">credits<button class="gl" data-gl="credit"></button></span> per million tokens. Higher is better: the <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a> <span class="m-label">Coding Index</span><button class="gl" data-gl="index"></button>. The best deals sit up and to the left.</p>
-    <p class="lede">The line links those best deals, the Pareto <span class="gl-t">frontier<button class="gl" data-gl="frontier"></button>:</span> for any model below it, a cheaper model scores at least as well.</p>
+    <h1 id="h1">How fast is <span id="h-metric">coding ability</span> getting cheaper?</h1>
+    <p class="lede" id="lede-price">Each dot is a Copilot model at its release date, by blended <span class="gl-t">price<button class="gl" data-gl="blended"></button></span>. Faded: below <span class="t-min">70</span> on the <span class="m-label">Coding Index</span><button class="gl" data-gl="index"></button>.</p>
+    <p class="lede" id="lede-score" hidden>Each dot is a Copilot model at its release date, by its <span class="m-label">Coding Index</span><button class="gl" data-gl="index"></button>.</p>
   </header>
 
   <aside class="sidebar">
-    <section class="filters" aria-label="Score, mix and filters">
+    <section class="filters" aria-label="View, score, threshold, mix and filters">
+      <div class="f-row">
+        <span class="f-label" id="fl-view">View</span>
+        <div class="f-ctrl">
+          <div class="segmented" role="group" aria-labelledby="fl-view">
+            <button type="button" data-view="price" aria-pressed="true">Price</button>
+            <button type="button" data-view="score" aria-pressed="false">Score</button>
+          </div>
+          <span class="f-hint">Vertical axis: blended price or the score</span>
+        </div>
+      </div>
       <div class="f-row">
         <span class="f-label"><span id="fl-metric">Score</span><button class="gl" data-gl="index"></button></span>
         <div class="f-ctrl">
@@ -480,17 +482,15 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
             <button type="button" data-metric="coding" aria-pressed="true">Coding</button>
             <button type="button" data-metric="intelligence" aria-pressed="false">Intelligence</button>
           </div>
-          <span class="f-hint">Artificial Analysis index on the vertical axis</span>
+          <span class="f-hint">Artificial Analysis index used for the threshold</span>
         </div>
       </div>
       <div class="f-row">
-        <span class="f-label"><span id="fl-scale">Scale</span><button class="gl" data-gl="log"></button></span>
+        <span class="f-label"><label for="min">Threshold</label></span>
         <div class="f-ctrl">
-          <div class="segmented" role="group" aria-labelledby="fl-scale">
-            <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
-            <button type="button" data-scale="log" aria-pressed="false">Log</button>
-          </div>
-          <span class="f-hint">Price axis; log spreads out the cheap models</span>
+          <span class="thr"><span>Score ≥</span><input type="number" id="min" min="0" max="100" step="5" value="70" inputmode="numeric"></span>
+          <span class="f-hint" id="min-hint">Models scoring at least this count; the others are faded</span>
+          <button type="button" class="link-btn" id="reset-min" hidden>Back to 70</button>
         </div>
       </div>
       <div class="f-row">
@@ -530,43 +530,37 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
 
   <main class="content">
     <p class="takeaway" id="takeaway" aria-live="polite"></p>
-    <div class="picks" id="picks" role="group" aria-label="Picks"></div>
-    <a class="picks-cmp" id="picks-cmp" hidden>Compare the picks side by side →</a>
-    <div class="summary">
-      <span class="legend-key"><span class="key-dot front"></span>On the frontier</span>
-      <span class="legend-key"><span class="key-dot"></span>Dominated (colour = provider)</span>
-      <span class="legend-key"><span class="key-line"></span><span class="gl-t">Pareto frontier<button class="gl" data-gl="frontier"></button></span></span>
-    </div>
+    <div class="summary" id="legend"></div>
 
-    <section class="chart" id="chart" aria-label="Blended price against the score">
-      <svg id="svg" role="img" aria-labelledby="svg-title"><title id="svg-title">Blended price in AI credits per 1M tokens against the Artificial Analysis Coding Index</title></svg>
+    <section class="chart" id="chart" aria-label="Copilot models by release date">
+      <svg id="svg" role="img" aria-labelledby="svg-title"><title id="svg-title">Copilot models by release date</title></svg>
       <div class="tip" id="tip" hidden></div>
     </section>
     <section class="unscored" id="unscored" aria-labelledby="unscored-title" hidden>
       <h2 class="f-label" id="unscored-title"></h2>
-      <p>These Copilot models have no <span class="m-label">Coding Index</span> on Artificial Analysis yet, so they are not plotted. They will join the chart once a score is published.</p>
+      <p id="unscored-text"></p>
       <ul id="unscored-list"></ul>
     </section>
 
     <details id="explain">
       <summary>How is this calculated?</summary>
       <div class="explain">
-        <p><b>Price.</b> GitHub’s list price per million input and output tokens, blended by the mix: <code>r × input + (1 − r) × output</code>, with <code>r</code> = 90% by default, because coding agents read far more than they write. Default tier only: long-context rates and caching are left out.</p>
-        <p><b>Score.</b> An <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a> index, picked with the Score switch. <b>Coding</b> (default) is their composite of coding benchmarks (e.g. Terminal-Bench, SciCode); recent models often get it a few weeks after release. <b>Intelligence</b> is their broader composite of reasoning, knowledge, maths and coding, published sooner. Models without the selected index are listed under the chart.</p>
-        <p>Artificial Analysis benchmarks each model at several reasoning efforts. This page uses <b>High</b>; when a model has no High result for the selected index, the nearest one (Xhigh, then Medium, Max, Low). The tooltip names the variant used.</p>
-        <p><b>Frontier.</b> Sort the models in view by price. A model is on the frontier when it scores higher than every cheaper one. The frontier is recomputed when filters or the mix change.</p>
+        <p><b>Date.</b> The day the provider released the model (<code>data/release-dates.csv</code>), not the day it reached Copilot.</p>
+        <p><b>Price.</b> GitHub’s list price per million input and output tokens, blended by the mix: <code>r × input + (1 − r) × output</code>, with <code>r</code> = 90% by default. Default tier only: long-context rates and caching are left out. It is <b>today’s</b> price for every model: we don’t keep a price history, so a model whose price changed since launch is shown at its current price.</p>
+        <p><b>Score.</b> An <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a> index, picked with the Score switch: <b>Coding</b> (default) or <b>Intelligence</b>, the broader one, often published sooner for new models. Models without the selected index can’t pass the threshold: they are hollow on the Price view and listed under the chart on the Score view.</p>
+        <p><b>Threshold.</b> On the Price view, models scoring below it are faded. The sentence above the chart compares the cheapest model reaching it today with the first one that did.</p>
         <ul>
-          <li>The index measures the model, not Copilot’s harness around it, and reasoning effort changes how many tokens a task uses: a higher score can cost more tokens per task than the blended price suggests.</li>
-          <li>Two Copilot entries can share one score (e.g. Claude Opus 4.8 and its fast mode, which costs twice as much).</li>
+          <li>Copilot drops older models, so the timeline only starts with the oldest model it still offers: the trend over a longer period isn’t visible here.</li>
+          <li>Scores measure the model, not Copilot’s harness around it, and say nothing about how many tokens a task takes.</li>
         </ul>
       </div>
     </details>
 
     <details id="details">
-      <summary>Show scores as a table</summary>
+      <summary>Show as a table</summary>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Model</th><th>Provider</th><th>Class</th><th class="num">Blended credits / 1M</th><th class="num m-label">Coding Index</th><th>Scored as</th><th>Frontier</th></tr></thead>
+          <thead><tr><th>Model</th><th>Provider</th><th>Class</th><th>Released</th><th class="num">Blended credits / 1M</th><th class="num m-label">Coding Index</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -582,13 +576,16 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
 
 <script src="shared.js"></script>
 <script>
-// Data: data/models.csv (scripts/update-pricing.mjs) and data/scores.csv (scripts/update-scores.mjs).
+// Data: data/models.csv, data/scores.csv, and the release dates in data/release-dates.csv,
+// matched to Copilot names through data/release-mapping.json (checked by scripts/check-release-dates.mjs).
 const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output', 'intelligence', 'coding'];
-// Score switch: column in data/scores.csv → labels.
+// Score switch: column in data/scores.csv → labels, and the default threshold (a score most recent
+// mid-priced models reach).
 const METRICS = {
-  coding: { label: 'Coding Index', headline: 'coding ability' },
-  intelligence: { label: 'Intelligence Index', headline: 'intelligence' },
+  coding: { label: 'Coding Index', headline: 'coding ability', short: 'coding', min: 70 },
+  intelligence: { label: 'Intelligence Index', headline: 'intelligence', short: 'intelligence', min: 40 },
 };
+const VIEWS = ['price', 'score'];
 
 function parseCSV(text) {
   const out = [];
@@ -618,16 +615,18 @@ function parseCSV(text) {
 
 const text = url => fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.text(); });
 const json = url => fetch(url, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
-Promise.all([text('data/models.csv'), text('data/scores.csv'), json('data/meta.json'), json('data/scores-meta.json'), json('data/aa-mapping.json')])
-  .then(([models, scores, meta, scoresMeta, mapping]) => init(parseCSV(models), parseCSV(scores), meta, scoresMeta, mapping), err => {
+Promise.all([text('data/models.csv'), text('data/scores.csv'), text('data/release-dates.csv'), json('data/release-mapping.json'),
+  json('data/meta.json'), json('data/scores-meta.json')])
+  .then(([models, scores, dates, releaseMap, meta, scoresMeta]) =>
+    init(parseCSV(models), parseCSV(scores), parseCSV(dates), releaseMap, meta, scoresMeta), err => {
     console.error(err);
     const p = document.createElement('p');
     p.className = 'empty';
-    p.textContent = 'Couldn’t load data/models.csv or data/scores.csv. Serve the page over HTTP (python3 -m http.server).';
+    p.textContent = 'Couldn’t load the data files. Serve the page over HTTP (python3 -m http.server).';
     document.getElementById('chart').replaceChildren(p);
   });
 
-function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
+function init(ALL, SCORES, DATES, RELEASE_MAP, meta, scoresMeta) {
   const KNOWN = [
     { name: 'OpenAI', color: '--s-openai' },
     { name: 'Anthropic', color: '--s-anthropic' },
@@ -636,50 +635,54 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
     { name: 'xAI', color: '--s-xai' },
     { name: 'Moonshot AI', color: '--s-moonshot' },
   ];
-  // Default tier only, joined with its scores. Models without the selected index are listed under the chart.
+  const DAY = 864e5;
+  const toTime = s => Date.parse(s + 'T00:00:00Z');
+  // Default tier only, joined with scores and release date. Models without a date are listed under the chart.
   const scoreOf = new Map(SCORES.map(s => [s.model, s]));
-  const DEFAULT = ALL.filter(m => m.tier === 'default').map(m => ({ ...m, score: scoreOf.get(m.model) || {} }));
-  const MODELS = DEFAULT.filter(m => Object.keys(METRICS).some(k => m.score[k] != null));
-  const hasScore = m => m.score[state.metric] != null;
+  const dateOf = new Map(DATES.map(d => [d.model, d.release_date]));
+  const DEFAULT = ALL.filter(m => m.tier === 'default').map(m => {
+    const released = RELEASE_MAP[m.model] ? dateOf.get(RELEASE_MAP[m.model]) || null : null;
+    return { ...m, score: scoreOf.get(m.model) || {}, released, t: released ? toTime(released) : null };
+  });
+  const DATED = DEFAULT.filter(m => m.t != null);
+  const UNDATED = DEFAULT.filter(m => m.t == null);
   const otherMetric = () => Object.keys(METRICS).find(k => k !== state.metric);
-  const article = w => (/^[aeiou]/i.test(w) ? 'an' : 'a');
 
-  const present = new Set(MODELS.map(m => m.provider));
+  const present = new Set(DATED.map(m => m.provider));
   const PROVIDERS = [
     ...KNOWN.filter(p => present.has(p.name)),
     ...[...present].filter(n => !KNOWN.some(p => p.name === n)).map(name => ({ name, color: '--s-other' })),
   ];
   const CAT_ORDER = ['Lightweight', 'Versatile', 'Powerful'];
-  const presentCats = new Set(MODELS.map(m => m.category));
+  const presentCats = new Set(DATED.map(m => m.category));
   const CATEGORIES = [...CAT_ORDER.filter(c => presentCats.has(c)), ...[...presentCats].filter(c => !CAT_ORDER.includes(c))];
 
   const fmtDate = s => new Date(s + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'long' });
+  const fmtMonth = t => new Date(t).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
   $('updated').textContent = [meta.updated && 'Prices updated ' + fmtDate(meta.updated),
     scoresMeta.updated && 'scores updated ' + fmtDate(scoresMeta.updated)].filter(Boolean).join(', ');
+  // The right edge of the chart: the step lines run up to the latest data.
+  const NOW = Math.max(...DATED.map(m => m.t), meta.updated ? toTime(meta.updated) : 0);
 
-  // Unscored models may come from a provider with no dot, hence the lookup in KNOWN too.
   const colorOf = p => `var(${(PROVIDERS.find(x => x.name === p) || KNOWN.find(x => x.name === p))?.color || '--s-other'})`;
-  // Prices are held in USD and shown in AI credits; USD only as a secondary figure.
   const { credits, usd } = CopilotShared;
   const score = v => (Math.round(v * 10) / 10).toFixed(1);
+  const ratio = r => (r < 10 ? String(Math.round(r * 10) / 10) : String(Math.round(r)));
 
   const DEFAULT_IN = 90;
-  const STORE = 'copilot-perf-view';
+  const STORE = 'copilot-timeline-view';
+  const DEFAULT_VIEW = 'price';
   const DEFAULT_METRIC = 'coding';
-  const DEFAULT_SCALE = 'linear';
-  const SCALES = ['linear', 'log'];
-  const state = { metric: DEFAULT_METRIC, scale: DEFAULT_SCALE, inPct: DEFAULT_IN, active: new Set(PROVIDERS.map(p => p.name)), cats: new Set(CATEGORIES) };
+  const defaultMins = () => Object.fromEntries(Object.entries(METRICS).map(([k, v]) => [k, v.min]));
+  const state = { view: DEFAULT_VIEW, metric: DEFAULT_METRIC, min: defaultMins(), inPct: DEFAULT_IN,
+    active: new Set(PROVIDERS.map(p => p.name)), cats: new Set(CATEGORIES) };
   const validPct = v => Number.isFinite(v) && v >= 0 && v <= 100;
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     if (saved) {
-      if (validPct(saved.inPct)) state.inPct = saved.inPct;
+      if (VIEWS.includes(saved.view)) state.view = saved.view;
       if (saved.metric in METRICS) state.metric = saved.metric;
-      if (SCALES.includes(saved.scale)) state.scale = saved.scale;
-      if (Array.isArray(saved.active)) state.active = new Set(PROVIDERS.map(p => p.name)
-        .filter(n => saved.active.includes(n) || (Array.isArray(saved.known) && !saved.known.includes(n))));
-      if (Array.isArray(saved.cats)) state.cats = new Set(CATEGORIES
-        .filter(c => saved.cats.includes(c) || (Array.isArray(saved.knownCats) && !saved.knownCats.includes(c))));
+      if (saved.min) for (const k in METRICS) if (validPct(saved.min[k])) state.min[k] = saved.min[k];
     }
   } catch {}
   // Mix, providers and classes follow the reader across pages.
@@ -690,19 +693,20 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
   if (sharedActive) state.active = sharedActive;
   if (sharedCats) state.cats = sharedCats;
   const focusModel = CopilotShared.takeFocus();
-  // A shared link (?score=intelligence&in=80) wins over the saved state.
+  // A shared link (?y=score&score=intelligence&min=45&in=80) wins over the saved state.
   const query = new URLSearchParams(location.search);
-  if (query.has('in') && validPct(Number(query.get('in')))) state.inPct = Number(query.get('in'));
+  if (VIEWS.includes(query.get('y'))) state.view = query.get('y');
   if (query.get('score') in METRICS) state.metric = query.get('score');
-  if (SCALES.includes(query.get('scale'))) state.scale = query.get('scale');
+  if (query.has('min') && validPct(Number(query.get('min')))) state.min[state.metric] = Number(query.get('min'));
+  if (query.has('in') && validPct(Number(query.get('in')))) state.inPct = Number(query.get('in'));
 
   const save = () => {
     CopilotShared.write({ inPct: state.inPct, active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES });
-    try { localStorage.setItem(STORE, JSON.stringify({ metric: state.metric, scale: state.scale, inPct: state.inPct,
-      active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES })); } catch {}
+    try { localStorage.setItem(STORE, JSON.stringify({ view: state.view, metric: state.metric, min: state.min })); } catch {}
     const q = new URLSearchParams(location.search);
+    if (state.view === DEFAULT_VIEW) q.delete('y'); else q.set('y', state.view);
     if (state.metric === DEFAULT_METRIC) q.delete('score'); else q.set('score', state.metric);
-    if (state.scale === DEFAULT_SCALE) q.delete('scale'); else q.set('scale', state.scale);
+    if (state.min[state.metric] === METRICS[state.metric].min) q.delete('min'); else q.set('min', state.min[state.metric]);
     if (state.inPct === DEFAULT_IN) q.delete('in'); else q.set('in', state.inPct);
     const s = q.toString();
     try { history.replaceState(null, '', s ? '?' + s : location.pathname); } catch {}
@@ -766,164 +770,165 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
 
   const blended = m => { const r = state.inPct / 100; return r * m.input + (1 - r) * m.output; };
 
-  // Pareto frontier: by price ascending (best score first on ties), keep each model that beats every cheaper one.
-  function frontier(list) {
-    const sorted = [...list].sort((a, b) => a.price - b.price || b.s - a.s);
+  // For the sentence: by release date (cheapest first on the same day), keep each model that reaches the
+  // threshold for less than every earlier one that did.
+  function cheapestSteps(list, min) {
     const out = [];
-    let best = -Infinity;
-    for (const p of sorted) if (p.s > best) { out.push(p); best = p.s; }
+    let best = Infinity;
+    [...list].filter(p => p.s != null && p.s >= min).sort((a, b) => a.t - b.t || a.price - b.price)
+      .forEach(p => { if (p.price < best) { out.push(p); best = p.price; } });
     return out;
   }
-
-  // Log ticks at 1, 2, 5 × 10^k inside the domain.
-  function logTicks(lo, hi) {
-    const t = [];
-    for (let k = Math.floor(Math.log10(lo)); k <= Math.ceil(Math.log10(hi)); k++) {
-      for (const f of [1, 2, 5]) { const v = f * 10 ** k; if (v >= lo && v <= hi) t.push(Math.round(v * 1e6) / 1e6); }
-    }
-    return t;
+  // For the sentence: by release date (best first on the same day), keep each new best score.
+  function bestSteps(list) {
+    const out = [];
+    let best = -Infinity;
+    [...list].filter(p => p.s != null).sort((a, b) => a.t - b.t || b.s - a.s)
+      .forEach(p => { if (p.s > best) { out.push(p); best = p.s; } });
+    return out;
   }
 
   // "Round" linear ticks from 0: steps of 1, 2, 2.5 or 5 × 10^k, at most n intervals.
   function niceScale(max, n) {
     const raw = max / n;
     const pow = 10 ** Math.floor(Math.log10(raw));
-    const step = [1, 2, 2.5, 5, 10].map(k => k * pow).find(s => s >= raw);
+    const step = [1, 2, 2.5, 5, 10].map(k => k * pow).find(st => st >= raw);
     const top = Math.ceil(max / step) * step;
     const ticks = [];
     for (let t = 0; t <= top + 1e-9; t += step) ticks.push(Math.round(t * 1000) / 1000);
     return { top, ticks };
   }
+  // Month ticks: the first of every 1, 2, 3, 6 or 12 months, at most n of them.
+  function monthTicks(lo, hi, n) {
+    const first = new Date(lo);
+    let y = first.getUTCFullYear(), mo = first.getUTCMonth() + 1;
+    const all = [];
+    for (let t = Date.UTC(y, mo, 1); t <= hi; t = Date.UTC(y, ++mo, 1)) all.push(t);
+    const every = [1, 2, 3, 6, 12].find(k => Math.ceil(all.length / k) <= n) || 12;
+    // Keep the months that divide evenly (Jan, Apr, Jul, Oct for quarters), so January is always a tick when shown.
+    return all.filter(t => new Date(t).getUTCMonth() % every === 0);
+  }
 
-  let points = [], frontSet = new Set();
+  let points = [], steps = [];
   const pins = CopilotShared.pinnable({ tip: $('tip'), open: (p, pinned) => showTip(p, pinned), close: () => hideTip() });
   const svg = $('svg');
   const tip = $('tip');
   let active = null;
 
   function render() {
+    const k = state.metric, min = state.min[k], label = METRICS[k].label, byPrice = state.view === 'price';
     // Controls
     $('mix').value = state.inPct;
     $('mix-in').textContent = state.inPct + '%';
     $('mix-o').textContent = (100 - state.inPct) + '%';
     $('mix').setAttribute('aria-valuetext', `${state.inPct}% input, ${100 - state.inPct}% output`);
     $('reset-mix').hidden = state.inPct === DEFAULT_IN;
-    const label = METRICS[state.metric].label;
-    document.querySelectorAll('[data-metric]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.metric === state.metric)));
-    document.querySelectorAll('[data-scale]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.scale === state.scale)));
+    if (document.activeElement !== $('min')) $('min').value = min;
+    $('reset-min').hidden = min === METRICS[k].min;
+    $('reset-min').textContent = `Back to ${METRICS[k].min}`;
+    $('min-hint').textContent = byPrice
+      ? 'Models scoring below this are faded'
+      : 'Dashed line on the chart';
+    document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
+    document.querySelectorAll('[data-metric]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.metric === k)));
     document.querySelectorAll('.m-label').forEach(n => { n.textContent = label; });
-    $('h-metric').textContent = METRICS[state.metric].headline;
-    $('svg-title').textContent = `Blended price in AI credits per 1M tokens against the Artificial Analysis ${label}`;
-    const SCORED = MODELS.filter(hasScore);
-    const UNSCORED = DEFAULT.filter(m => !hasScore(m));
+    document.querySelectorAll('.t-min').forEach(n => { n.textContent = min; });
+    $('lede-price').hidden = !byPrice;
+    $('lede-score').hidden = byPrice;
+    $('h1').replaceChildren(...(byPrice
+      ? ['How fast is ', el('span', null, METRICS[k].headline), ' getting cheaper?']
+      : ['How fast are models getting better at ', el('span', null, k === 'coding' ? 'coding' : 'everything'), '?']));
+    $('svg-title').textContent = byPrice
+      ? `Copilot models by release date and blended price, with the cheapest model scoring at least ${min} on the ${label} over time`
+      : `Copilot models by release date and ${label}, with the best score over time`;
+
+    const shown = m => byPrice || m.score[k] != null;
     const syncChip = ({ b, n }, on, count) => {
       b.setAttribute('aria-pressed', String(on));
       n.textContent = count;
       b.classList.toggle('zero', !count);
     };
-    chips.forEach((c, name) => syncChip(c, state.active.has(name), SCORED.filter(m => m.provider === name && passes(m, 'provider')).length));
-    catChips.forEach((c, name) => syncChip(c, state.cats.has(name), SCORED.filter(m => m.category === name && passes(m, 'cat')).length));
-    $('f-count').replaceChildren('Showing ', el('b', null, String(SCORED.filter(m => passes(m)).length)), ` of ${SCORED.length} scored models`);
+    chips.forEach((c, name) => syncChip(c, state.active.has(name), DATED.filter(m => shown(m) && m.provider === name && passes(m, 'provider')).length));
+    catChips.forEach((c, name) => syncChip(c, state.cats.has(name), DATED.filter(m => shown(m) && m.category === name && passes(m, 'cat')).length));
+    const pool = DATED.filter(shown);
+    $('f-count').replaceChildren('Showing ', el('b', null, String(pool.filter(m => passes(m)).length)),
+      ` of ${pool.length} ${byPrice ? 'dated' : 'scored'} models`);
     $('reset').hidden = !isFiltered();
 
-    const k = state.metric;
-    points = SCORED.filter(m => passes(m)).map(m => ({ m, price: blended(m), s: m.score[k], effort: m.score[`${k}Effort`], aaName: m.score[`${k}AaName`] }));
-    const front = frontier(points);
-    frontSet = new Set(front);
-    draw(front);
+    const inView = DATED.filter(m => passes(m)).map(m => ({ m, t: m.t, price: blended(m), s: m.score[k] ?? null,
+      effort: m.score[`${k}Effort`], aaName: m.score[`${k}AaName`] }));
+    const unscored = inView.filter(p => p.s == null);
+    points = byPrice ? inView : inView.filter(p => p.s != null);
+    steps = byPrice ? cheapestSteps(points, min) : bestSteps(points);
+    draw();
+    renderLegend(byPrice, min);
+    renderTakeaway(byPrice, unscored, min, k);
 
-    // Takeaway: the top scorer, the cheapest frontier model within 90% of it, and how many are dominated.
-    if (points.length) {
-      const top = front[front.length - 1];
-      const value = front.find(p => p.s >= 0.9 * top.s);
-      const dominated = points.length - front.length;
-      const at = p => ` (score ${score(p.s)} for ${credits(p.price)} credits per million tokens)`;
-      const parts = [`Top ${label}: `, el('b', null, top.m.model), at(top), '. '];
-      if (value !== top) {
-        const r = top.price / value.price;
-        parts.push(el('b', null, value.m.model), ` gets ${Math.round(value.s / top.s * 100)}% of that score for `,
-          el('b', null, (r < 10 ? String(Math.round(r * 10) / 10) : Math.round(r)) + '× less'), '. ');
-      }
-      if (dominated) parts.push(el('span', 'muted', `${dominated} of ${points.length} models have a cheaper alternative that scores at least as well. `));
-      // Newer models often lack the selected index: say so, so "Top" isn't read as the overall answer.
-      if (UNSCORED.length) {
-        const other = otherMetric();
-        const n = UNSCORED.filter(m => m.score[other] != null).length;
-        parts.push(el('span', 'muted', `${UNSCORED.length} model${UNSCORED.length > 1 ? 's' : ''} without ${article(label)} ${label} yet ${UNSCORED.length > 1 ? 'are' : 'is'} not ranked (listed below the chart)`));
-        if (n) {
-          const btn = el('button', 'link-btn', `${n} of them ${n > 1 ? 'have' : 'has'} ${article(METRICS[other].label)} ${METRICS[other].label} →`);
-          btn.type = 'button';
-          btn.addEventListener('click', () => { state.metric = other; render(); });
-          parts.push(el('span', 'muted', ': '), btn);
-        } else parts.push(el('span', 'muted', '.'));
-      }
-      $('takeaway').replaceChildren(...parts);
-      renderPicks(front, top);
-    } else {
-      $('takeaway').textContent = 'No models in view.';
-      $('picks').replaceChildren();
-      $('picks-cmp').hidden = true;
-    }
-
-    $('unscored').hidden = !UNSCORED.length;
-    $('unscored-title').textContent = `Not scored yet · ${UNSCORED.length}`;
-    $('unscored-list').replaceChildren(...UNSCORED.map(m => {
+    // Under the chart: models with no score (Score view) and models with no release date.
+    const missing = [...(byPrice ? [] : unscored.map(p => ({ m: p.m, why: 'not scored yet' }))),
+      ...UNDATED.filter(m => passes(m)).map(m => ({ m, why: 'no release date' }))];
+    $('unscored').hidden = !missing.length;
+    $('unscored-title').textContent = `Not on the chart · ${missing.length}`;
+    $('unscored-text').textContent = byPrice
+      ? 'These Copilot models have no release date in data/release-dates.csv yet.'
+      : `These Copilot models have no ${label} on Artificial Analysis yet${missing.some(x => x.why === 'no release date') ? ', or no release date' : ''}, so they are not plotted.`;
+    $('unscored-list').replaceChildren(...missing.map(({ m, why }) => {
       const li = el('li');
       li.style.setProperty('--c', colorOf(m.provider));
-      // null in aa-mapping.json: the model isn't on Artificial Analysis at all.
-      li.append(el('span', 'sw'), m.model, el('span', 'why', MAPPING[m.model] === null ? 'not tracked' : 'coming soon'));
+      li.append(el('span', 'sw'), m.model, el('span', 'why', why));
       return li;
     }));
 
-    // Table: frontier first, then by score
-    const rows = [...points].sort((a, b) => frontSet.has(b) - frontSet.has(a) || b.s - a.s);
-    $('tbody').replaceChildren(...rows.map(p => {
+    // Table: by release date, newest first.
+    document.querySelectorAll('th.m-label').forEach(n => { n.textContent = label; });
+    $('tbody').replaceChildren(...[...inView].sort((a, b) => b.t - a.t || a.price - b.price).map(p => {
       const tr = el('tr');
       const cell = el('td');
       cell.style.setProperty('--c', colorOf(p.m.provider));
       cell.append(el('span', 'sw'), p.m.model);
-      tr.append(cell, el('td', null, p.m.provider), el('td', null, p.m.category), el('td', 'num', credits(p.price)),
-        el('td', 'num', score(p.s)), el('td', null, p.aaName), el('td', null, frontSet.has(p) ? 'Yes' : ''));
+      tr.append(cell, el('td', null, p.m.provider), el('td', null, p.m.category), el('td', null, p.m.released),
+        el('td', 'num', credits(p.price)), el('td', 'num', p.s == null ? '–' : score(p.s)));
       return tr;
     }));
     save();
   }
 
-  // Three picks from the frontier, each by a stated rule. One model can fill several roles.
-  function renderPicks(front, top) {
-    const roles = [
-      { k: 'Budget pick', rule: 'Cheapest with at least 75% of the top score', p: front.find(p => p.s >= 0.75 * top.s) },
-      { k: 'Balanced pick', rule: 'Cheapest with at least 90% of the top score', p: front.find(p => p.s >= 0.9 * top.s) },
-      { k: 'Best score', rule: `Highest ${METRICS[state.metric].label} in view`, p: top },
-    ];
-    const cards = [];
-    roles.forEach(r => {
-      const same = cards.find(c => c.p === r.p);
-      if (same) { same.k.push(r.k); return; }
-      cards.push({ k: [r.k], rule: r.rule, p: r.p });
-    });
-    const q = new URLSearchParams(cards.map(c => ['m', c.p.m.model]));
-    if (state.inPct !== DEFAULT_IN) q.set('in', state.inPct);
-    $('picks-cmp').href = 'compare.html?' + q;
-    $('picks-cmp').hidden = cards.length < 2;
-    $('picks').replaceChildren(...cards.map(c => {
-      const b = el('button', 'pick');
-      b.type = 'button';
-      b.style.setProperty('--c', colorOf(c.p.m.provider));
-      b.append(el('span', 'k', c.k.join(' · ')), el('span', 'nm', c.p.m.model),
-        el('span', 'v', `${score(c.p.s)} · ${credits(c.p.price)} credits / 1M`), el('span', 'r', c.rule));
-      b.title = c.rule;
-      // A pick that rests on a temporary price says so (the note comes from GitHub's pricing page).
-      if (/promotion/i.test(c.p.m.note || '')) {
-        b.append(el('span', 'promo', 'Promotional price: see its note'));
-        b.title += '\n\n' + c.p.m.note;
-      }
-      b.addEventListener('click', e => { e.stopPropagation(); pins.pin(c.p); });
-      return b;
-    }));
+  function renderLegend(byPrice, min) {
+    const key = (cls, text) => { const s = el('span', 'legend-key'); s.append(el('span', cls), text); return s; };
+    $('legend').replaceChildren(...(byPrice ? [
+      key('key-dot', `${min}+`),
+      key('key-dot below', `Below ${min}`),
+      key('key-dot hollow', 'Not scored yet'),
+    ] : [
+      key('key-thr', `Threshold ${min}`),
+    ]));
   }
 
-  function draw(front) {
+  // One bold headline, then a muted footnote for what it leaves out.
+  function renderTakeaway(byPrice, unscored, min, k) {
+    if (!points.length) { $('takeaway').textContent = 'No models in view.'; return; }
+    const what = `${min}+ on ${METRICS[k].short}`;
+    const parts = [];
+    const a = steps[0], b = steps[steps.length - 1];
+    if (byPrice) {
+      const n = steps.length > 1 ? Math.round((b.t - a.t) / (DAY * 30.44)) : 0;
+      if (!steps.length) parts.push(`No model scores ${what}. Lower the threshold.`);
+      else if (steps.length === 1) parts.push(el('b', null, b.m.model), ` is the cheapest model scoring ${what} since ${fmtMonth(b.t)}: ${credits(b.price)} credits per 1M tokens.`);
+      else parts.push(el('b', null, `${ratio(a.price / b.price)}× cheaper${n >= 1 ? ` in ${n} month${n > 1 ? 's' : ''}` : ''}.`),
+        ` Scoring ${what} cost ${credits(a.price)} credits per 1M tokens in ${fmtMonth(a.t)}, ${credits(b.price)} today (${b.m.model}).`);
+    } else {
+      parts.push(el('b', null, `Best ${METRICS[k].short} score: ${steps.length > 1 ? score(a.s) + ' → ' : ''}${score(b.s)}`),
+        steps.length > 1 ? ` from ${fmtMonth(a.t)} to ${fmtMonth(b.t)} (${b.m.model}).` : ` (${b.m.model}, ${fmtMonth(b.t)}).`);
+    }
+    // A step that rests on a temporary price, and models without a score.
+    const notes = [];
+    if (byPrice && steps.some(p => /promotion/i.test(p.m.note || ''))) notes.push('promotional price');
+    if (unscored.length) notes.push(`${unscored.length} model${unscored.length > 1 ? 's' : ''} not scored yet`);
+    if (notes.length) { const t = notes.join(' · '); parts.push(' ', el('span', 'muted', t[0].toUpperCase() + t.slice(1) + '.')); }
+    $('takeaway').replaceChildren(...parts);
+  }
+
+  function draw() {
     pins.reset();
     svg.querySelectorAll(':scope > :not(title)').forEach(n => n.remove());
     $('chart').querySelector('.empty')?.remove();
@@ -937,6 +942,7 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
       $('chart').append(p);
       return;
     }
+    const byPrice = state.view === 'price', min = state.min[state.metric], label = METRICS[state.metric].label;
 
     const W = svg.clientWidth || $('chart').clientWidth;
     const narrow = W < 560;
@@ -946,84 +952,83 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
     const M = { top: 20, right: narrow ? 16 : 28, bottom: 52, left: narrow ? 44 : 60 };
     const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
 
-    // Domains: x from 0 to a round price (linear) or with some room either side (log),
-    // y snapped to multiples of 5 (or 10 for wide ranges).
-    const log = state.scale === 'log';
-    const prices = points.map(p => p.price), scores = points.map(p => p.s);
-    const lin = log ? null : niceScale(Math.max(...prices) * 1.05, narrow ? 4 : 6);
-    const xlo = log ? Math.min(...prices) / 1.35 : 0, xhi = log ? Math.max(...prices) * 1.35 : lin.top;
-    const smin = Math.min(...scores), smax = Math.max(...scores);
-    const step = smax - smin > 40 ? 10 : 5;
-    const ylo = Math.max(0, Math.floor((smin - 2) / step) * step), yhi = Math.ceil((smax + 2) / step) * step;
-    const x = log
-      ? v => M.left + (Math.log(v) - Math.log(xlo)) / (Math.log(xhi) - Math.log(xlo)) * iw
-      : v => M.left + (v - xlo) / (xhi - xlo) * iw;
-    const y = v => M.top + (1 - (v - ylo) / (yhi - ylo)) * ih;
+    // x: release dates with a little room either side, up to the latest data.
+    const ts = points.map(p => p.t);
+    const tlo0 = Math.min(...ts), thi0 = Math.max(NOW, ...ts);
+    const pad = Math.max((thi0 - tlo0) * 0.03, 10 * DAY);
+    const tlo = tlo0 - pad, thi = thi0 + pad;
+    const x = t => M.left + (t - tlo) / (thi - tlo) * iw;
+    // y: price from 0 to a round value, or the score snapped to 5s or 10s.
+    let y, yt, ylo, yhi;
+    if (byPrice) {
+      const lin = niceScale(Math.max(...points.map(p => p.price)) * 1.05, narrow ? 4 : 6);
+      ylo = 0; yhi = lin.top;
+      y = v => M.top + (1 - v / yhi) * ih;
+      yt = lin.ticks;
+    } else {
+      const scores = [...points.map(p => p.s), min];
+      const smin = Math.min(...scores), smax = Math.max(...scores);
+      const step = smax - smin > 40 ? 10 : 5;
+      ylo = Math.max(0, Math.floor((smin - 2) / step) * step); yhi = Math.ceil((smax + 2) / step) * step;
+      y = v => M.top + (1 - (v - ylo) / (yhi - ylo)) * ih;
+      yt = [];
+      for (let t = ylo; t <= yhi + 1e-9; t += step) yt.push(t);
+    }
+    const yOf = p => y(byPrice ? p.price : p.s);
 
     // Grid and ticks
     const grid = sv('g', { class: 'grid', 'aria-hidden': 'true' });
     const ticks = sv('g', { 'aria-hidden': 'true' });
-    // On narrow screens, drop the 2 × 10^k log ticks when there are many.
-    const all = log ? logTicks(xlo, xhi) : lin.ticks;
-    const xt = log && narrow && all.length > 6 ? all.filter(t => Math.round(t / 10 ** Math.floor(Math.log10(t))) !== 2) : all;
-    xt.forEach(t => {
+    monthTicks(tlo, thi, narrow ? 4 : 9).forEach((t, i) => {
+      const d = new Date(t);
+      const mon = d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
       grid.append(sv('line', { x1: x(t), x2: x(t), y1: M.top, y2: M.top + ih }));
-      ticks.append(sv('text', { class: 'tick', x: x(t), y: M.top + ih + 18, 'text-anchor': 'middle' }, credits(t)));
+      ticks.append(sv('text', { class: 'tick', x: x(t), y: M.top + ih + 18, 'text-anchor': 'middle' },
+        d.getUTCMonth() === 0 || i === 0 ? `${mon} ${d.getUTCFullYear()}` : mon));
     });
-    for (let t = ylo; t <= yhi + 1e-9; t += step) {
+    yt.forEach(t => {
       grid.append(sv('line', { x1: M.left, x2: M.left + iw, y1: y(t), y2: y(t) }));
-      ticks.append(sv('text', { class: 'tick', x: M.left - 10, y: y(t) + 4, 'text-anchor': 'end' }, String(t)));
-    }
-    ticks.append(sv('text', { class: 'ax-title', x: M.left + iw / 2, y: H - 10, 'text-anchor': 'middle' }, narrow
-      ? `← cheaper · credits per 1M tokens${log ? ' (log)' : ''} · pricier →`
-      : `← cheaper · Blended credits per 1M tokens, ${state.inPct}/${100 - state.inPct} input/output${log ? ' (log scale)' : ''} · pricier →`));
-    ticks.append(sv('text', { class: 'ax-title', transform: `translate(14 ${M.top + ih / 2}) rotate(-90)`, 'text-anchor': 'middle' },
-      `${METRICS[state.metric].label} · better →`));
+      ticks.append(sv('text', { class: 'tick', x: M.left - 10, y: y(t) + 4, 'text-anchor': 'end' }, byPrice ? credits(t) : String(t)));
+    });
+    ticks.append(sv('text', { class: 'ax-title', x: M.left + iw / 2, y: H - 10, 'text-anchor': 'middle' }, 'Release date →'));
+    ticks.append(sv('text', { class: 'ax-title', transform: `translate(14 ${M.top + ih / 2}) rotate(-90)`, 'text-anchor': 'middle' }, byPrice
+      ? (narrow ? 'Credits per 1M tokens' : `Blended credits per 1M tokens, ${state.inPct}/${100 - state.inPct} input/output · pricier →`)
+      : `${label} · better →`));
     svg.append(grid, ticks);
 
-    // Dominated zone: below and right of the frontier, where every model has a cheaper one that scores as well.
-    if (front.length) {
-      const last = front[front.length - 1], bottom = M.top + ih, right = M.left + iw;
-      svg.append(sv('polygon', { class: 'zone', 'aria-hidden': 'true', points: [
-        `${x(front[0].price)},${bottom}`, ...front.map(p => `${x(p.price)},${y(p.s)}`), `${right},${y(last.s)}`, `${right},${bottom}`,
-      ].join(' ') }));
-      if (points.length > front.length) svg.append(sv('text', { class: 'zone-lbl', x: right - 8, y: bottom - 10, 'text-anchor': 'end', 'aria-hidden': 'true' },
-        narrow ? 'Shaded: a cheaper model scores as well' : 'Shaded area: each model here has a cheaper one that scores at least as well'));
+    // Threshold (Score view): the score a model needs to count on the Price view.
+    if (!byPrice && min >= ylo && min <= yhi) {
+      svg.append(sv('line', { class: 'thr-line', x1: M.left, x2: M.left + iw, y1: y(min), y2: y(min), 'aria-hidden': 'true' }),
+        sv('text', { class: 'thr-lbl', x: M.left + 6, y: y(min) - 6, 'aria-hidden': 'true' }, `≥ ${min}`));
     }
 
-    // Frontier line
-    if (front.length > 1) {
-      svg.append(sv('polyline', { class: 'front-line', 'aria-hidden': 'true',
-        points: front.map(p => `${x(p.price)},${y(p.s)}`).join(' ') }));
-    }
-
-    // Dots: dominated first, frontier on top. Each gets a larger invisible hit target.
+    // Dots: unscored and faded first. Each gets a larger invisible hit target.
     const labels = sv('g', { 'aria-hidden': 'true' });
     const dots = sv('g');
-    const order = [...points].sort((a, b) => frontSet.has(a) - frontSet.has(b));
-    order.forEach(p => {
-      p.cx = x(p.price); p.cy = y(p.s);
-      const isFront = frontSet.has(p);
-      const g = sv('g', { class: 'pt' + (isFront ? ' front' : ''), tabindex: '0', role: 'img',
-        'aria-label': `${p.m.model}, ${p.m.provider}: ${credits(p.price)} credits per 1M tokens, ${METRICS[state.metric].label} ${score(p.s)}${isFront ? ', on the frontier' : ''}` });
+    const rank = p => (p.s == null ? 0 : !byPrice || p.s >= min ? 2 : 1);
+    [...points].sort((a, b) => rank(a) - rank(b)).forEach(p => {
+      p.cx = x(p.t); p.cy = yOf(p);
+      const cls = ['pt', p.s == null && 'unscored', byPrice && p.s != null && p.s < min && 'below'].filter(Boolean).join(' ');
+      const what = byPrice ? `${credits(p.price)} credits per 1M tokens, ${p.s == null ? `no ${label} yet` : `${label} ${score(p.s)}`}` : `${label} ${score(p.s)}`;
+      const g = sv('g', { class: cls, tabindex: '0', role: 'img',
+        'aria-label': `${p.m.model}, ${p.m.provider}, released ${fmtDate(p.m.released)}: ${what}` });
       g.style.setProperty('--c', colorOf(p.m.provider));
-      g.append(sv('circle', { class: 'hit', cx: p.cx, cy: p.cy, r: 12 }), sv('circle', { class: 'dot', cx: p.cx, cy: p.cy, r: isFront ? 6.5 : 5.5 }));
+      g.append(sv('circle', { class: 'hit', cx: p.cx, cy: p.cy, r: 12 }), sv('circle', { class: 'dot', cx: p.cx, cy: p.cy, r: 5.5 }));
       pins.attach(g, p);
       p.g = g;
       dots.append(g);
     });
     svg.append(labels, dots);
 
-    // Labels: frontier first, then by score. Try right, left, above, below; skip a dominated label that still collides.
+    // Labels: models above the threshold first, then the newest. Try right, left, above, below; skip a label that still collides.
     const placed = [];
     const outside = r => r.x < M.left - 4 || r.x + r.w > W - 2 || r.y < 0 || r.y + r.h > M.top + ih;
-    const collisions = r => placed.filter(o => r.x < o.x + o.w && r.x + r.w > o.x && r.y < o.y + o.h && r.y + r.h > o.y).length
+    const hits = (r, o) => r.x < o.x + o.w && r.x + r.w > o.x && r.y < o.y + o.h && r.y + r.h > o.y;
+    const collisions = r => placed.filter(o => hits(r, o)).length
       + points.filter(q => q.cx > r.x - 5 && q.cx < r.x + r.w + 5 && q.cy > r.y - 5 && q.cy < r.y + r.h + 5).length;
     const overlaps = r => outside(r) || collisions(r) > 0;
-    const byPriority = [...points].sort((a, b) => frontSet.has(b) - frontSet.has(a) || b.s - a.s);
-    byPriority.forEach(p => {
-      const isFront = frontSet.has(p);
-      const t = sv('text', { class: 'lbl lbl-halo' + (isFront ? ' front' : '') }, p.m.model);
+    [...points].sort((a, b) => rank(b) - rank(a) || b.t - a.t).forEach(p => {
+      const t = sv('text', { class: 'lbl lbl-halo' }, p.m.model);
       labels.append(t);
       const w = t.getComputedTextLength(), h = 14, gap = 10;
       const spots = [
@@ -1034,13 +1039,8 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
         { x: p.cx - 6, y: p.cy - gap - h, anchor: 'start' },
         { x: p.cx - 6, y: p.cy + gap, anchor: 'start' },
       ];
-      let spot = spots.find(s => !overlaps({ ...s, w, h }));
-      if (!spot) {
-        if (!isFront) { t.remove(); return; }
-        // A frontier label is always drawn: the in-bounds spot with the fewest collisions.
-        const fits = spots.filter(s => !outside({ ...s, w, h }));
-        spot = (fits.length ? fits : spots).reduce((a, b) => (collisions({ ...b, w, h }) < collisions({ ...a, w, h }) ? b : a));
-      }
+      const spot = spots.find(s => !overlaps({ ...s, w, h }));
+      if (!spot) { t.remove(); return; }
       placed.push({ x: spot.x, y: spot.y, w, h });
       const tx = spot.anchor === 'start' ? spot.x : spot.anchor === 'end' ? spot.x + w : spot.x + w / 2;
       t.setAttribute('x', tx);
@@ -1057,20 +1057,21 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
     p.g.classList.add('active');
     p.label?.classList.add('active');
     $('chart').classList.add('dim');
-    const m = p.m;
+    const m = p.m, k = state.metric, min = state.min[k], label = METRICS[k].label, byPrice = state.view === 'price';
     tip.style.setProperty('--c', colorOf(m.provider));
     const head = el('div', 't-head');
     head.append(el('span', 't-line'), el('span', null, `${m.provider} · ${m.category}`));
     const dl = el('dl');
     const add = (key, v, cls) => { dl.append(el('dt', cls === 'sep' ? 'sep' : null, key), el('dd', cls || null, v)); };
-    add(METRICS[state.metric].label, score(p.s), 'on');
-    add('Blended / 1M', `${credits(p.price)} credits (${usd(p.price)})`, 'on');
+    add('Released', fmtDate(m.released), 'on');
+    add(label, p.s == null ? 'not scored yet' : score(p.s), byPrice ? null : 'on');
+    add('Blended / 1M', `${credits(p.price)} credits (${usd(p.price)})`, byPrice ? 'on' : null);
     add('Price in / out', `${credits(m.input)} / ${credits(m.output)} credits`);
-    add('Frontier', frontSet.has(p) ? 'Yes' : 'No');
-    add('Scored as', p.effort, 'sep');
-    tip.replaceChildren(head, el('div', 't-name', m.model), dl, el('div', 't-note', `Artificial Analysis: ${p.aaName}`));
+    if (p.s != null) add(`Scores ≥ ${min}`, p.s >= min ? 'Yes' : 'No');
+    tip.replaceChildren(head, el('div', 't-name', m.model), dl);
+    if (p.aaName) tip.append(el('div', 't-note', `Artificial Analysis: ${p.aaName}`));
     if (m.note) tip.append(el('div', 't-note', m.note));
-    tip.append(pinned ? CopilotShared.pageLinks('value', m.model) : CopilotShared.hint('Click to compare it on the other pages'));
+    tip.append(pinned ? CopilotShared.pageLinks('timeline', m.model) : CopilotShared.hint('Click to compare it on the other pages'));
     tip.classList.toggle('pinned', !!pinned);
     tip.hidden = false;
 
@@ -1094,10 +1095,16 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
   }
 
   // Controls
+  document.querySelectorAll('[data-view]').forEach(b =>
+    b.addEventListener('click', () => { state.view = b.dataset.view; render(); }));
   document.querySelectorAll('[data-metric]').forEach(b =>
     b.addEventListener('click', () => { state.metric = b.dataset.metric; render(); }));
-  document.querySelectorAll('[data-scale]').forEach(b =>
-    b.addEventListener('click', () => { state.scale = b.dataset.scale; render(); }));
+  $('min').addEventListener('input', e => {
+    const v = Number(e.target.value);
+    if (e.target.value !== '' && validPct(v)) { state.min[state.metric] = v; render(); }
+  });
+  $('min').addEventListener('change', () => { $('min').value = state.min[state.metric]; });
+  $('reset-min').addEventListener('click', () => { state.min[state.metric] = METRICS[state.metric].min; render(); });
   $('mix').addEventListener('input', e => { state.inPct = Number(e.target.value); render(); });
   $('reset-mix').addEventListener('click', () => { state.inPct = DEFAULT_IN; render(); });
   $('all').addEventListener('click', () => { PROVIDERS.forEach(p => state.active.add(p.name)); render(); });
@@ -1136,23 +1143,21 @@ function init(ALL, SCORES, meta, scoresMeta, MAPPING) {
   // Labels are measured with the web font; redraw once it has loaded.
   const fontsReady = document.fonts ? document.fonts.ready.then(() => render()) : Promise.resolve();
 
-  // Arriving from another page (?focus=<model>): show and pin its dot, or point to it in the unscored list.
+  // Arriving from another page (?focus=<model>): show and pin its dot. On the Score view, a model
+  // without the index switches to the other index, else to the Price view, where every dated model is drawn.
   if (focusModel) fontsReady.then(() => {
-    const m = DEFAULT.find(o => o.model === focusModel);
+    const m = DATED.find(o => o.model === focusModel);
     if (!m) return;
-    if (!hasScore(m) && m.score[otherMetric()] != null) state.metric = otherMetric();
-    if (hasScore(m)) {
-      state.active.add(m.provider);
-      state.cats.add(m.category);
-      render();
-      const p = points.find(q => q.m === m);
-      if (!p) return;
-      $('chart').scrollIntoView({ block: 'center' });
-      requestAnimationFrame(() => pins.pin(p));
-    } else {
-      const li = [...$('unscored-list').children].find(li => li.childNodes[1]?.textContent === m.model);
-      if (li) { li.scrollIntoView({ block: 'center' }); li.classList.add('focus-flash'); }
+    if (state.view === 'score' && m.score[state.metric] == null) {
+      if (m.score[otherMetric()] != null) state.metric = otherMetric(); else state.view = 'price';
     }
+    state.active.add(m.provider);
+    state.cats.add(m.category);
+    render();
+    const p = points.find(q => q.m === m);
+    if (!p) return;
+    $('chart').scrollIntoView({ block: 'center' });
+    requestAnimationFrame(() => pins.pin(p));
   });
 }
 </script>

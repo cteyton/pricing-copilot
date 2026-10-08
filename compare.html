@@ -96,7 +96,7 @@ body {
 .theme-btn .sun { display: none; }
 .is-dark .theme-btn .sun { display: block; }
 .is-dark .theme-btn .moon { display: none; }
-/* Site nav: one tab per page, shared by index.html, cost.html, tokens.html, performance.html and compare.html */
+/* Site nav: one tab per page, shared by index.html, cost.html, tokens.html, performance.html, compare.html and timeline.html */
 .site-nav { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
 .site-nav .brand {
   display: inline-flex; align-items: center; gap: 8px; flex: none;
@@ -122,6 +122,11 @@ body {
   box-shadow: 0 1px 2px rgb(0 0 0 / .06);
 }
 .site-nav .tabs a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Six tabs: drop the brand name, then use the short labels, before the tabs have to scroll.
+   Measured on the masthead, not the viewport: index.html is narrower than the other pages. */
+.masthead { container-type: inline-size; }
+@container (max-width: 1480px) { .site-nav .brand { font-size: 0; gap: 0; } }
+@container (max-width: 1340px) { .site-nav .tabs .tq { display: none; } .site-nav .tabs .ts { display: inline; } }
 @media (max-width: 640px) {
   .site-nav .brand { display: none; }
   .site-nav .tabs a { font-size: 12px; padding: 7px 9px; }
@@ -360,6 +365,7 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
         <a href="tokens.html">2 · <span class="tq">What does my budget buy?</span><span class="ts">Budget</span></a>
         <a href="performance.html">3 · <span class="tq">Which model is worth it?</span><span class="ts">Value</span></a>
         <a href="compare.html" aria-current="page">4 · <span class="tq">How do they compare?</span><span class="ts">Compare</span></a>
+        <a href="timeline.html">5 · <span class="tq">Is it getting cheaper?</span><span class="ts">Timeline</span></a>
       </div>
     </nav>
     <button type="button" class="theme-btn" id="theme-toggle" aria-pressed="false">

@@ -1,4 +1,4 @@
-// Shared by the four pages, loaded before each page's own script:
+// Shared by the pages, loaded before each page's own script:
 // - state that follows the reader from page to page (mix, providers, classes, the compare shortlist),
 // - links to the same model on another page (?focus=<model>),
 // - tooltips that pin on click so those links can be used,
@@ -21,6 +21,7 @@ window.CopilotShared = (() => {
     { id: 'budget', href: 'tokens.html', label: '2 · Budget' },
     { id: 'value', href: 'performance.html', label: '3 · Value' },
     { id: 'compare', href: 'compare.html', label: '4 · Compare' },
+    { id: 'timeline', href: 'timeline.html', label: '5 · Timeline' },
   ];
 
   const css = `
@@ -34,6 +35,14 @@ window.CopilotShared = (() => {
   const style = document.createElement('style');
   style.textContent = css;
   document.head.append(style);
+
+  // On phones the tab strip scrolls sideways: bring the current page's tab into view.
+  const tabs = document.querySelector('.site-nav .tabs');
+  const current = tabs?.querySelector('[aria-current="page"]');
+  if (current && tabs.scrollWidth > tabs.clientWidth) {
+    const left = current.getBoundingClientRect().left - tabs.getBoundingClientRect().left;
+    tabs.scrollLeft = left - (tabs.clientWidth - current.offsetWidth) / 2;
+  }
 
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch { return {}; }

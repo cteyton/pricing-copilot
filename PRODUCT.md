@@ -12,7 +12,7 @@ Three audiences, in this order:
 
 - **Business analysts and other non-technical Copilot users** (primary for the start page). They use GitHub Copilot, including agent mode, to write and analyse rather than to ship code: stories, acceptance criteria, specs, summaries, the odd SQL query. They do not follow LLM news and do not want to. Their job: pick a model that does the task well enough without running out of their monthly credits.
 - **Developers** who use Copilot agent mode to ship code (tests, reviews, debugging, multi-file features) and want the same quick answer for their tasks; the start page offers them their own task list behind a role switch.
-- **Power users** who already follow model releases and want the full picture: per-token prices, budgets, benchmark scores, side-by-side specs (the four detail pages).
+- **Power users** who already follow model releases and want the full picture: per-token prices, budgets, benchmark scores, side-by-side specs (the five detail pages).
 
 ## Product Purpose
 
@@ -32,7 +32,7 @@ Built on GitHub's own Copilot price list (refreshed daily) joined to Artificial 
 
 - Static site on GitHub Pages: plain HTML/CSS/JS, no build, no dependencies. Data in `data/*.csv|json`, fetched over HTTP.
 - UI language: English (confirmed, including the start page).
-- Pages: start page (`index.html`, simple view), then 1 · Cost (`cost.html`), 2 · Budget (`tokens.html`), 3 · Value (`performance.html`), 4 · Compare (`compare.html`).
+- Pages: start page (`index.html`, simple view), then 1 · Cost (`cost.html`), 2 · Budget (`tokens.html`), 3 · Value (`performance.html`), 4 · Compare (`compare.html`), 5 · Timeline (`timeline.html`).
 - Prices change; recommendations must be derived from the data at load time, never hard-coded model names.
 - Scores are benchmarks (coding, general intelligence), not measurements of the start page's tasks; say so wherever a recommendation leans on them.
 - Promotional prices (a `note` mentioning a promotion) must be flagged where they drive a recommendation.
@@ -41,6 +41,7 @@ Built on GitHub's own Copilot price list (refreshed daily) joined to Artificial 
 
 - `data/models.csv`: GitHub Copilot list prices per model and tier.
 - `data/scores.csv`: Artificial Analysis Coding and Intelligence indexes (attribution required).
+- `data/release-dates.csv`: provider release dates (hand-maintained). There is no price history: the timeline uses today's prices.
 - No user research, testimonials or usage telemetry: do not invent usage numbers beyond the stated 50K-token request assumption.
 
 ## Product Principles

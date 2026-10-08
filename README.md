@@ -33,7 +33,7 @@ No build or dependencies (Geist fonts load from Google Fonts, with a system fall
 
 ## Data
 
-- Source: https://docs.github.com/fr/copilot/reference/copilot-billing/models-and-pricing (raw markdown: `https://docs.github.com/api/article/body?pathname=/fr/copilot/reference/copilot-billing/models-and-pricing`). The scraper parses the French page, but the UI is in English and links to the English doc (https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing).
+- Source: https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing (raw markdown: `https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-billing/models-and-pricing`).
 - `data/models.csv`: one row per model and tier, prices in USD per million tokens (the pages convert them to AI credits for display, keeping USD as a secondary figure in tooltips and on `compare.html`). Columns: `provider,family,model,category,status,tier,threshold,input,cachedInput,cacheWrite,output,note`. `category` (Lightweight / Versatile / Powerful) and `status` (release status, e.g. GA) are taken as-is from the page.
 - `data/meta.json`: source URL and `updated`, the date the data last changed (shown in the footer).
 - `family` drives the grouping: version for OpenAI and xAI (GPT-6, GPT-5.6, Grok 4.7…), product line for Claude (Opus, Sonnet, Haiku, Fable). Derived by `FAMILY_RULES` in the script.

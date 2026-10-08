@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // Fetches the "Models and pricing for GitHub Copilot" page (raw markdown)
 // and regenerates data/models.csv. data/meta.json is only rewritten when the data changes.
-// The French version of the page is parsed, hence the French keys in PROVIDER_NAMES and COLUMNS.
 //
 // Usage: node scripts/update-pricing.mjs
 // PRICING_SOURCE=<local path> parses a file instead of the URL (tests).
@@ -11,8 +10,8 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const PAGE = 'https://docs.github.com/fr/copilot/reference/copilot-billing/models-and-pricing';
-const SOURCE = 'https://docs.github.com/api/article/body?pathname=/fr/copilot/reference/copilot-billing/models-and-pricing';
+const PAGE = 'https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing';
+const SOURCE = 'https://docs.github.com/api/article/body?pathname=/en/copilot/reference/copilot-billing/models-and-pricing';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV_PATH = join(ROOT, 'data', 'models.csv');
 const META_PATH = join(ROOT, 'data', 'meta.json');
@@ -21,23 +20,20 @@ const FIELDS = ['provider', 'family', 'model', 'category', 'status', 'tier', 'th
 const PRICE_FIELDS = ['input', 'cachedInput', 'cacheWrite', 'output'];
 
 const PROVIDER_NAMES = {
-  'xAI (intelligence artificielle explicable)': 'xAI',
-  'IA Moonshot': 'Moonshot AI',
-  'Affiné (GitHub)': 'GitHub',
+  'Fine-tuned (GitHub)': 'GitHub',
 };
 
-// Column headers of the (French) page → CSV fields. Other columns are ignored.
+// Column headers of the page → CSV fields. Other columns are ignored.
 const COLUMNS = {
   'Model': 'model',
-  'Catégorie': 'category',
-  'État de la version': 'status',
-  'Niveau': 'tier',
-  'Seuil (jetons d’entrée)': 'threshold',
-  "Seuil (jetons d'entrée)": 'threshold',
+  'Category': 'category',
+  'Release status': 'status',
+  'Tier': 'tier',
+  'Threshold (input tokens)': 'threshold',
   'Input': 'input',
-  'Entrée mise en cache': 'cachedInput',
-  'Écriture du cache': 'cacheWrite',
-  'Sortie': 'output',
+  'Cached input': 'cachedInput',
+  'Cache write': 'cacheWrite',
+  'Output': 'output',
 };
 
 const TIERS = { 'Default': 'default', 'Long context': 'long' };
@@ -117,6 +113,7 @@ export function parse(md) {
       };
       for (const f of PRICE_FIELDS) row[f] = price(raw[f], where);
       if (row.input === '' || row.output === '') fail(`missing input/output price (${where})`);
+      if (rows.some(r => r.model === model && r.tier === tier)) fail(`duplicate ${tier} tier (${where})`);
       rows.push(row);
     }
   }

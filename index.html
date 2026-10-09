@@ -224,17 +224,28 @@ h1 {
 
 /* Why this model (folded) */
 details.why { margin-top: 16px; }
-details.why summary {
+details.a-calc { margin-top: 6px; }
+:is(details.why, details.a-calc) summary {
   display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
   font-size: 13.5px; font-weight: 500; color: var(--ink); padding: 4px 0;
 }
-details.why summary::-webkit-details-marker { display: none; }
-details.why summary svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--ease-out); }
-details.why[open] summary svg { transform: rotate(90deg); }
+details summary::-webkit-details-marker { display: none; }
+:is(details.why, details.a-calc) summary svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--ease-out); }
+details[open] summary svg { transform: rotate(90deg); }
+details.a-calc summary { font-weight: 400; color: var(--ink-2); }
+details.a-calc summary:hover { color: var(--ink); }
 .why-list { margin: 8px 0 0; padding: 0 0 0 19px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 62ch; }
 .why-list b { color: var(--ink); font-weight: 500; }
 .why-list a, .a-foot a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
 .why-list a:hover, .a-foot a:hover { text-decoration-color: currentColor; }
+.calc { margin: 8px 0 0; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 8px; max-width: 62ch; }
+.calc-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.calc-steps li { display: grid; grid-template-columns: 7.5em 1fr; gap: 2px 12px; align-items: baseline; }
+.calc-k { font: 500 11px/1.5 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.calc-v { font: 500 12.5px/1.5 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); overflow-wrap: anywhere; }
+.calc-note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-2); }
+.calc-note a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+@media (max-width: 520px) { .calc-steps li { grid-template-columns: 1fr; } }
 .a-foot { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; }
 
 /* Habits */
@@ -341,6 +352,10 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           </span>
           <button type="button" class="link-btn reset" id="credits-reset" hidden>Back to 6,000</button>
         </p>
+        <details class="a-calc" id="a-calc" hidden>
+          <summary><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>How is this counted?</summary>
+          <div id="a-calc-body"></div>
+        </details>
         <div id="answer-more"></div>
       </section>
     </div>
@@ -453,6 +468,7 @@ function init(ROWS, SCORES, meta) {
     const promo = /promotion/i.test(m.note || '') ? (m.note.match(/through ([A-Z][a-z]+ \d{1,2}, \d{4})/) || [])[1] || '' : null;
     return {
       name: m.model, provider: m.provider, promo,
+      input: m.input, output: m.output, blendedUSD,
       perRequest: blendedUSD * REQUEST_TOKENS / 1e6 / CREDIT_USD,
       coding: num(s.coding), intelligence: num(s.intelligence),
     };
@@ -514,7 +530,6 @@ function init(ROWS, SCORES, meta) {
 
   // Formats
   const fmtInt = n => Math.round(n).toLocaleString('en-US');
-  const fmtPer = c => (c < 0.95 ? c.toFixed(1) : c < 9.95 ? c.toFixed(1).replace(/\.0$/, '') : fmtInt(c));
   // Requests a month, rounded so they don't read as exact: 3 significant digits above 1,000.
   const fmtReq = n => (n >= 1000 ? fmtInt(Math.round(n / 10) * 10) : fmtInt(n));
   const monthOf = m => (m.perRequest > 0 ? state.credits / m.perRequest : 0);
@@ -570,7 +585,7 @@ function init(ROWS, SCORES, meta) {
     const task = TASKS.find(t => t.id === state.task);
     const s = suggest(task);
     const box = $('answer'), more = $('answer-more');
-    $('a-month').hidden = !s;
+    $('a-month').hidden = $('a-calc').hidden = !s;
     if (!s) { box.replaceChildren(el('p', 'empty', 'No scored model for this task yet.')); more.replaceChildren(); return; }
     const { pick, cheaper, stronger, k } = s;
 
@@ -586,6 +601,7 @@ function init(ROWS, SCORES, meta) {
     }
     box.replaceChildren(...top);
     $('a-req').replaceChildren('≈ ', el('b', null, fmtReq(monthOf(pick)) + ' requests a month'));
+    $('a-calc-body').replaceChildren(calc(pick));
 
     const parts = [];
     const opts = [
@@ -627,9 +643,8 @@ function init(ROWS, SCORES, meta) {
     const g = el('button', 'gl'); g.type = 'button'; g.dataset.gl = 'request';
     req.append(g);
     if (window.glossaryBind) glossaryBind(g);
-    li('It costs ', el('b', null, fmtPer(pick.perRequest) + ' credits'), ' per ', req,
+    li('It costs ', el('b', null, CopilotShared.credits(pick.perRequest * CREDIT_USD) + ' credits'), ' per ', req,
       ratio >= 1.5 ? `, ${ratio >= 10 ? fmtInt(ratio) : ratio.toFixed(1).replace(/\.0$/, '')}× less than the best model.` : '.');
-    li(`A request is about 50,000 tokens: one agent step reading your files, history and prompt, ${inPct}% read and ${100 - inPct}% written. Short questions cost less, long tasks more.`);
     const val = el('a', null, 'Every model’s price against its score →');
     val.href = 'performance.html' + (k === 'intelligence' ? '?score=intelligence' : '');
     li('Scores come from ', el('b', null, 'Artificial Analysis'), ' benchmarks: a guide, not a test of your own work. ', val);
@@ -644,6 +659,25 @@ function init(ROWS, SCORES, meta) {
     foot.append(cmp, all);
     parts.push(foot);
     more.replaceChildren(...parts);
+  }
+
+  // The requests-a-month figure, worked out step by step with the pick's own numbers.
+  const fmtUSD = v => '$' + v.toFixed(4).replace(/0{1,2}$/, '');
+  function calc(m) {
+    const box = el('div', 'calc');
+    const ol = el('ol', 'calc-steps');
+    const step = (k, v) => { const l = el('li'); l.append(el('span', 'calc-k', k), el('span', 'calc-v', v)); ol.append(l); };
+    const perUSD = m.blendedUSD * REQUEST_TOKENS / 1e6;
+    const n = monthOf(m);
+    step('Mixed price', `${inPct}% × ${fmtUSD(m.input)} read + ${100 - inPct}% × ${fmtUSD(m.output)} written = ${fmtUSD(m.blendedUSD)} per 1M tokens`);
+    step('One request', `${fmtInt(REQUEST_TOKENS)} tokens × ${fmtUSD(m.blendedUSD)} / 1M = ${fmtUSD(perUSD)} = ${CopilotShared.credits(perUSD)} credits`);
+    step('Your budget', `${fmtInt(state.credits)} ÷ ${CopilotShared.credits(perUSD)} = ${n.toLocaleString('en-US', { maximumFractionDigits: 1 })}` + (fmtReq(n) !== fmtInt(n) ? ` → ≈ ${fmtReq(n)} a month` : ' a month'));
+    const note = el('p', 'calc-note', `Prices are per million tokens, 1 credit = $0.01. A request is one agent step of about ${fmtInt(REQUEST_TOKENS)} tokens, ${inPct}% read (files, history, prompt) and ${100 - inPct}% written. Short questions cost less, long tasks more. `);
+    const mix = el('a', null, 'Change the mix →');
+    mix.href = 'tokens.html';
+    note.append(mix);
+    box.append(ol, note);
+    return box;
   }
 
   // Budget, edited inside the answer sentence.

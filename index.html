@@ -16,8 +16,8 @@
 <style>
 /* Start page: the simple view for people who don't follow LLM news.
    Same design language as cost.html (tokens, nav, theme), fewer controls:
-   pick a task on the left, the answer on the right, then the whole menu priced
-   in what a monthly budget buys. Color is reserved for providers and the bars. */
+   pick a task on the left, the answer on the right, three habits below.
+   The full menu of models lives on the detail pages. Color is reserved for providers. */
 :root {
   --bg: #fafaf9;
   --surface: #ffffff;
@@ -95,26 +95,6 @@ h1 {
 }
 .lede { color: var(--ink-2); font-size: 16px; line-height: 1.55; max-width: 60ch; margin: 0; text-wrap: pretty; }
 .lede b { color: var(--ink); font-weight: 500; }
-.budget {
-  display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  margin-top: 20px; font-size: 14px; color: var(--ink-2);
-}
-.budget label { color: var(--ink-2); }
-.num {
-  display: inline-flex; align-items: center;
-  border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--surface);
-  transition: border-color .15s;
-}
-.num:focus-within { border-color: var(--ink-2); }
-.num input {
-  appearance: textfield; -moz-appearance: textfield;
-  width: 6.5ch; border: 0; background: transparent; color: var(--ink);
-  font: 500 14px/1 var(--font-mono); padding: 8px 4px 8px 10px; text-align: right;
-}
-.num input::-webkit-outer-spin-button, .num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.num input:focus { outline: none; }
-.num span { padding: 0 10px 0 4px; color: var(--ink-3); font-size: 13px; }
-.budget .reset { font-size: 13px; }
 
 /* Picker: tasks on the left, the answer on the right */
 .picker {
@@ -157,15 +137,15 @@ h1 {
 .task { border-bottom: 1px solid var(--rule); }
 .task label {
   position: relative;
-  display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; column-gap: 14px; align-items: start;
-  padding: 14px 12px 14px 10px; margin-inline: -10px -12px;
+  display: grid; grid-template-columns: 18px minmax(0, 1fr); column-gap: 14px; align-items: start;
+  padding: 12px 12px 12px 10px; margin-inline: -10px -12px;
   border-radius: 10px; cursor: pointer;
   transition: background .15s;
 }
 .task label:hover { background: var(--hover); }
 .task input { position: absolute; opacity: 0; pointer-events: none; }
 .task .dot {
-  margin-top: 2px; width: 18px; height: 18px; border-radius: 50%;
+  margin-top: 1px; width: 18px; height: 18px; border-radius: 50%;
   border: 1.5px solid var(--rule-strong); background: var(--surface);
   display: grid; place-items: center;
   transition: border-color .2s, background .2s;
@@ -179,14 +159,9 @@ h1 {
 .task input:checked + label { background: var(--surface); box-shadow: 0 1px 2px rgb(0 0 0 / .05), 0 4px 16px rgb(0 0 0 / .04); }
 .task input:focus-visible + label { outline: 2px solid var(--ink); outline-offset: 2px; }
 .task .t-name { display: block; font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.35; }
-.task .t-ex { display: block; margin-top: 3px; font-size: 13px; color: var(--ink-2); line-height: 1.45; }
-.task .t-cost {
-  align-self: center; white-space: nowrap;
-  font: 400 12px/1 var(--font-mono); color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-}
-.task input:checked + label .t-cost { color: var(--ink); }
-.tasks-note { margin: 12px 0 0; font-size: 12.5px; color: var(--ink-3); }
+/* The examples only under the chosen task: the list scans as six short lines. */
+.task .t-ex { display: none; margin-top: 3px; font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.task input:checked + label .t-ex { display: block; }
 
 /* The answer */
 .answer {
@@ -201,23 +176,10 @@ h1 {
 .a-model {
   display: flex; align-items: center; gap: 12px;
   margin: 6px 0 0;
-  font-weight: 500; font-size: clamp(28px, 3.6vw, 40px); line-height: 1.08; letter-spacing: -0.03em;
+  font-weight: 500; font-size: clamp(30px, 4vw, 44px); line-height: 1.08; letter-spacing: -0.03em;
   text-wrap: balance;
 }
 .a-model .sw { flex: none; width: 14px; height: 14px; border-radius: 4px; background: var(--c, var(--s-other)); }
-.facts { margin: 22px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.fact { margin: 0; min-width: 0; }
-.fact dt { font-size: 12.5px; color: var(--ink-3); margin-bottom: 8px; }
-.fact dd { margin: 0; }
-.meter { display: flex; gap: 4px; height: 28px; align-items: center; }
-.meter i { flex: 1; max-width: 34px; height: 12px; border-radius: 4px; background: var(--hover); box-shadow: inset 0 0 0 1px var(--rule-strong); }
-.meter i.on { background: var(--ink); box-shadow: none; }
-.f-big { font-size: 14px; color: var(--ink-2); height: 28px; display: flex; align-items: baseline; gap: 6px; }
-.f-big b { font-size: 26px; line-height: 1; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
-.f-sub { margin-top: 6px !important; font-size: 13px; color: var(--ink-2); }
-.opt .o-name .pips { margin-left: 4px; }
-.a-why { margin: 12px 0 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; text-wrap: pretty; }
-.a-why b { color: var(--ink); font-weight: 500; }
 .promo {
   display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
   font-size: 12.5px; color: var(--ink-2);
@@ -225,112 +187,42 @@ h1 {
 }
 .promo svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .a-month {
-  margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--rule);
-  font-size: 15px; line-height: 1.45; letter-spacing: -0.01em; color: var(--ink-2); text-wrap: pretty;
+  margin: 14px 0 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+  font-size: 16px; line-height: 1.4; color: var(--ink-2);
 }
 .a-month b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.a-month label { color: var(--ink-2); }
+.a-budget { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.num {
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--surface);
+  transition: border-color .15s;
+}
+.num:hover { border-color: var(--ink-3); }
+.num:focus-within { border-color: var(--ink-2); }
+.num input {
+  appearance: textfield; -moz-appearance: textfield;
+  width: 7ch; border: 0; background: transparent; color: var(--ink);
+  font: 500 14px/1 var(--font-mono); padding: 6px 8px; text-align: right;
+}
+.num input::-webkit-outer-spin-button, .num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num input:focus { outline: none; }
+.a-month .reset { font-size: 13px; }
 
-/* Options: the pick, a cheaper and a stronger model, each with its month in requests */
-.opts { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 4px; }
-.opt {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "role role" "name cost" "bar bar";
-  column-gap: 12px;
-  padding: 12px 0;
+/* Alternatives: a cheaper and a stronger model, one line each */
+.alts { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--rule); }
+.alt {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
 }
-.opt + .opt { border-top: 1px solid var(--rule); }
-.opt .o-role { grid-area: role; font-size: 12.5px; color: var(--ink-3); margin-bottom: 2px; }
-.opt .o-name { grid-area: name; font-size: 15px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
-.opt .o-name .sw { flex: none; width: 9px; height: 9px; border-radius: 3px; background: var(--c, var(--s-other)); }
-.opt .o-cost { grid-area: cost; align-self: baseline; font: 400 12.5px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
-.opt .o-bar { grid-area: bar; margin-top: 10px; display: flex; align-items: center; gap: 12px; }
-.track { flex: 1; height: 10px; border-radius: 999px; background: var(--hover); overflow: hidden; }
-.fill {
-  display: block; height: 100%; border-radius: inherit; background: var(--c, var(--s-other));
-  width: 100%; transform-origin: left center;
-  transform: scaleX(max(var(--w, 0), .008));
-  transition: transform .7s var(--ease-out);
-}
-.opt .o-n { flex: none; min-width: 9.5em; text-align: right; font: 400 12.5px/1 var(--font-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.opt .o-n b { color: var(--ink); font-weight: 500; }
-.opt.is-pick {
-  margin-inline: -14px; padding: 14px;
-  background: var(--hover); border-radius: 12px;
-}
-.opt.is-pick + .opt { border-top: 0; }
-.opt.is-pick .o-role {
-  justify-self: start; margin-bottom: 8px;
-  font-size: 11.5px; font-weight: 500; line-height: 1;
-  padding: 4px 8px; border-radius: 999px; background: var(--ink); color: var(--bg);
-}
-.opt.is-pick .o-name { font-size: 16px; }
-.opt.is-pick .o-cost { color: var(--ink); }
-.opt.is-pick .track { height: 14px; background: var(--surface); }
-.a-foot { margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; }
-.a-foot a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.a-foot a:hover { text-decoration-color: currentColor; }
+.alt .o-role { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); margin-bottom: 3px; }
+.alt .o-name { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-size: 15px; font-weight: 500; }
+.alt .o-name .sw { flex: none; width: 9px; height: 9px; border-radius: 3px; background: var(--c, var(--s-other)); }
+.alt .o-n { font: 400 12.5px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.alt .o-n b { color: var(--ink); font-weight: 500; }
 
-/* The menu: every model, priced in what the budget buys */
-section.menu, section.habits { margin-top: 72px; }
-h2 {
-  font-weight: 500; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.15; letter-spacing: -0.02em;
-  margin: 0 0 10px; text-wrap: balance;
-}
-.sub { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 64ch; text-wrap: pretty; }
-.more { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 24px; }
-.more a, .why-list a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.more a:hover, .why-list a:hover { text-decoration-color: currentColor; }
-.band { margin-top: 32px; }
-.band-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-strong); }
-.band-head h3 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.005em; }
-.band-head p { margin: 0; font-size: 13px; color: var(--ink-3); text-align: right; }
-.m-head, .m-row {
-  display: grid;
-  grid-template-columns: minmax(0, 15rem) 5.5rem 7rem minmax(0, 1fr);
-  column-gap: 20px; align-items: center;
-}
-.m-head {
-  padding: 14px 0 6px; font-size: 12px; color: var(--ink-3);
-}
-.m-head span:nth-child(3) { text-align: right; }
-.m-list { list-style: none; margin: 0; padding: 0; }
-.m-row { padding: 9px 0; border-bottom: 1px solid var(--rule); scroll-margin-top: 80px; }
-.m-row .m-name { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; min-width: 0; }
-.m-row .m-name .sw { flex: none; width: 9px; height: 9px; border-radius: 3px; background: var(--c, var(--s-other)); }
-.m-row .m-name span:not(.sw):not(.tag) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.m-row .m-cost { text-align: right; font: 400 13px/1 var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
-.m-row .m-bar { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.m-row .track { height: 8px; }
-.m-row .m-n { flex: none; min-width: 11.5em; font: 400 12.5px/1 var(--font-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.m-row .m-n b { color: var(--ink); font-weight: 500; }
-.m-row .tag {
-  flex: none; font-size: 11.5px; line-height: 1; padding: 4px 7px; border-radius: 999px;
-  background: var(--ink); color: var(--bg); font-weight: 500;
-}
-.m-row.is-pick { background: linear-gradient(var(--hover), var(--hover)) no-repeat; background-size: calc(100% + 24px) 100%; background-position: -12px 0; }
-@supports (background-size: calc(100% + 24px) 100%) {
-  .m-row.is-pick { box-shadow: -12px 0 0 var(--hover), 12px 0 0 var(--hover); }
-}
-.m-row.is-old .m-name, .m-row.is-old .m-cost, .m-row.is-old .m-n, .m-row.is-old .m-n b { color: var(--ink-3); }
-.m-row.is-old .sw, .m-row.is-old .fill, .m-row.is-old .pips { opacity: .45; }
-.old-tag {
-  flex: none; font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 999px;
-  border: 1px solid var(--rule-strong); color: var(--ink-3);
-}
-.old-toggle { margin-top: 10px; font-size: 12.5px; color: var(--ink-3); text-align: left; line-height: 1.4; }
-.pips { display: inline-flex; gap: 3px; }
-.pips i { width: 7px; height: 7px; border-radius: 50%; background: var(--rule-strong); }
-.pips i.on { background: var(--ink); }
-.pips-na { font-size: 12px; color: var(--ink-3); }
-
-/* Habits */
-.h-list { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
-.h-list li { border-top: 2px solid var(--ink); padding-top: 14px; }
-.h-list b { display: block; font-size: 16px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.3; }
-.h-list p { margin: 8px 0 0; color: var(--ink-2); font-size: 14px; line-height: 1.55; text-wrap: pretty; }
-
-/* Why this model (inside the answer panel) */
+/* Why this model (folded) */
 details.why { margin-top: 16px; }
 details.why summary {
   display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
@@ -341,6 +233,20 @@ details.why summary svg { width: 11px; height: 11px; fill: none; stroke: current
 details.why[open] summary svg { transform: rotate(90deg); }
 .why-list { margin: 8px 0 0; padding: 0 0 0 19px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 62ch; }
 .why-list b { color: var(--ink); font-weight: 500; }
+.why-list a, .a-foot a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.why-list a:hover, .a-foot a:hover { text-decoration-color: currentColor; }
+.a-foot { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; }
+
+/* Habits */
+section.habits { margin-top: 72px; }
+.habits h2 {
+  font-weight: 500; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.15; letter-spacing: -0.02em;
+  margin: 0; text-wrap: balance;
+}
+.h-list { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.h-list li { border-top: 2px solid var(--ink); padding-top: 14px; }
+.h-list b { display: block; font-size: 16px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.3; }
+.h-list p { margin: 8px 0 0; color: var(--ink-2); font-size: 14px; line-height: 1.55; text-wrap: pretty; }
 
 .link-btn {
   appearance: none; border: 0; background: none; padding: 4px 2px;
@@ -353,12 +259,12 @@ details.why[open] summary svg { transform: rotate(90deg); }
 
 /* Footer */
 footer {
-  margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule);
+  margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
   color: var(--ink-3); font-size: 12px;
   display: flex; flex-wrap: wrap; gap: 6px 24px;
 }
 footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.empty { color: var(--ink-2); padding: 24px 0; }
+.empty { color: var(--ink-2); padding: 24px 0; margin: 0; }
 
 button:focus-visible, summary:focus-visible, a:focus-visible, .num:has(input:focus-visible) {
   outline: 2px solid var(--ink);
@@ -368,23 +274,14 @@ button:focus-visible, summary:focus-visible, a:focus-visible, .num:has(input:foc
 @media (max-width: 960px) {
   .picker { grid-template-columns: minmax(0, 1fr); }
   .answer { position: static; }
-  .m-head, .m-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; }
-  .m-head { display: none; }
-  .m-row .m-q { justify-self: end; }
-  .m-row .m-cost { display: none; }
-  .m-row .m-bar { grid-column: 1 / -1; }
   .h-list { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 }
 @media (max-width: 520px) {
   .intro { padding-top: 28px; }
-  .opt .o-n, .m-row .m-n { min-width: 0; }
-  .band-head { flex-direction: column; gap: 2px; }
-  .band-head p { text-align: left; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
 }
-.no-anim .fill { transition: none; }
 </style>
 <link rel="stylesheet" href="site.css">
 </head>
@@ -393,7 +290,7 @@ button:focus-visible, summary:focus-visible, a:focus-visible, .num:has(input:foc
 THESIS: the answer before the vocabulary. Name the task, get one model and what a month of it costs; refuses the price-chart-first dashboard.
 OWN-WORLD: the site's own Geist on warm neutrals, provider swatches, round-capped bars; a bordered answer panel is the only raised surface.
 STORY: a business analyst learns which model fits the task, how many agent requests their 6,000 credits buy with it, and that pricier is rarely needed; they leave with a model name.
-FIRST VIEWPORT: question as H1, one-line lede with the editable budget; tasks list left (5/12), answer panel right (7/12) with model name at display size and three month bars.
+FIRST VIEWPORT: question as H1, one-line lede; tasks list left (5/12), answer panel right (7/12): model name at display size, requests a month with the budget editable in that sentence, a cheaper and a stronger option, the reasoning folded; then three habits that save credits. Everything else lives on the detail pages.
 FORM: established-world surface, task picker + answer panel (structure chosen in-thread; seed script returned no output).
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
@@ -419,12 +316,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
   <header class="intro">
     <h1>Which Copilot model should I use?</h1>
-    <p class="lede">Tell us what you are about to do. We suggest the <b>cheapest model that does it well</b>, and show how far your monthly <span class="gl-t">AI credits<button class="gl" data-gl="credit"></button></span> go with it.</p>
-    <div class="budget">
-      <label for="credits">Your budget</label>
-      <span class="num"><input id="credits" type="number" inputmode="numeric" min="0" max="1000000" step="500" value="6000"><span>credits a month</span></span>
-      <button type="button" class="link-btn reset" id="credits-reset" hidden>Back to 6,000</button>
-    </div>
+    <p class="lede">Pick a task. We suggest the <b>cheapest model that does it well</b>.</p>
   </header>
 
   <main>
@@ -436,11 +328,20 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <div class="segmented" role="group" aria-labelledby="roles-label" id="roles"></div>
         </div>
         <ul class="task-list" id="tasks"></ul>
-        <p class="tasks-note">Credits shown per <span class="gl-t">agent request<button class="gl" data-gl="request"></button></span> with the suggested model.</p>
       </fieldset>
 
-      <section class="answer" id="answer" aria-live="polite" aria-labelledby="a-model">
-        <p class="empty">Loading prices…</p>
+      <section class="answer" aria-labelledby="a-model">
+        <div id="answer" aria-live="polite"><p class="empty">Loading prices…</p></div>
+        <p class="a-month" id="a-month" hidden>
+          <span id="a-req"></span>
+          <span class="a-budget">
+            <label for="credits">with</label>
+            <span class="num"><input id="credits" type="number" inputmode="numeric" min="0" max="1000000" step="500" value="6000"></span>
+            <span class="gl-t">credits<button class="gl" data-gl="credit"></button></span>
+          </span>
+          <button type="button" class="link-btn reset" id="credits-reset" hidden>Back to 6,000</button>
+        </p>
+        <div id="answer-more"></div>
       </section>
     </div>
 
@@ -452,16 +353,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <li><b>Share only what’s needed</b><p>Each file or document in the context is read again at every step. Attach the spec you are working on, not the whole folder.</p></li>
       </ul>
     </section>
-
-    <section class="menu" aria-labelledby="menu-title">
-      <h2 id="menu-title">What your credits buy with each model</h2>
-      <p class="sub" id="menu-sub">Every Copilot model, grouped by how hungry it is. Longer bar, more work for the same budget.</p>
-      <p class="more"><span>Prices per million tokens: <a href="cost.html">1 · What does a model cost? →</a></span><span>With your own input/output mix: <a href="tokens.html">2 · What does my budget buy? →</a></span></p>
-      <div id="bands"></div>
-    </section>
-
-
-
 
     <footer>
       <span>Prices: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">GitHub Docs</a></span>
@@ -541,7 +432,6 @@ const ROLES = [
 const TASKS = ROLES.flatMap(r => r.tasks.map(t => ({ ...t, role: r.id })));
 const INDEX_LABEL = { intelligence: 'reasoning and writing', coding: 'coding' };
 const DEFAULT_CREDITS = 6000;
-const WORKDAYS = 21;
 const STORE = 'copilot-start';
 
 function init(ROWS, SCORES, meta) {
@@ -612,7 +502,6 @@ function init(ROWS, SCORES, meta) {
   const roleOf = id => TASKS.find(t => t.id === id).role;
   state.lastTask = Object.fromEntries(ROLES.map(r => [r.id, r.tasks.some(t => t.id === saved.lastTask?.[r.id]) ? saved.lastTask[r.id] : r.first]));
   state.lastTask[roleOf(state.task)] = state.task;
-  state.showOld = saved.showOld === true;
   function save() {
     try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {}
     const p = new URLSearchParams(location.search);
@@ -628,25 +517,19 @@ function init(ROWS, SCORES, meta) {
   const fmtPer = c => (c < 0.95 ? c.toFixed(1) : c < 9.95 ? c.toFixed(1).replace(/\.0$/, '') : fmtInt(c));
   // Requests a month, rounded so they don't read as exact: 3 significant digits above 1,000.
   const fmtReq = n => (n >= 1000 ? fmtInt(Math.round(n / 10) * 10) : fmtInt(n));
-  const perDay = n => {
-    const d = n / WORKDAYS;
-    return d >= 1.5 ? `${fmtInt(d)} a day` : d >= 0.75 ? 'about 1 a day' : 'less than 1 a day';
-  };
   const monthOf = m => (m.perRequest > 0 ? state.credits / m.perRequest : 0);
   const pct = (m, k) => Math.round(m[k] / TOP[k] * 100);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const swatch = m => { const s = el('span', 'sw'); s.style.setProperty('--c', colorOf(m.provider)); s.setAttribute('aria-hidden', 'true'); return s; };
 
-  // Role switch and task list (built once; the per-request hint is refreshed on render).
-  const hints = new Map();
+  // Role switch and task list (built once per role).
   function pickTask(id) {
     state.task = id; state.lastTask[roleOf(id)] = id;
-    save(); renderAnswer(true); renderBands();
+    save(); renderAnswer();
   }
   function renderTasks() {
     const role = ROLES.find(r => r.id === roleOf(state.task));
     $('roles').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === role.id)));
-    hints.clear();
     $('tasks').replaceChildren(...role.tasks.map(t => {
       const li = el('li', 'task');
       const input = el('input');
@@ -663,9 +546,7 @@ function init(ROWS, SCORES, meta) {
       label.htmlFor = input.id;
       const text = el('span');
       text.append(el('span', 't-name', t.name), el('span', 't-ex', t.ex));
-      const hint = el('span', 't-cost');
-      hints.set(t.id, hint);
-      label.append(el('span', 'dot'), text, hint);
+      label.append(el('span', 'dot'), text);
       li.append(input, label);
       return li;
     }));
@@ -682,47 +563,52 @@ function init(ROWS, SCORES, meta) {
   });
   renderTasks();
 
-  function renderAnswer(animate) {
+  // The answer: the model, what the budget buys with it (the budget input sits in that
+  // sentence and is never re-rendered), a cheaper and a stronger option, the reasoning folded.
+  let whyOpen = false;
+  function renderAnswer() {
     const task = TASKS.find(t => t.id === state.task);
     const s = suggest(task);
-    const box = $('answer');
-    if (!s) { box.replaceChildren(el('p', 'empty', 'No scored model for this task yet.')); return; }
+    const box = $('answer'), more = $('answer-more');
+    $('a-month').hidden = !s;
+    if (!s) { box.replaceChildren(el('p', 'empty', 'No scored model for this task yet.')); more.replaceChildren(); return; }
     const { pick, cheaper, stronger, k } = s;
 
-    const lead = el('p', 'a-lead', 'For this, use');
     const name = el('h2', 'a-model');
     name.id = 'a-model';
     name.append(swatch(pick), el('span', null, pick.name));
-
-    // Two facts side by side: quality as a 5-step meter, cost per request.
-    const best = CURRENT.filter(m => m[k] === TOP[k]).sort((a, b) => a.perRequest - b.perRequest)[0];
-    const facts = el('dl', 'facts');
-    const fq = el('div', 'fact');
-    const meter = el('span', 'meter');
-    const lv = qualityLevel(pick, k);
-    meter.setAttribute('role', 'img');
-    meter.setAttribute('aria-label', `Quality ${lv} out of 5`);
-    for (let i = 1; i <= 5; i++) meter.append(el('i', i <= lv ? 'on' : ''));
-    const qdd = el('dd');
-    qdd.append(meter);
-    const qsub = el('dd', 'f-sub', pick[k] === TOP[k] ? `Best at ${INDEX_LABEL[k]}` : `${pct(pick, k)}% of the best at ${INDEX_LABEL[k]}`);
-    fq.append(el('dt', null, 'Quality'), qdd, qsub);
-    const fc = el('div', 'fact');
-    const cdd = el('dd', 'f-big');
-    cdd.append(el('b', null, fmtPer(pick.perRequest)), ' credits / request');
-    const ratio = best.perRequest / pick.perRequest;
-    const csub = el('dd', 'f-sub', pick[k] === TOP[k] ? 'The priciest choice here' : ratio >= 1.5 ? `${ratio >= 10 ? fmtInt(ratio) : ratio.toFixed(1).replace(/\.0$/, '')}× cheaper than the best` : 'Priced like the best');
-    fc.append(el('dt', null, 'Cost'), cdd, csub);
-    facts.append(fq, fc);
-    const parts = [lead, name, facts];
+    const top = [el('p', 'a-lead', 'For this, use'), name];
     if (pick.promo != null) {
       const p = el('p', 'promo');
       p.innerHTML = '<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3.2l2 1.3"/></svg>';
       p.append(pick.promo ? `Promotional price until ${pick.promo}` : 'Promotional price, may go up');
-      parts.push(p);
+      top.push(p);
+    }
+    box.replaceChildren(...top);
+    $('a-req').replaceChildren('≈ ', el('b', null, fmtReq(monthOf(pick)) + ' requests a month'));
+
+    const parts = [];
+    const opts = [
+      cheaper && { m: cheaper, role: `Cheaper, ${pct(cheaper, k) >= pct(pick, k) - 3 ? 'about as good' : 'a bit less sharp'}` },
+      stronger && { m: stronger, role: 'Stronger, if it gets stuck' },
+    ].filter(Boolean);
+    if (opts.length) {
+      const list = el('ul', 'alts');
+      list.setAttribute('aria-label', 'Other options');
+      opts.forEach(o => {
+        const li = el('li', 'alt');
+        li.style.setProperty('--c', colorOf(o.m.provider));
+        const nm = el('span', 'o-name');
+        nm.append(swatch(o.m), el('span', null, o.m.name));
+        const nn = el('span', 'o-n');
+        nn.append(el('b', null, fmtReq(monthOf(o.m))), ' a month');
+        li.append(el('span', 'o-role', o.role), nm, nn);
+        list.append(li);
+      });
+      parts.push(list);
     }
 
-    // Why this model: the rule applied to this task, in plain words. Stays open across re-renders.
+    // Why this model: quality, cost and the rule applied, in plain words. Stays open across re-renders.
     const why = el('details', 'why');
     why.open = whyOpen;
     why.addEventListener('toggle', () => { whyOpen = why.open; });
@@ -731,182 +617,47 @@ function init(ROWS, SCORES, meta) {
     sum.append('Why this model?');
     const ul = el('ul', 'why-list');
     const li = (...xs) => { const l = el('li'); l.append(...xs); ul.append(l); };
-    li('For this task we look for at least ', el('b', null, Math.round(task.level * 100) + '%'), ` of the best Copilot score at ${INDEX_LABEL[k]}.`);
     const below = CURRENT.filter(m => m[k] != null && m.perRequest < pick.perRequest).sort((a, b) => b[k] - a[k])[0];
-    li(el('b', null, pick.name), ` is the cheapest model that clears it (${pct(pick, k)}%).`, below ? ` The best cheaper one, ${below.name}, reaches ${pct(below, k)}%.` : '');
-    li('A request is about 50,000 ', el('b', null, 'tokens'), `: one agent step reading your files, history and prompt, ${inPct}% read and ${100 - inPct}% written. Short questions cost less, long tasks more.`);
+    li('This task needs at least ', el('b', null, Math.round(task.level * 100) + '%'), ` of the best Copilot score at ${INDEX_LABEL[k]}. `,
+      el('b', null, pick.name), pick[k] === TOP[k] ? ' is the best and the cheapest that clears it.' : ` reaches ${pct(pick, k)}% and is the cheapest that clears it.`,
+      below ? ` The best cheaper one, ${below.name}, reaches ${pct(below, k)}%.` : '');
+    const best = CURRENT.filter(m => m[k] === TOP[k]).sort((a, b) => a.perRequest - b.perRequest)[0];
+    const ratio = best.perRequest / pick.perRequest;
+    const req = el('span', 'gl-t', 'agent request');
+    const g = el('button', 'gl'); g.type = 'button'; g.dataset.gl = 'request';
+    req.append(g);
+    if (window.glossaryBind) glossaryBind(g);
+    li('It costs ', el('b', null, fmtPer(pick.perRequest) + ' credits'), ' per ', req,
+      ratio >= 1.5 ? `, ${ratio >= 10 ? fmtInt(ratio) : ratio.toFixed(1).replace(/\.0$/, '')}× less than the best model.` : '.');
+    li(`A request is about 50,000 tokens: one agent step reading your files, history and prompt, ${inPct}% read and ${100 - inPct}% written. Short questions cost less, long tasks more.`);
     const val = el('a', null, 'Every model’s price against its score →');
     val.href = 'performance.html' + (k === 'intelligence' ? '?score=intelligence' : '');
     li('Scores come from ', el('b', null, 'Artificial Analysis'), ' benchmarks: a guide, not a test of your own work. ', val);
     why.append(sum, ul);
     parts.push(why);
 
-    const n = monthOf(pick);
-    const month = el('p', 'a-month');
-    if (state.credits <= 0) month.append('Set a budget above to see how far it goes.');
-    else month.append(`With ${fmtInt(state.credits)} credits: `, el('b', null, fmtReq(n) + ' requests a month'), ` · ${perDay(n).replace('a day', 'per working day')}`);
-    parts.push(month);
-
-    const opts = [
-      { m: pick, role: 'Suggested', cls: 'is-pick' },
-      cheaper && { m: cheaper, role: `Cheaper, ${pct(cheaper, k) >= pct(pick, k) - 3 ? 'about as good' : 'a bit less sharp'}` },
-      stronger && { m: stronger, role: 'Stronger, for when it gets stuck' },
-    ].filter(Boolean);
-    const max = Math.max(...opts.map(o => monthOf(o.m)), 1);
-    const list = el('ul', 'opts');
-    list.setAttribute('aria-label', 'Your month with each option');
-    opts.forEach(o => {
-      const li = el('li', 'opt ' + (o.cls || ''));
-      li.style.setProperty('--c', colorOf(o.m.provider));
-      const nm = el('span', 'o-name');
-      nm.append(swatch(o.m), el('span', null, o.m.name));
-      const ol = qualityLevel(o.m, k), op = el('span', 'pips');
-      op.setAttribute('role', 'img'); op.setAttribute('aria-label', `Quality ${ol} out of 5`);
-      for (let i = 1; i <= 5; i++) op.append(el('i', i <= ol ? 'on' : ''));
-      nm.append(op);
-      const cost = el('span', 'o-cost', `${fmtPer(o.m.perRequest)} credits / request`);
-      const bar = el('span', 'o-bar');
-      const track = el('span', 'track'), fill = el('span', 'fill');
-      fill.style.setProperty('--w', animate ? prevWidth(o.m.name) : monthOf(o.m) / max);
-      track.append(fill);
-      const nn = el('span', 'o-n');
-      const mm = monthOf(o.m);
-      nn.append(el('b', null, fmtReq(mm)), ' a month');
-      bar.append(track, nn);
-      li.append(el('span', 'o-role', o.role), nm, cost, bar);
-      list.append(li);
-      if (animate) requestAnimationFrame(() => requestAnimationFrame(() => fill.style.setProperty('--w', mm / max)));
-      widths.set(o.m.name, mm / max);
-    });
-    parts.push(list);
-
     const foot = el('p', 'a-foot');
     const cmp = el('a', null, 'Compare them side by side →');
-    cmp.href = 'compare.html?' + opts.map(o => 'm=' + encodeURIComponent(o.m.name)).join('&');
-    foot.append(cmp);
+    cmp.href = 'compare.html?' + [pick, ...opts.map(o => o.m)].map(m => 'm=' + encodeURIComponent(m.name)).join('&');
+    const all = el('a', null, 'See every model →');
+    all.href = 'tokens.html';
+    foot.append(cmp, all);
     parts.push(foot);
-    box.replaceChildren(...parts);
-  }
-  // Bars grow from their previous width when the task changes, so the eye follows the change.
-  const widths = new Map();
-  let whyOpen = false;
-  const prevWidth = name => widths.get(name) ?? 0;
-
-  // The menu: three bands by credits per request.
-  const BANDS = [
-    { name: 'Easy on credits', note: 'Under 5 credits per request', test: c => c < 5 },
-    { name: 'Moderate', note: '5 to 25 credits per request', test: c => c >= 5 && c <= 25 },
-    { name: 'Credit-hungry', note: 'Over 25 credits per request', test: c => c > 25 },
-  ];
-  function renderBands() {
-    const task = TASKS.find(t => t.id === state.task);
-    const s = suggest(task);
-    const max = Math.max(...MODELS.map(monthOf), 1);
-    const nodes = [];
-    BANDS.forEach(b => {
-      const all = MODELS.filter(m => b.test(m.perRequest)).sort((a, c) => a.perRequest - c.perRequest || a.name.localeCompare(c.name));
-      if (!all.length) return;
-      const old = all.filter(m => m.newer);
-      const ms = state.showOld ? all : all.filter(m => !m.newer);
-      const band = el('div', 'band');
-      const head = el('div', 'band-head');
-      head.append(el('h3', null, b.name), el('p', null, b.note));
-      const cols = el('div', 'm-head');
-      cols.setAttribute('aria-hidden', 'true');
-      const qh = el('span');
-      qh.append('Quality');
-      cols.append(el('span', null, 'Model'), qh, el('span', null, 'Credits / request'), el('span', null, `Requests with ${fmtInt(state.credits)} credits`));
-      const list = el('ul', 'm-list');
-      ms.forEach(m => {
-        const li = el('li', 'm-row');
-        li.style.setProperty('--c', colorOf(m.provider));
-        const nm = el('span', 'm-name');
-        nm.append(swatch(m), el('span', null, m.name));
-        nm.title = m.name;
-        const ql = el('span', 'm-q');
-        const level = qualityLevel(m);
-        if (level) {
-          const p = el('span', 'pips');
-          p.setAttribute('role', 'img');
-          p.setAttribute('aria-label', `Quality ${level} out of 5`);
-          for (let i = 1; i <= 5; i++) p.append(el('i', i <= level ? 'on' : ''));
-          ql.append(p);
-        } else ql.append(el('span', 'pips-na', 'Not rated yet'));
-        const cost = el('span', 'm-cost', fmtPer(m.perRequest));
-        cost.setAttribute('aria-label', `${fmtPer(m.perRequest)} credits per request`);
-        const bar = el('span', 'm-bar');
-        const track = el('span', 'track'), fill = el('span', 'fill');
-        fill.style.setProperty('--w', monthOf(m) / max);
-        track.append(fill);
-        const n = monthOf(m);
-        const nn = el('span', 'm-n');
-        nn.append(el('b', null, fmtReq(n)), ` · ${perDay(n)}`);
-        bar.append(track, nn);
-        if (s && m === s.pick) { li.classList.add('is-pick'); nm.append(el('span', 'tag', 'Suggested')); }
-        if (m.newer) {
-          li.classList.add('is-old');
-          const o = el('span', 'old-tag', 'Older');
-          o.title = `Replaced by ${m.newer.name}`;
-          nm.append(o);
-          li.title = `Older version, replaced by ${m.newer.name}`;
-        }
-        li.append(nm, ql, cost, bar);
-        list.append(li);
-      });
-      band.append(head, cols, list);
-      if (old.length) {
-        const t = el('button', 'link-btn old-toggle', state.showOld
-          ? `Hide ${old.length} older version${old.length > 1 ? 's' : ''}`
-          : `Show ${old.length} older version${old.length > 1 ? 's' : ''}`);
-        t.type = 'button';
-        t.title = old.map(m => `${m.name} → ${m.newer.name}`).join('\n');
-        t.setAttribute('aria-expanded', String(!!state.showOld));
-        t.addEventListener('click', () => {
-          state.showOld = !state.showOld; save(); renderBands();
-          const again = [...$('bands').querySelectorAll('.old-toggle')].find(x => x.dataset.band === b.name);
-          if (again) again.focus({ preventScroll: true });
-        });
-        t.dataset.band = b.name;
-        band.append(t);
-      }
-      nodes.push(band);
-    });
-    $('bands').replaceChildren(...nodes);
-    // Glossary button on the Quality column header of every band (created at render time).
-    $('bands').querySelectorAll('.m-head span:nth-child(2)').forEach(h => {
-      h.parentElement.removeAttribute('aria-hidden');
-      const g = el('button', 'gl');
-      g.type = 'button'; g.dataset.gl = 'quality';
-      h.append(g);
-      if (window.glossaryBind) glossaryBind(g);
-    });
-    // Per-request hint next to each task.
-    hints.forEach((h, id) => {
-      const x = suggest(TASKS.find(t => t.id === id));
-      h.textContent = x ? `≈ ${fmtPer(x.pick.perRequest)} cr` : '';
-      h.setAttribute('aria-label', x ? `about ${fmtPer(x.pick.perRequest)} credits per request` : '');
-    });
-  }
-  // General quality, 1 to 5, from the Intelligence Index next to the best Copilot model.
-  function qualityLevel(m, k = 'intelligence') {
-    const v = m[k] ?? null;
-    if (v == null) return 0;
-    const f = v / TOP[k];
-    return f >= .95 ? 5 : f >= .85 ? 4 : f >= .75 ? 3 : f >= .6 ? 2 : 1;
+    more.replaceChildren(...parts);
   }
 
-  // Budget
+  // Budget, edited inside the answer sentence.
   const input = $('credits');
   input.value = state.credits;
   const syncReset = () => { $('credits-reset').hidden = state.credits === DEFAULT_CREDITS; };
   input.addEventListener('input', () => {
     const v = Number(input.value);
     state.credits = Number.isFinite(v) ? Math.min(Math.max(Math.round(v), 0), 1e6) : 0;
-    save(); syncReset(); renderAnswer(true); renderBands();
+    save(); syncReset(); renderAnswer();
   });
   $('credits-reset').addEventListener('click', () => {
     state.credits = DEFAULT_CREDITS; input.value = DEFAULT_CREDITS;
-    save(); syncReset(); renderAnswer(true); renderBands();
+    save(); syncReset(); renderAnswer(); input.focus();
   });
   syncReset();
 
@@ -937,8 +688,7 @@ function init(ROWS, SCORES, meta) {
   darkMQ.addEventListener('change', syncTheme);
   syncTheme();
 
-  renderAnswer(true);
-  renderBands();
+  renderAnswer();
 }
 </script>
 <script src="glossary.js"></script>

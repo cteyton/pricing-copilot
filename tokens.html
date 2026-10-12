@@ -34,6 +34,7 @@
   --s-xai: #e87ba4;
   --s-moonshot: #008300;
   --s-other: #8f8d87;
+  --bad: #b2431f;
 
   --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -51,6 +52,7 @@
     --rule: #2a2a28; --rule-strong: #3a3a37; --hover: #222221;
     --s-openai: #3987e5; --s-anthropic: #d95926; --s-google: #199e70;
     --s-microsoft: #c98500; --s-xai: #d55181; --s-moonshot: #008300; --s-other: #85837d;
+    --bad: #ec7a55;
     color-scheme: dark;
   }
 }
@@ -59,6 +61,7 @@
   --rule: #2a2a28; --rule-strong: #3a3a37; --hover: #222221;
   --s-openai: #3987e5; --s-anthropic: #d95926; --s-google: #199e70;
   --s-microsoft: #c98500; --s-xai: #d55181; --s-moonshot: #008300; --s-other: #85837d;
+  --bad: #ec7a55;
   color-scheme: dark;
 }
 
@@ -389,6 +392,104 @@ button:focus-visible, .row:focus-visible, summary:focus-visible {
 .tip dt.sep, .tip dd.sep { padding-top: 6px; border-top: 1px solid var(--rule); }
 .tip .t-note { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 12px; }
 
+/* Runway: one row per model, a 30-day month of 22 working days in weeks of five,
+   each day filled while the budget lasts at the chosen pace. */
+.runway { margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--rule); }
+.runway h2 {
+  font-weight: 500; font-size: clamp(24px, 3vw, 32px); line-height: 1.15;
+  letter-spacing: -0.02em; margin: 0 0 12px; text-wrap: balance;
+}
+.runway .lede { max-width: 64ch; }
+.rw-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 32px; align-items: end; margin-top: 24px; }
+.rw-top .takeaway { margin: 0; }
+.rw-stats { display: flex; gap: 28px; }
+.rw-stat { display: grid; gap: 6px; justify-items: end; }
+.rw-stat b { font: 500 40px/0.95 var(--font-sans); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.rw-stat.muted b { color: var(--ink-2); }
+.rw-stat span { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.runway .toolbar { margin-top: 22px; }
+.runway .segmented button[data-pace] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.rw-hint { margin: 10px 0 0; color: var(--ink-3); font-size: 13px; }
+
+.rw-card { margin-top: 20px; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 6px 20px 8px; }
+.rw-row, .rw-cols {
+  display: grid;
+  grid-template-columns: 14.75rem auto minmax(0, 1fr) 6.5rem 6rem;
+  column-gap: 24px;
+  align-items: center;
+}
+.rw-cols { align-items: end; min-height: 44px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.rw-k { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.rw-k.r { text-align: right; }
+/* 22 day cells, grouped by week so every cell keeps the same width. */
+.rw-days { display: flex; gap: 10px; }
+.rw-wk { display: grid; grid-auto-flow: column; grid-auto-columns: 20px; column-gap: 3px; }
+.rw-cols .rw-wk { row-gap: 5px; font: 400 11px/1 var(--font-mono); color: var(--ink-3); text-align: center; font-variant-numeric: tabular-nums; }
+.rw-cols .rw-wk .wk { grid-row: 1; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; text-align: left; white-space: nowrap; }
+.rw-cols .rw-wk .d { grid-row: 2; }
+.rw-cell { height: 16px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--rule); }
+.rw-cell.on { background: var(--c); box-shadow: none; }
+.rw-cell.part { box-shadow: inset 0 0 0 1px var(--rule-strong); }
+.rw-group {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 16px 0 8px; border-bottom: 1px solid var(--rule);
+}
+.rw-group .t { font-weight: 500; white-space: nowrap; }
+.rw-group .n { font: 400 12px/1 var(--font-mono); color: var(--ink-3); white-space: nowrap; }
+.rw-row { position: relative; min-height: 30px; border-bottom: 1px solid var(--hover); }
+.rw-row:last-child { border-bottom: 0; }
+.rw-row::before {
+  content: ""; position: absolute; inset: 0 -10px; border-radius: 6px;
+  background: var(--hover); opacity: 0; transition: opacity .12s; z-index: 0;
+}
+.rw-row:hover::before { opacity: 1; }
+.rw-row > * { position: relative; }
+.rw-name { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13.5px; white-space: nowrap; }
+.rw-name .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.rw-name .nm { overflow: hidden; text-overflow: ellipsis; }
+.rw-row.worth .rw-name { font-weight: 600; }
+.rw-name .sfx { font: 400 11px/1 var(--font-mono); color: var(--ink-3); }
+.rw-badge { flex: none; font: 500 11px/1 var(--font-mono); letter-spacing: .06em; padding: 3px 6px; border: 1px solid var(--rule-strong); border-radius: 999px; color: var(--ink-2); }
+.rw-lead { font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rw-lead b { font: 500 12.5px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.rw-row.out .rw-lead b { color: var(--bad); }
+.rw-max { text-align: right; font: 500 12.5px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.rw-max.ok { color: var(--ink); }
+.rw-int { display: grid; grid-template-columns: minmax(0, 1fr) 30px; align-items: center; gap: 8px; }
+.rw-int .bar-bg { height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; }
+.rw-int .bar-bg i { display: block; height: 100%; background: var(--ink-3); }
+.rw-row.worth .rw-int .bar-bg i { background: var(--c); }
+.rw-int .v { text-align: right; font: 400 12px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.rw-legend { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 14px; color: var(--ink-3); font-size: 12.5px; }
+.rw-legend > span { display: inline-flex; align-items: center; gap: 8px; }
+.rw-legend b { color: var(--ink); font-weight: 500; }
+.rw-legend .rw-cell { width: 14px; height: 10px; border-radius: 2px; }
+.rw-legend .rw-cell.on { --c: var(--ink-3); }
+.rw-note { margin: 10px 0 0; font-size: 12.5px; color: var(--ink-3); max-width: 90ch; }
+.rw-legend a, .rw-note a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+
+@media (max-width: 1100px) {
+  .rw-row, .rw-cols { grid-template-columns: minmax(0, 1fr) auto 6rem; }
+  .rw-row .rw-lead, .rw-cols .rw-k.lead, .rw-row .rw-int, .rw-cols .rw-k.int { display: none; }
+}
+@media (max-width: 720px) {
+  .rw-top { grid-template-columns: 1fr; }
+  .rw-stat { justify-items: start; }
+  .rw-card { padding-inline: 14px; }
+  .rw-cols { display: none; }
+  .rw-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "name max" "days days" "lead lead";
+    row-gap: 6px; padding: 10px 0;
+  }
+  .rw-name { grid-area: name; }
+  .rw-max { grid-area: max; }
+  .rw-max::after { content: " max / day"; font: 400 11px/1 var(--font-sans); color: var(--ink-3); }
+  .rw-row .rw-days { grid-area: days; gap: 5px; }
+  .rw-row .rw-wk { flex: var(--n, 5) 1 0; grid-auto-columns: minmax(0, 1fr); column-gap: 2px; }
+  .rw-row .rw-lead { display: block; grid-area: lead; font-size: 12px; }
+}
+
 /* Explainer and table */
 details { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
 details + details { margin-top: 0; }
@@ -463,7 +564,7 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
     <div class="formula" aria-label="How the budget is computed">
       <div class="fx"><span class="fx-k">Budget</span><span class="fx-v" id="fx-credits">6,000 credits</span><span class="fx-s">a month · <span id="fx-usd">$60.00</span></span></div>
       <span class="fx-op" aria-hidden="true" id="fx-day-op" hidden>÷</span>
-      <div class="fx" id="fx-day" hidden><span class="fx-k"><span class="gl-t">Working days<button class="gl" data-gl="workday"></button></span></span><span class="fx-v">21</span><span class="fx-s" id="fx-day-credits">286 credits a day</span></div>
+      <div class="fx" id="fx-day" hidden><span class="fx-k"><span class="gl-t">Working days<button class="gl" data-gl="workday"></button></span></span><span class="fx-v" id="fx-days">22</span><span class="fx-s" id="fx-day-credits">273 credits a day</span></div>
       <span class="fx-op" aria-hidden="true">÷</span>
       <div class="fx"><span class="fx-k">Blended price / 1M <span class="gl-t">tokens<button class="gl" data-gl="blended"></button></span></span><span class="fx-v" id="fx-mix">0.9 × input + 0.1 × output</span><span class="fx-s">in credits, weighted by the mix</span></div>
       <span class="fx-op" aria-hidden="true">=</span>
@@ -549,6 +650,40 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
       <div class="tip" id="tip" hidden></div>
     </section>
 
+    <section class="runway" id="runway" aria-labelledby="rw-title">
+      <h2 id="rw-title">How long do <span id="rw-credits">6,000</span> credits last?</h2>
+      <p class="lede">Each row is a 30-day month starting on a Monday: 22 working days, weekends skipped. Pick how many agent <span class="gl-t">requests<button class="gl" data-gl="request"></button></span> you send a day: filled days are covered by the budget, empty ones are not.</p>
+      <div class="rw-top">
+        <p class="takeaway" id="rw-takeaway" aria-live="polite"></p>
+        <div class="rw-stats">
+          <div class="rw-stat"><b id="rw-n-last">—</b><span>last the month</span></div>
+          <div class="rw-stat muted"><b id="rw-n-out">—</b><span>run out early</span></div>
+        </div>
+      </div>
+      <div class="toolbar" role="group" aria-label="Runway">
+        <div class="tb-group"><span class="tb-k" id="fl-pace">Requests a working day</span><div class="segmented" role="group" aria-labelledby="fl-pace" id="rw-paces"></div></div>
+        <div class="tb-group"><span class="tb-k" id="fl-rw-order">Order</span><div class="segmented" role="group" aria-labelledby="fl-rw-order"><button type="button" data-rw-order="runway" aria-pressed="true">By runway</button><button type="button" data-rw-order="family" aria-pressed="false">By family</button></div></div>
+      </div>
+      <p class="rw-hint" id="rw-hint"></p>
+      <div class="rw-card">
+        <div class="rw-cols">
+          <span class="rw-k">Model</span>
+          <span class="rw-days" id="rw-days-head" aria-hidden="true"></span>
+          <span class="rw-k lead"><span class="gl-t">Credits at this pace<button class="gl" data-gl="runwayUse"></button></span></span>
+          <span class="rw-k r"><span class="gl-t">Max / day<button class="gl" data-gl="maxDay"></button></span></span>
+          <span class="rw-k r int">Intel.</span>
+        </div>
+        <div id="rw-body"></div>
+      </div>
+      <div class="rw-legend">
+        <span><span class="rw-cell on"></span>Covered day</span>
+        <span><span class="rw-cell"></span>Out of credits</span>
+        <span><b>Max / day</b>: the most requests a working day the budget covers for the whole month</span>
+        <span><b>WORTH IT</b>: no cheaper model in view scores as well (<a href="cost.html">Cost &amp; value</a>)</span>
+      </div>
+      <p class="rw-note" id="rw-note"></p>
+    </section>
+
     <details id="explain">
       <summary>How is this calculated?</summary>
       <div class="explain">
@@ -558,7 +693,7 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
         <p id="example"></p>
         <ul>
           <li><b>Caching is not included.</b> Cached input tokens are billed about 10× cheaper than fresh input, so agent sessions that resend the same context get more out of the budget than shown here.</li>
-          <li><b>Per working day</b> divides the monthly budget by 21 working days (5 days a week). Weekends and holidays are not counted.</li>
+          <li><b>Per working day</b> divides the monthly budget by 22 working days (a 30-day month, 5 days a week). Weekends and holidays are not counted.</li>
           <li><b>Long-context tiers</b> apply to requests whose prompt passes the model’s threshold. They are hidden by default; turn them on above to see how much they cut the budget.</li>
           <li><b>A request</b> is counted as 50,000 tokens in the tooltip, a rough size for one agent step that sends files and conversation history. Actual sizes vary widely.</li>
         </ul>
@@ -587,7 +722,7 @@ footer a { color: var(--ink-2); text-underline-offset: 3px; text-decoration-colo
 <script>
 // Data: data/models.csv, regenerated daily by scripts/update-pricing.mjs.
 // Prices in USD per million tokens; cachedInput / cacheWrite are ignored here.
-const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output'];
+const NUMERIC = ['input', 'cachedInput', 'cacheWrite', 'output', 'intelligence', 'coding'];
 
 function parseCSV(text) {
   const out = [];
@@ -618,7 +753,9 @@ function parseCSV(text) {
 Promise.all([
   fetch('data/models.csv', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); }),
   fetch('data/meta.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : {})).catch(() => ({})),
-]).then(([csv, meta]) => init(parseCSV(csv), meta), err => {
+  // Scores only feed the runway's Intelligence column; the page works without them.
+  fetch('data/scores.csv', { cache: 'no-cache' }).then(r => (r.ok ? r.text() : '')).catch(() => ''),
+]).then(([csv, meta, scores]) => init(parseCSV(csv), meta, scores ? parseCSV(scores) : []), err => {
   console.error(err);
   const p = document.createElement('p');
   p.className = 'empty';
@@ -626,7 +763,7 @@ Promise.all([
   document.getElementById('chart').replaceChildren(p);
 });
 
-function init(MODELS, meta) {
+function init(MODELS, meta, SCORES) {
   const KNOWN = [
     { name: 'OpenAI', color: '--s-openai' },
     { name: 'Anthropic', color: '--s-anthropic' },
@@ -679,7 +816,9 @@ function init(MODELS, meta) {
   }
 
   const CREDIT_USD = 0.01;
-  const WORK_DAYS = 21;
+  // A 30-day month starting on a Monday: 22 working days.
+  const MONTH_DAYS = 30;
+  const WORK_DAYS = 22;
   const REQUEST_TOKENS = CopilotShared.REQUEST_TOKENS;
   const DEFAULTS = { credits: 6000, inPct: 90 };
   const PRESETS = [1000, 3000, 6000, 10000, 30000];
@@ -689,8 +828,10 @@ function init(MODELS, meta) {
   const presentCats = new Set(MODELS.map(m => m.category));
   const CATEGORIES = [...CAT_ORDER.filter(c => presentCats.has(c)), ...[...presentCats].filter(c => !CAT_ORDER.includes(c))];
 
+  const PACES = [10, 20, 30, 60, 100];
   const state = {
     credits: DEFAULTS.credits, inPct: DEFAULTS.inPct, view: 'tokens', unit: 'tokens', period: 'month',
+    pace: 30, rwOrder: 'runway',
     active: new Set(PROVIDERS.map(p => p.name)), cats: new Set(CATEGORIES), long: false,
   };
   const validCredits = v => Number.isFinite(v) && v >= 0 && v <= MAX_CREDITS;
@@ -709,6 +850,8 @@ function init(MODELS, meta) {
       if (Array.isArray(saved.cats)) state.cats = new Set(CATEGORIES
         .filter(c => saved.cats.includes(c) || (Array.isArray(saved.knownCats) && !saved.knownCats.includes(c))));
       if (typeof saved.long === 'boolean') state.long = saved.long;
+      if (PACES.includes(saved.pace)) state.pace = saved.pace;
+      if (saved.rwOrder === 'runway' || saved.rwOrder === 'family') state.rwOrder = saved.rwOrder;
     }
   } catch {}
   // Mix, providers and classes follow the reader across pages.
@@ -728,7 +871,8 @@ function init(MODELS, meta) {
   const save = () => {
     CopilotShared.write({ inPct: state.inPct, active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES });
     try { localStorage.setItem(STORE, JSON.stringify({ credits: state.credits, inPct: state.inPct, view: state.view, unit: state.unit, period: state.period,
-      active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES, long: state.long })); } catch {}
+      active: [...state.active], known: PROVIDERS.map(p => p.name), cats: [...state.cats], knownCats: CATEGORIES, long: state.long,
+      pace: state.pace, rwOrder: state.rwOrder })); } catch {}
     const q = new URLSearchParams(location.search);
     const isDefault = state.credits === DEFAULTS.credits && state.inPct === DEFAULTS.inPct;
     if (isDefault) { q.delete('credits'); q.delete('in'); }
@@ -916,6 +1060,7 @@ function init(MODELS, meta) {
     $('fx-usd').textContent = '$' + (state.credits * CREDIT_USD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const spent = spend().toLocaleString('en-US', { maximumFractionDigits: 1 });
     $('h-day').hidden = $('fx-day').hidden = $('fx-day-op').hidden = !isDay();
+    $('fx-days').textContent = WORK_DAYS;
     $('fx-day-credits').textContent = int(spend()) + ' credits a day';
     const k = v => String(Math.round(v * 100) / 100);
     $('fx-mix').textContent = `${k(r)} × input + ${k(1 - r)} × output`;
@@ -1043,8 +1188,142 @@ function init(MODELS, meta) {
       return tr;
     }));
 
+    renderRunway();
     pins.reset();
     save();
+  }
+
+  // Runway: at a steady pace of agent requests, the working day on which the monthly budget runs out.
+  const intel = new Map(SCORES.filter(s => s.intelligence != null).map(s => [s.model, s.intelligence]));
+  const intelTop = Math.max(10, Math.ceil(Math.max(0, ...intel.values()) / 10) * 10);
+  const paceBtns = PACES.map(v => {
+    const b = el('button', null, String(v));
+    b.type = 'button';
+    b.dataset.pace = v;
+    b.addEventListener('click', () => { state.pace = v; render(); });
+    $('rw-paces').append(b);
+    return b;
+  });
+  document.querySelectorAll('[data-rw-order]').forEach(b =>
+    b.addEventListener('click', () => { state.rwOrder = b.dataset.rwOrder; render(); }));
+  // Calendar weeks: working days are dates 1–5, 8–12, 15–19, 22–26, 29–30; weekends are skipped.
+  // Each day is { i: working-day index from 0, date }.
+  const WEEKS = [];
+  for (let date = 1, i = 0; date <= MONTH_DAYS; date++) {
+    const wd = (date - 1) % 7;
+    if (wd > 4) continue;
+    if (wd === 0) WEEKS.push([]);
+    WEEKS[WEEKS.length - 1].push({ i: i++, date });
+  }
+  const dateOf = i => WEEKS.flat()[Math.min(WORK_DAYS, Math.max(1, i)) - 1].date; // nth working day → date
+  const weekOf = i => WEEKS.findIndex(w => w.some(d => d.i === Math.min(WORK_DAYS, Math.max(1, i)) - 1)) + 1;
+  $('rw-days-head').append(...WEEKS.map((days, w) => {
+    const wk = el('span', 'rw-wk'), l = el('span', 'wk', `Wk ${w + 1}`);
+    l.style.gridColumn = `1 / span ${days.length}`;
+    wk.append(l, ...days.map(d => el('span', 'd', String(d.date))));
+    return wk;
+  }));
+
+  function renderRunway() {
+    const pace = state.pace;
+    paceBtns.forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.pace) === pace)));
+    document.querySelectorAll('[data-rw-order]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.rwOrder === state.rwOrder)));
+    $('rw-credits').textContent = int(state.credits);
+    $('rw-hint').textContent = pace <= 10 ? 'About 10 a day: a few chat questions, no long agent sessions.'
+      : pace <= 30 ? 'About 20 to 30 a day: regular agent-mode use alongside other work.'
+      : 'Over 60 a day: agent mode running most of the day.';
+
+    const list = MODELS.filter(m => passes(m));
+    // Credits for one request of REQUEST_TOKENS at the current mix.
+    const perReq = m => B.get(m.id).blended * REQUEST_TOKENS / 1e6 / CREDIT_USD;
+    // Worth it: the same Pareto frontier as page 1, on the default tiers in view.
+    const scored = list.filter(m => m.tier === 'default' && intel.has(m.model))
+      .sort((a, b) => B.get(a.id).blended - B.get(b.id).blended || intel.get(b.model) - intel.get(a.model));
+    const worth = new Set();
+    let best = -Infinity;
+    for (const m of scored) if (intel.get(m.model) > best) { worth.add(m); best = intel.get(m.model); }
+
+    const R = list.map(m => {
+      const pr = perReq(m);
+      const days = pr > 0 ? state.credits / (pace * pr) : Infinity;
+      return { m, days, full: days >= WORK_DAYS, max: pr > 0 ? state.credits / WORK_DAYS / pr : Infinity,
+        used: WORK_DAYS * pace * pr, left: state.credits - WORK_DAYS * pace * pr, worth: worth.has(m), s: m.tier === 'default' ? intel.get(m.model) : undefined };
+    });
+    const byRunway = (a, b) => b.days - a.days || a.m.model.localeCompare(b.m.model, 'en', { numeric: true });
+    let groups;
+    if (state.rwOrder === 'runway') {
+      const last = R.filter(r => r.full).sort(byRunway), out = R.filter(r => !r.full).sort(byRunway);
+      const n = k => `${k} model${k === 1 ? '' : 's'}`;
+      groups = [{ t: 'Lasts the month', n: n(last.length), rows: last }, { t: 'Runs out early', n: n(out.length), rows: out }].filter(g => g.rows.length);
+    } else {
+      const fm = new Map();
+      R.forEach(r => { if (!fm.has(r.m.family)) fm.set(r.m.family, []); fm.get(r.m.family).push(r); });
+      groups = [...fm.entries()].map(([f, rows]) => ({ t: f, n: `${rows.filter(r => r.full).length} of ${rows.length} last`, rows: rows.sort(byRunway) }))
+        .sort((a, b) => Math.min(...b.rows.map(r => r.days)) - Math.min(...a.rows.map(r => r.days)));
+    }
+
+    const fmtMax = v => (v >= 10 ? int(v) : String(Math.round(v * 10) / 10));
+    const row = r => {
+      const { m } = r;
+      const d = el('div', 'rw-row' + (r.full ? '' : ' out') + (r.worth ? ' worth' : ''));
+      d.style.setProperty('--c', colorOf(m.provider));
+      const day = Math.max(1, Math.ceil(r.days)), date = dateOf(day);
+      d.setAttribute('aria-label', r.full
+        ? `${m.model}: lasts the month, ${int(r.used)} of ${int(state.credits)} credits used, ${int(r.left)} left; up to ${fmtMax(r.max)} requests a working day`
+        : `${m.model}: runs out on day ${date} of ${MONTH_DAYS}, working day ${day} of ${WORK_DAYS}; up to ${fmtMax(r.max)} requests a working day last the month`);
+      const name = el('span', 'rw-name');
+      name.append(el('span', 'sw'), el('span', 'nm', m.model));
+      if (m.tier === 'long') name.append(el('span', 'sfx', suffix(m)));
+      if (r.worth) name.append(el('span', 'rw-badge', 'WORTH IT'));
+      const cells = el('span', 'rw-days');
+      cells.setAttribute('aria-hidden', 'true');
+      cells.append(...WEEKS.map(days => {
+        const wk = el('span', 'rw-wk');
+        wk.style.setProperty('--n', days.length);
+        wk.append(...days.map(({ i }) => {
+          const f = Math.min(1, Math.max(0, r.days - i));
+          const c = el('span', 'rw-cell' + (f >= 1 ? ' on' : f > 0 ? ' part' : ''));
+          if (f > 0 && f < 1) c.style.background = `linear-gradient(90deg, var(--c) ${f * 100}%, transparent ${f * 100}%)`;
+          return c;
+        }));
+        return wk;
+      }));
+      const lead = el('span', 'rw-lead');
+      if (r.full) lead.append(el('b', null, `${int(r.used)} used`), ` of ${int(state.credits)} · ${int(r.left)} left`);
+      else lead.append(el('b', null, `Day ${date}`), ` of ${MONTH_DAYS} · runs out in week ${weekOf(day)}`);
+      const max = el('span', 'rw-max' + (r.max >= pace ? ' ok' : ''), fmtMax(r.max));
+      const sc = el('span', 'rw-int');
+      const bg = el('span', 'bar-bg'), fill = el('i');
+      fill.style.width = (r.s != null ? r.s / intelTop * 100 : 0) + '%';
+      bg.append(fill);
+      sc.append(bg, el('span', 'v', r.s != null ? r.s.toFixed(1) : '—'));
+      d.append(name, cells, lead, max, sc);
+      return d;
+    };
+    const ok = list.length && state.credits > 0;
+    $('rw-body').replaceChildren(...(ok ? groups.flatMap(g => {
+      const h = el('div', 'rw-group');
+      h.append(el('span', 't', g.t), el('span', 'n', g.n));
+      return [h, ...g.rows.map(row)];
+    }) : [el('p', 'empty', state.credits > 0 ? 'No entry matches these filters.' : 'Enter a budget above 0 credits.')]));
+
+    const nLast = ok ? R.filter(r => r.full).length : 0;
+    $('rw-n-last').textContent = ok ? nLast : '—';
+    $('rw-n-out').textContent = ok ? R.length - nLast : '—';
+    if (ok) {
+      const top = rs => rs.filter(r => r.worth).sort((a, b) => b.s - a.s)[0];
+      const wl = top(R.filter(r => r.full)), wo = top(R.filter(r => !r.full));
+      const muted = [];
+      if (wl) muted.push(`The strongest worth-it model that lasts is ${wl.m.model} (Intelligence ${wl.s.toFixed(1)}).`);
+      if (wo && (!wl || wo.s > wl.s)) muted.push(`${wo.m.model} scores higher but runs out on day ${dateOf(Math.ceil(wo.days))}.`);
+      $('rw-takeaway').replaceChildren(`At ${pace} requests a working day, ${int(state.credits)} credits last the whole month with `,
+        el('b', null, `${nLast} of ${R.length} models`), '. ', el('span', 'muted', muted.join(' ')));
+    } else $('rw-takeaway').textContent = '';
+    const unscored = list.filter(m => m.tier === 'default' && !intel.has(m.model)).map(m => m.model);
+    $('rw-note').textContent = `${int(REQUEST_TOKENS)} tokens a request at a ${state.inPct}/${100 - state.inPct} mix, list prices, no caching.`
+      + (state.long ? '' : ' Long-context tiers hidden.')
+      + ' Intelligence Index from Artificial Analysis'
+      + (unscored.length ? `; ${unscored.length > 3 ? unscored.length + ' models in view have' : unscored.join(', ') + (unscored.length > 1 ? ' have' : ' has')} none yet.` : '.');
   }
 
   // Tooltip

@@ -16,7 +16,7 @@
 <style>
 /* Start page: the simple view for people who don't follow LLM news.
    Same design language as cost.html (tokens, nav, theme), fewer controls:
-   pick a task on the left, the answer on the right, three habits below.
+   one sentence to fill in (role, task), the answer as a three-step ladder, three habits below.
    The full menu of models lives on the detail pages. Color is reserved for providers. */
 :root {
   --bg: #fafaf9;
@@ -96,102 +96,70 @@ h1 {
 .lede { color: var(--ink-2); font-size: 16px; line-height: 1.55; max-width: 60ch; margin: 0; text-wrap: pretty; }
 .lede b { color: var(--ink); font-weight: 500; }
 
-/* Picker: tasks on the left, the answer on the right */
-.picker {
-  margin-top: 40px;
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: clamp(24px, 3.5vw, 48px);
-  align-items: start;
+/* The question as a sentence to fill in: two native selects dressed as inline chips.
+   The select covers its chip, invisible, so the chip sizes to its text and the browser's own picker opens. */
+.ask {
+  margin: 40px 0 0;
+  font: 500 clamp(20px, 2.8vw, 30px)/1.5 var(--font-sans); letter-spacing: -0.02em;
+  color: var(--ink-2); text-wrap: balance;
 }
-.tasks { border: 0; margin: 0; padding: 0; min-width: 0; }
-.tasks legend { font: 500 18px/1.3 var(--font-sans); letter-spacing: -0.01em; padding: 0; margin-bottom: 14px; }
-.roles { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-.roles-label { font-size: 13px; color: var(--ink-2); }
-.segmented {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 8px;
-  background: var(--hover);
-  border: 1px solid var(--rule);
-}
-.segmented button {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--ink-2);
-  font: 500 13px/1 var(--font-sans);
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background .15s, color .15s, box-shadow .15s;
-}
-.segmented button:hover { color: var(--ink); }
-.segmented button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.segmented button[aria-pressed="true"] {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 0 0 1px var(--rule);
-}
-.task-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-.task { border-bottom: 1px solid var(--rule); }
-.task label {
+.chip {
   position: relative;
-  display: grid; grid-template-columns: 18px minmax(0, 1fr); column-gap: 14px; align-items: start;
-  padding: 12px 12px 12px 10px; margin-inline: -10px -12px;
-  border-radius: 10px; cursor: pointer;
-  transition: background .15s;
+  display: inline-flex; align-items: center; gap: 10px; max-width: 100%;
+  padding: 4px 14px; line-height: 1.3; /* a task that wraps (phones) still reads as one chip */
+  border: 1px solid var(--rule-strong); border-radius: 12px;
+  background: var(--surface); color: var(--ink);
+  transition: border-color .15s;
 }
-.task label:hover { background: var(--hover); }
-.task input { position: absolute; opacity: 0; pointer-events: none; }
-.task .dot {
-  margin-top: 1px; width: 18px; height: 18px; border-radius: 50%;
-  border: 1.5px solid var(--rule-strong); background: var(--surface);
-  display: grid; place-items: center;
-  transition: border-color .2s, background .2s;
+.chip:hover { border-color: var(--ink-3); }
+.chip:has(select:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.chip svg { flex: none; width: 14px; height: 14px; fill: none; stroke: var(--ink-3); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.chip select {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; font: 400 16px/1 var(--font-sans);
 }
-.task .dot::after {
-  content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--bg);
-  transform: scale(0); transition: transform .3s var(--ease-out);
-}
-.task input:checked + label .dot { border-color: var(--ink); background: var(--ink); }
-.task input:checked + label .dot::after { transform: scale(1); }
-.task input:checked + label { background: var(--surface); box-shadow: 0 1px 2px rgb(0 0 0 / .05), 0 4px 16px rgb(0 0 0 / .04); }
-.task input:focus-visible + label { outline: 2px solid var(--ink); outline-offset: 2px; }
-.task .t-name { display: block; font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.35; }
-/* The examples only under the chosen task: the list scans as six short lines. */
-.task .t-ex { display: none; margin-top: 3px; font-size: 13px; color: var(--ink-2); line-height: 1.45; }
-.task input:checked + label .t-ex { display: block; }
 
-/* The answer */
+/* The answer: a three-step ladder, the pick wide on the left, a cheaper and a stronger option beside it.
+   Each bar is requests a month, relative to the most of the three; the bars sit on one baseline. */
 .answer {
-  position: sticky; top: 16px;
+  margin-top: 32px;
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: 16px;
   padding: clamp(20px, 3vw, 32px);
-  min-width: 0;
 }
+.ladder { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); }
+.rung {
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;
+  min-width: 0; padding: 8px 28px;
+  border-left: 1px solid var(--rule);
+}
+.rung:last-child { padding-right: 0; }
+.rung.pick { justify-content: flex-start; gap: 10px; padding: 0 32px 0 0; border-left: 0; }
+.bar { display: block; height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; }
+.bar > span { display: block; height: 100%; width: var(--w, 0%); background: var(--c, var(--s-other)); border-radius: inherit; transition: width .4s var(--ease-out); }
+.pick .bar { height: 6px; border-radius: 3px; margin-top: 4px; }
+
 .a-lead { margin: 0; font-size: 14px; color: var(--ink-2); }
 .a-model {
   display: flex; align-items: center; gap: 12px;
-  margin: 6px 0 0;
+  margin: 10px 0 0;
   font-weight: 500; font-size: clamp(30px, 4vw, 44px); line-height: 1.08; letter-spacing: -0.03em;
   text-wrap: balance;
 }
 .a-model .sw { flex: none; width: 14px; height: 14px; border-radius: 4px; background: var(--c, var(--s-other)); }
 .promo {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
+  display: inline-flex; align-items: center; gap: 8px; margin: 12px 0 0;
   font-size: 12.5px; color: var(--ink-2);
   padding: 5px 10px; border-radius: 999px; background: var(--hover);
 }
 .promo svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .a-month {
-  margin: 14px 0 0;
+  margin: 4px 0 0;
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
   font-size: 16px; line-height: 1.4; color: var(--ink-2);
 }
-.a-month b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.a-month b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .a-month label { color: var(--ink-2); }
 .a-budget { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 .num {
@@ -210,34 +178,38 @@ h1 {
 .num input:focus { outline: none; }
 .a-month .reset { font-size: 13px; }
 
-/* Alternatives: a cheaper and a stronger model, one line each */
-.alts { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--rule); }
-.alt {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 16px;
-  padding: 12px 0; border-bottom: 1px solid var(--rule);
-}
-.alt .o-role { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); margin-bottom: 3px; }
-.alt .o-name { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-size: 15px; font-weight: 500; }
-.alt .o-name .sw { flex: none; width: 9px; height: 9px; border-radius: 3px; background: var(--c, var(--s-other)); }
-.alt .o-n { font: 400 12.5px/1.3 var(--font-mono); color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.alt .o-n b { color: var(--ink); font-weight: 500; }
+/* Cheaper and stronger rungs */
+.o-role { font-size: 12.5px; color: var(--ink-3); }
+.o-name { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 18px; font-weight: 500; line-height: 1.25; }
+.o-name .sw { flex: none; width: 9px; height: 9px; border-radius: 3px; background: var(--c, var(--s-other)); }
+.o-n { font: 400 12.5px/1.3 var(--font-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.o-n b { color: var(--ink); font-weight: 500; }
+.o-none { font-size: 14px; color: var(--ink-3); }
 
 /* Why this model (folded) */
-details.why { margin-top: 16px; }
-details.a-calc { margin-top: 6px; }
-:is(details.why, details.a-calc) summary {
-  display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
+/* The answer's footer: the reason in one line, unfolded on demand, and where to go next. */
+.a-foot {
+  margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--rule);
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px;
+  font-size: 13px;
+}
+details.why { flex: 1 1 28rem; min-width: 0; }
+details.why summary {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; cursor: pointer; list-style: none;
   font-size: 13.5px; font-weight: 500; color: var(--ink); padding: 4px 0;
 }
-details summary::-webkit-details-marker { display: none; }
-:is(details.why, details.a-calc) summary svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--ease-out); }
-details[open] summary svg { transform: rotate(90deg); }
-details.a-calc summary { font-weight: 400; color: var(--ink-2); }
-details.a-calc summary:hover { color: var(--ink); }
+details.why summary::-webkit-details-marker { display: none; }
+details.why summary svg { align-self: center; overflow: visible; width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--ease-out); }
+details.why[open] summary svg { transform: rotate(90deg); }
+.why-short { margin-left: 8px; font-size: 13px; font-weight: 400; color: var(--ink-3); }
+.why-sub { margin: 14px 0 0 19px; font-size: 13.5px; font-weight: 500; }
+.why-body .calc { margin-left: 19px; }
+.a-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.a-links a { white-space: nowrap; }
 .why-list { margin: 8px 0 0; padding: 0 0 0 19px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 62ch; }
 .why-list b { color: var(--ink); font-weight: 500; }
-.why-list a, .a-foot a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
-.why-list a:hover, .a-foot a:hover { text-decoration-color: currentColor; }
+.why-list a, .a-links a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.why-list a:hover, .a-links a:hover { text-decoration-color: currentColor; }
 .calc { margin: 8px 0 0; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 8px; max-width: 62ch; }
 .calc-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .calc-steps li { display: grid; grid-template-columns: 7.5em 1fr; gap: 2px 12px; align-items: baseline; }
@@ -246,7 +218,6 @@ details.a-calc summary:hover { color: var(--ink); }
 .calc-note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-2); }
 .calc-note a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
 @media (max-width: 520px) { .calc-steps li { grid-template-columns: 1fr; } }
-.a-foot { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; }
 
 /* Habits */
 section.habits { margin-top: 72px; }
@@ -283,12 +254,18 @@ button:focus-visible, summary:focus-visible, a:focus-visible, .num:has(input:foc
 }
 
 @media (max-width: 960px) {
-  .picker { grid-template-columns: minmax(0, 1fr); }
-  .answer { position: static; }
+  .ladder { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .rung.pick { grid-column: 1 / -1; padding: 0 0 20px; }
+  .rung:not(.pick) { justify-content: flex-start; padding: 16px 16px 0 0; border-left: 0; border-top: 1px solid var(--rule); }
+  .rung:last-child { padding: 16px 0 0 16px; border-left: 1px solid var(--rule); }
   .h-list { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 }
 @media (max-width: 520px) {
   .intro { padding-top: 28px; }
+  .ask { margin-top: 28px; }
+  .ask-end { display: none; } /* the task chip fills the line there: the full stop would sit alone */
+  .ladder { grid-template-columns: minmax(0, 1fr); }
+  .rung:last-child { padding: 16px 0 0; border-left: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
@@ -301,8 +278,8 @@ button:focus-visible, summary:focus-visible, a:focus-visible, .num:has(input:foc
 THESIS: the answer before the vocabulary. Name the task, get one model and what a month of it costs; refuses the price-chart-first dashboard.
 OWN-WORLD: the site's own Geist on warm neutrals, provider swatches, round-capped bars; a bordered answer panel is the only raised surface.
 STORY: a business analyst learns which model fits the task, how many agent requests their 6,000 credits buy with it, and that pricier is rarely needed; they leave with a model name.
-FIRST VIEWPORT: question as H1, one-line lede; tasks list left (5/12), answer panel right (7/12): model name at display size, requests a month with the budget editable in that sentence, a cheaper and a stronger option, the reasoning folded; then three habits that save credits. Everything else lives on the detail pages.
-FORM: established-world surface, task picker + answer panel (structure chosen in-thread; seed script returned no output).
+FIRST VIEWPORT: question as H1, one-line lede; a sentence to fill in ("I work as a [role] and I want to [task]."); the answer panel as a three-step ladder: model name at display size with requests a month (budget editable in that sentence), a cheaper and a stronger option beside it, bars on one baseline; the reasoning folded in one line; then three habits that save credits. Everything else lives on the detail pages.
+FORM: established-world surface, fill-in sentence + answer ladder (Claude Design variant 0a) (structure chosen in-thread; seed script returned no output).
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
 <div class="app">
@@ -327,38 +304,42 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
   <header class="intro">
     <h1>Which Copilot model should I use?</h1>
-    <p class="lede">Pick a task. We suggest the <b>cheapest model that does it well</b>.</p>
+    <p class="lede">Say what you are about to do. We suggest the <b>cheapest model that does it well</b>.</p>
   </header>
 
   <main>
-    <div class="picker">
-      <fieldset class="tasks">
-        <legend>What are you about to do?</legend>
-        <div class="roles">
-          <span class="roles-label" id="roles-label">I work as a</span>
-          <div class="segmented" role="group" aria-labelledby="roles-label" id="roles"></div>
-        </div>
-        <ul class="task-list" id="tasks"></ul>
-      </fieldset>
+    <p class="ask">I work as a
+      <span class="chip"><span id="role-t"></span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><select id="role" aria-label="Your role"></select></span>
+      and I want to
+      <span class="chip"><span id="task-t"></span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><select id="task" aria-label="What you are about to do"></select></span><span class="ask-end">.</span>
+    </p>
 
-      <section class="answer" aria-labelledby="a-model">
-        <div id="answer" aria-live="polite"><p class="empty">Loading prices…</p></div>
-        <p class="a-month" id="a-month" hidden>
-          <span id="a-req"></span>
-          <span class="a-budget">
-            <label for="credits">with</label>
-            <span class="num"><input id="credits" type="number" inputmode="numeric" min="0" max="1000000" step="500" value="6000"></span>
-            <span class="gl-t">credits<button class="gl" data-gl="credit"></button></span>
-          </span>
-          <button type="button" class="link-btn reset" id="credits-reset" hidden>Back to 6,000</button>
-        </p>
-        <details class="a-calc" id="a-calc" hidden>
-          <summary><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>How is this counted?</summary>
-          <div id="a-calc-body"></div>
+    <section class="answer" aria-labelledby="a-model">
+      <div class="ladder">
+        <div class="rung pick">
+          <div id="answer" aria-live="polite"><p class="empty">Loading prices…</p></div>
+          <p class="a-month" id="a-month" hidden>
+            <span id="a-req"></span>
+            <span class="a-budget">
+              <label for="credits">with</label>
+              <span class="num"><input id="credits" type="number" inputmode="numeric" min="0" max="1000000" step="500" value="6000"></span>
+              <span class="gl-t">credits<button class="gl" data-gl="credit"></button></span>
+            </span>
+            <button type="button" class="link-btn reset" id="credits-reset" hidden>Back to 6,000</button>
+          </p>
+          <span class="bar" id="a-bar" aria-hidden="true" hidden><span></span></span>
+        </div>
+        <div class="rung" id="r-cheaper" hidden></div>
+        <div class="rung" id="r-stronger" hidden></div>
+      </div>
+      <div class="a-foot" id="a-foot" hidden>
+        <details class="why">
+          <summary><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>Why this model?<span class="why-short" id="why-short"></span></summary>
+          <div class="why-body" id="why-body"></div>
         </details>
-        <div id="answer-more"></div>
-      </section>
-    </div>
+        <span class="a-links"><a id="a-compare" href="compare.html">Compare them side by side →</a><a href="tokens.html">See every model →</a></span>
+      </div>
+    </section>
 
     <section class="habits" aria-labelledby="habits-title">
       <h2 id="habits-title">Three habits that make credits last</h2>
@@ -424,24 +405,24 @@ Promise.all([
   document.getElementById('answer').replaceChildren(p);
 });
 
-// What people ask Copilot to do, by role, from light to heavy. `index` is the benchmark that fits
+// What people ask Copilot to do, by role, from light to heavy. Names complete "I want to …". `index` is the benchmark that fits
 // the task best; `level` is the share of the top Copilot score a model needs to be suggested.
 const ROLES = [
   { id: 'ba', name: 'Business analyst', first: 'stories', tasks: [
-    { id: 'rewrite', name: 'Rewrite, summarize or translate', ex: 'Polish an email, sum up meeting notes, translate a spec.', index: 'intelligence', level: .6 },
-    { id: 'stories', name: 'Write user stories and acceptance criteria', ex: 'Turn a need into stories, Gherkin scenarios or test cases.', index: 'intelligence', level: .8 },
-    { id: 'analyze', name: 'Analyze specs and documents', ex: 'Spot gaps and contradictions, compare versions, assess the impact of a change.', index: 'intelligence', level: .9 },
-    { id: 'code-qa', name: 'Ask questions about the code', ex: 'Find where a business rule lives, explain what a screen or function does.', index: 'coding', level: .85 },
-    { id: 'sql', name: 'Write SQL, scripts or small fixes', ex: 'Query data, automate a spreadsheet chore, fix a label in the app.', index: 'coding', level: .92 },
-    { id: 'hard', name: 'Something hard that other models got wrong', ex: 'A tricky analysis or bug where a lighter model kept missing the point.', index: 'intelligence', level: .98 },
+    { id: 'rewrite', name: 'rewrite, summarize or translate', ex: 'Polish an email, sum up meeting notes, translate a spec.', index: 'intelligence', level: .6 },
+    { id: 'stories', name: 'write user stories and acceptance criteria', ex: 'Turn a need into stories, Gherkin scenarios or test cases.', index: 'intelligence', level: .8 },
+    { id: 'analyze', name: 'analyze specs and documents', ex: 'Spot gaps and contradictions, compare versions, assess the impact of a change.', index: 'intelligence', level: .9 },
+    { id: 'code-qa', name: 'ask questions about the code', ex: 'Find where a business rule lives, explain what a screen or function does.', index: 'coding', level: .85 },
+    { id: 'sql', name: 'write SQL, scripts or small fixes', ex: 'Query data, automate a spreadsheet chore, fix a label in the app.', index: 'coding', level: .92 },
+    { id: 'hard', name: 'crack a problem other models got wrong', ex: 'A tricky analysis or bug where a lighter model kept missing the point.', index: 'intelligence', level: .98 },
   ] },
   { id: 'dev', name: 'Developer', first: 'feature', tasks: [
-    { id: 'explain', name: 'Explain code, write docs or commit messages', ex: 'Walk through an unfamiliar module, write a docstring, a README section or a commit message.', index: 'coding', level: .75 },
-    { id: 'tests', name: 'Write tests', ex: 'Cover a function and its edge cases, fix a broken assertion, add a regression test.', index: 'coding', level: .85 },
-    { id: 'review', name: 'Review a change or refactor', ex: 'Spot bugs in a pull request; rename, extract or simplify without changing behavior.', index: 'coding', level: .9 },
-    { id: 'debug', name: 'Debug a failure', ex: 'Read a stack trace or a failing CI run, find the root cause, propose the fix.', index: 'coding', level: .92 },
-    { id: 'feature', name: 'Build a feature across several files', ex: 'Agent mode reads the codebase, edits several files, runs the build and the tests.', index: 'coding', level: .95 },
-    { id: 'dev-hard', name: 'Architecture, or a bug other models got wrong', ex: 'Plan a migration, untangle concurrency, crack a fix lighter models kept missing.', index: 'coding', level: .98 },
+    { id: 'explain', name: 'explain code, write docs or commit messages', ex: 'Walk through an unfamiliar module, write a docstring, a README section or a commit message.', index: 'coding', level: .75 },
+    { id: 'tests', name: 'write tests', ex: 'Cover a function and its edge cases, fix a broken assertion, add a regression test.', index: 'coding', level: .85 },
+    { id: 'review', name: 'review a change or refactor', ex: 'Spot bugs in a pull request; rename, extract or simplify without changing behavior.', index: 'coding', level: .9 },
+    { id: 'debug', name: 'debug a failure', ex: 'Read a stack trace or a failing CI run, find the root cause, propose the fix.', index: 'coding', level: .92 },
+    { id: 'feature', name: 'build a feature across several files', ex: 'Agent mode reads the codebase, edits several files, runs the build and the tests.', index: 'coding', level: .95 },
+    { id: 'dev-hard', name: 'plan architecture or fix a stubborn bug', ex: 'Plan a migration, untangle concurrency, crack a fix lighter models kept missing.', index: 'coding', level: .98 },
   ] },
 ];
 const TASKS = ROLES.flatMap(r => r.tasks.map(t => ({ ...t, role: r.id })));
@@ -537,56 +518,52 @@ function init(ROWS, SCORES, meta) {
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const swatch = m => { const s = el('span', 'sw'); s.style.setProperty('--c', colorOf(m.provider)); s.setAttribute('aria-hidden', 'true'); return s; };
 
-  // Role switch and task list (built once per role).
+  // The sentence: role and task as native selects; each chip shows its selected option.
+  const roleSel = $('role'), taskSel = $('task');
+  function renderSentence() {
+    const role = ROLES.find(r => r.id === roleOf(state.task));
+    const task = role.tasks.find(t => t.id === state.task);
+    roleSel.value = role.id;
+    taskSel.replaceChildren(...role.tasks.map(t => { const o = el('option', null, t.name); o.value = t.id; return o; }));
+    taskSel.value = task.id;
+    $('role-t').textContent = role.name;
+    $('task-t').textContent = task.name;
+  }
   function pickTask(id) {
     state.task = id; state.lastTask[roleOf(id)] = id;
-    save(); renderAnswer();
+    save(); renderSentence(); renderAnswer();
   }
-  function renderTasks() {
-    const role = ROLES.find(r => r.id === roleOf(state.task));
-    $('roles').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === role.id)));
-    $('tasks').replaceChildren(...role.tasks.map(t => {
-      const li = el('li', 'task');
-      const input = el('input');
-      input.type = 'radio'; input.name = 'task'; input.id = 't-' + t.id; input.value = t.id;
-      input.checked = t.id === state.task;
-      input.addEventListener('change', () => {
-        pickTask(t.id);
-        if (matchMedia('(max-width: 960px)').matches) {
-          const a = $('answer'), top = a.getBoundingClientRect().top;
-          if (top > innerHeight * .6) a.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-        }
-      });
-      const label = el('label');
-      label.htmlFor = input.id;
-      const text = el('span');
-      text.append(el('span', 't-name', t.name), el('span', 't-ex', t.ex));
-      label.append(el('span', 'dot'), text);
-      li.append(input, label);
-      return li;
-    }));
-  }
-  ROLES.forEach(r => {
-    const b = el('button', null, r.name);
-    b.type = 'button'; b.dataset.role = r.id;
-    b.addEventListener('click', () => {
-      if (roleOf(state.task) === r.id) return;
-      state.task = state.lastTask[r.id];
-      renderTasks(); pickTask(state.task);
-    });
-    $('roles').append(b);
-  });
-  renderTasks();
+  roleSel.replaceChildren(...ROLES.map(r => { const o = el('option', null, r.name); o.value = r.id; return o; }));
+  roleSel.addEventListener('change', () => pickTask(state.lastTask[roleSel.value]));
+  taskSel.addEventListener('change', () => pickTask(taskSel.value));
+  renderSentence();
 
   // The answer: the model, what the budget buys with it (the budget input sits in that
-  // sentence and is never re-rendered), a cheaper and a stronger option, the reasoning folded.
-  let whyOpen = false;
+  // sentence and is never re-rendered), a cheaper and a stronger rung, the reasoning folded.
+  const setBar = (bar, m, max) => {
+    const fill = bar.firstElementChild;
+    fill.style.setProperty('--c', colorOf(m.provider));
+    fill.style.setProperty('--w', (max > 0 ? monthOf(m) / max * 100 : 0) + '%');
+  };
+  function rung(box, m, role, none, max) {
+    box.hidden = false;
+    if (!m) { box.replaceChildren(el('span', 'o-role', role), el('span', 'o-none', none)); return; }
+    const nm = el('span', 'o-name');
+    nm.append(swatch(m), el('span', null, m.name));
+    const nn = el('span', 'o-n');
+    nn.append(el('b', null, fmtReq(monthOf(m))), ' requests a month');
+    const bar = el('span', 'bar');
+    bar.setAttribute('aria-hidden', 'true');
+    bar.append(el('span'));
+    setBar(bar, m, max);
+    box.replaceChildren(el('span', 'o-role', role), nm, nn, bar);
+  }
   function renderAnswer() {
     const task = TASKS.find(t => t.id === state.task);
     const s = suggest(task);
-    const box = $('answer'), more = $('answer-more');
-    $('a-month').hidden = $('a-calc').hidden = !s;
-    if (!s) { box.replaceChildren(el('p', 'empty', 'No scored model for this task yet.')); more.replaceChildren(); return; }
+    const box = $('answer');
+    $('a-month').hidden = $('a-bar').hidden = $('a-foot').hidden = $('r-cheaper').hidden = $('r-stronger').hidden = !s;
+    if (!s) { box.replaceChildren(el('p', 'empty', 'No scored model for this task yet.')); return; }
     const { pick, cheaper, stronger, k } = s;
 
     const name = el('h2', 'a-model');
@@ -601,36 +578,16 @@ function init(ROWS, SCORES, meta) {
     }
     box.replaceChildren(...top);
     $('a-req').replaceChildren('≈ ', el('b', null, fmtReq(monthOf(pick)) + ' requests a month'));
-    $('a-calc-body').replaceChildren(calc(pick));
 
-    const parts = [];
-    const opts = [
-      cheaper && { m: cheaper, role: `Cheaper, ${pct(cheaper, k) >= pct(pick, k) - 3 ? 'about as good' : 'a bit less sharp'}` },
-      stronger && { m: stronger, role: 'Stronger, if it gets stuck' },
-    ].filter(Boolean);
-    if (opts.length) {
-      const list = el('ul', 'alts');
-      list.setAttribute('aria-label', 'Other options');
-      opts.forEach(o => {
-        const li = el('li', 'alt');
-        li.style.setProperty('--c', colorOf(o.m.provider));
-        const nm = el('span', 'o-name');
-        nm.append(swatch(o.m), el('span', null, o.m.name));
-        const nn = el('span', 'o-n');
-        nn.append(el('b', null, fmtReq(monthOf(o.m))), ' a month');
-        li.append(el('span', 'o-role', o.role), nm, nn);
-        list.append(li);
-      });
-      parts.push(list);
-    }
+    const max = Math.max(...[pick, cheaper, stronger].filter(Boolean).map(monthOf));
+    setBar($('a-bar'), pick, max);
+    rung($('r-cheaper'), cheaper, !cheaper ? 'Cheaper' : pct(cheaper, k) >= pct(pick, k) - 3 ? 'Cheaper, about as good' : 'Cheaper, a bit less sharp', 'Nothing cheaper does it well enough', max);
+    rung($('r-stronger'), stronger, stronger ? 'Stronger, if it gets stuck' : 'Stronger', 'Already the strongest', max);
 
-    // Why this model: quality, cost and the rule applied, in plain words. Stays open across re-renders.
-    const why = el('details', 'why');
-    why.open = whyOpen;
-    why.addEventListener('toggle', () => { whyOpen = why.open; });
-    const sum = el('summary');
-    sum.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>';
-    sum.append('Why this model?');
+    // Why this model: quality, cost, the rule applied and how requests are counted, in plain words.
+    $('why-short').textContent = pick[k] === TOP[k]
+      ? `The best at ${INDEX_LABEL[k]}, and the cheapest of the best.`
+      : `The cheapest to reach ${Math.round(task.level * 100)}% of the best ${INDEX_LABEL[k]} score.`;
     const ul = el('ul', 'why-list');
     const li = (...xs) => { const l = el('li'); l.append(...xs); ul.append(l); };
     const below = CURRENT.filter(m => m[k] != null && m.perRequest < pick.perRequest).sort((a, b) => b[k] - a[k])[0];
@@ -648,17 +605,9 @@ function init(ROWS, SCORES, meta) {
     const val = el('a', null, 'Every model’s price against its score →');
     val.href = 'performance.html' + (k === 'intelligence' ? '?score=intelligence' : '');
     li('Scores come from ', el('b', null, 'Artificial Analysis'), ' benchmarks: a guide, not a test of your own work. ', val);
-    why.append(sum, ul);
-    parts.push(why);
+    $('why-body').replaceChildren(ul, el('p', 'why-sub', 'How the requests a month are counted'), calc(pick));
 
-    const foot = el('p', 'a-foot');
-    const cmp = el('a', null, 'Compare them side by side →');
-    cmp.href = 'compare.html?' + [pick, ...opts.map(o => o.m)].map(m => 'm=' + encodeURIComponent(m.name)).join('&');
-    const all = el('a', null, 'See every model →');
-    all.href = 'tokens.html';
-    foot.append(cmp, all);
-    parts.push(foot);
-    more.replaceChildren(...parts);
+    $('a-compare').href = 'compare.html?' + [pick, cheaper, stronger].filter(Boolean).map(m => 'm=' + encodeURIComponent(m.name)).join('&');
   }
 
   // The requests-a-month figure, worked out step by step with the pick's own numbers.

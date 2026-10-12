@@ -217,7 +217,7 @@ A neutral warm-grey ledger with six identifying provider hues and nothing else c
 
 Pages sit in a centred column up to 110rem wide (the start page's content is 76rem, but its header breaks out to the same width so the nav lines up across pages), with a fluid side gutter of clamp(16px, 3vw, 40px).
 
-Detail pages are a single column in this order: masthead, intro (question and lede), filter bar, then content (takeaway, chart toolbar, legend, chart, explainer, table, footer). There is no sidebar: charts use the full width. The start page is a two-column task picker with a sticky answer card on the right, folding to one column on narrow screens.
+Detail pages are a single column in this order: masthead, intro (question and lede), filter bar, then content (takeaway, chart toolbar, legend, chart, explainer, table, footer). There is no sidebar: charts use the full width. The start page is one column: a sentence to fill in ("I work as a [role] and I want to [task].", two native selects dressed as inline chips), then the answer card as a three-step ladder (the pick wide on the left, a cheaper and a stronger option beside it, requests-a-month bars on one baseline), folding to the pick above two rungs on tablets and one stack on phones.
 
 Spacing follows a 4/8 rhythm: 8px between controls, 16px inside groups, 24px between bands (intro to filter bar, filter bar to content), 48px before the explainer and footer. Expandable sections and the footer are separated by a 1px rule with 20px above the content.
 

@@ -175,7 +175,7 @@ A neutral warm-grey ledger with six identifying provider hues and nothing else c
 - **Provider hues** (openai-blue, anthropic-clay, google-green, microsoft-amber, xai-pink, moonshot-green, other-stone): identity, not decoration. Each marks one provider's models across every chart, bar, chip swatch and table dot. The dark theme shifts each slightly (for example Anthropic Clay to `#d95926`) to hold contrast on dark paper.
 
 ### Tertiary
-- **Better Green / Worse Rust** (better-green, worse-rust): only on the comparison table, for the gap to the baseline column. Dark-mode values are `#4cc08a` and `#ec7a55`.
+- **Better Green / Worse Rust** (better-green, worse-rust; Better Green is #86d39b in dark on page 1): also marks the worth-it models and picks on page 1 (cost.html). Otherwise only on the comparison table, for the gap to the baseline column. Dark-mode values are `#4cc08a` and `#ec7a55`.
 
 ### Neutral
 - **Paper** (paper / paper-dark): the page background.
@@ -268,7 +268,7 @@ Two shape families. **Pills** (999px) are for things you press: filter buttons, 
 
 ### Navigation
 - **Brand:** the GitHub mark and "Copilot pricing" with the start page's question under it in Ink Faint; it is the link to the start page.
-- **Steps:** the five detail pages in a Wash rail (12px radius). Each step shows its mono number, its short name (13px/500) and its question (12px, Ink Faint, balanced wrap). The current step becomes a Sheet tile with the selected lift; hover brightens the text only.
+- **Steps:** the four detail pages in a Wash rail (12px radius). Each step shows its mono number, its short name (13px/500) and its question (12px, Ink Faint, balanced wrap). The current step becomes a Sheet tile with the selected lift; hover brightens the text only.
 - **Narrow:** the brand's question hides first; under ~860px of masthead width the steps fold into one pill naming the current page, which opens the same list as a floating panel.
 
 ### Filter bar (signature)

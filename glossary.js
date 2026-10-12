@@ -13,7 +13,7 @@
     long: ['Long context', 'Some models charge a higher rate once a single prompt passes a size threshold (e.g. 272K tokens). Drawn as outlined bars.'],
     class: ['Class', 'GitHub’s own capability tiers: Lightweight for quick tasks, Versatile for everyday work, Powerful for the hardest problems.'],
     multCheap: ['×N', 'How many times the cheapest model in view: ×10 means ten times the price.'],
-    moreTokens: ['N× more', 'Tokens compared with the most expensive model in view, which buys the fewest: 10× more means ten times as many tokens for the same budget. More tokens is not the same as better work: see page 3.'],
+    moreTokens: ['N× more', 'Tokens compared with the most expensive model in view, which buys the fewest: 10× more means ten times as many tokens for the same budget. More tokens is not the same as better work: see page 1.'],
     workday: ['Working day', 'The monthly budget split over 21 working days (5 days a week), to show what one day of work can use.'],
     request: ['Agent request', 'Counted as 50,000 tokens: one agent step that sends files and history and gets an answer. Real sizes vary widely.'],
     index: ['Artificial Analysis index', 'A composite benchmark score: higher is better. Coding Index covers coding tasks; Intelligence Index adds reasoning, knowledge and maths.'],

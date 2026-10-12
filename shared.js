@@ -17,11 +17,10 @@ window.CopilotShared = (() => {
   // Secondary USD figure next to a credit value.
   const usd = v => '$' + (v < 1 && Math.round(v * 1e4) % 100 ? v.toFixed(3) : v.toFixed(2));
   const PAGES = [
-    { id: 'cost', href: 'cost.html', label: '1 · Cost' },
+    { id: 'cost', href: 'cost.html', label: '1 · Cost & value' },
     { id: 'budget', href: 'tokens.html', label: '2 · Budget' },
-    { id: 'value', href: 'performance.html', label: '3 · Value' },
-    { id: 'compare', href: 'compare.html', label: '4 · Compare' },
-    { id: 'timeline', href: 'timeline.html', label: '5 · Timeline' },
+    { id: 'compare', href: 'compare.html', label: '3 · Compare' },
+    { id: 'timeline', href: 'timeline.html', label: '4 · Timeline' },
   ];
 
   const css = `
@@ -134,7 +133,7 @@ window.CopilotShared = (() => {
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch { return {}; }
   }
-  // A page may list fewer providers or classes than another (performance.html only lists scored
+  // A page may list fewer providers or classes than another (cost.html only lists scored
   // models): what it doesn't know keeps its previous state instead of being dropped, which would
   // make the other pages treat it as new and turn it back on.
   function merge(prev, patch, selKey, knownKey) {
@@ -169,7 +168,7 @@ window.CopilotShared = (() => {
     return model;
   }
 
-  // "Compare on 2 · Budget · 3 · Value", the other pages with this model focused.
+  // "Compare on 2 · Budget · 3 · Compare", the other pages with this model focused.
   function pageLinks(current, model) {
     const box = document.createElement('div');
     box.className = 't-links';

@@ -1,5 +1,5 @@
 /* Shared by every page, loaded after the page's own <style>:
-   - the masthead: brand (link to the start page), the five detail pages as numbered steps, theme button;
+   - the masthead: brand (link to the start page), the four detail pages as numbered steps, theme button;
    - the detail pages' controls: a filter bar under the intro (assumptions and model filters in
      drop-down panels) and a toolbar above the chart (how the chart is drawn). */
 
@@ -23,7 +23,7 @@
 .site-nav .brand[aria-current="page"] .q { color: var(--ink); }
 .site-nav .brand:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 
-/* The five detail pages: number and short name, with the page's question under it */
+/* The four detail pages: number and short name, with the page's question under it */
 .steps {
   flex: 1; min-width: 0; max-width: 72rem;
   display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px;

@@ -32,7 +32,7 @@ Built on GitHub's own Copilot price list (refreshed daily) joined to Artificial 
 
 - Static site on GitHub Pages: plain HTML/CSS/JS, no build, no dependencies. Data in `data/*.csv|json`, fetched over HTTP.
 - UI language: English (confirmed, including the start page).
-- Pages: start page (`index.html`, simple view), then 1 · Cost (`cost.html`), 2 · Budget (`tokens.html`), 3 · Value (`performance.html`), 4 · Compare (`compare.html`), 5 · Timeline (`timeline.html`).
+- Pages: start page (`index.html`, simple view), then 1 · Cost & value (`cost.html`), 2 · Budget (`tokens.html`), 3 · Compare (`compare.html`), 4 · Timeline (`timeline.html`). `performance.html` redirects to `cost.html`.
 - Prices change; recommendations must be derived from the data at load time, never hard-coded model names.
 - Scores are benchmarks (coding, general intelligence), not measurements of the start page's tasks; say so wherever a recommendation leans on them.
 - Promotional prices (a `note` mentioning a promotion) must be flagged where they drive a recommendation.

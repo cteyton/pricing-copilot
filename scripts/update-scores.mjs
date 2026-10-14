@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Fetches model benchmarks from the Artificial Analysis free API and regenerates data/scores.csv:
-// a Coding Index and an Intelligence Index per Copilot model, matched through data/aa-mapping.json.
+// a Coding Index and an Intelligence Index per Copilot model, matched through data/aa-mapping.json
+// (or by its own name when unmapped).
 // Each index picks its own variant: a model can have an Intelligence score at High but no Coding score there.
 // data/scores-meta.json is only rewritten when the data changes.
 //
@@ -100,10 +101,15 @@ function summarize(prev, next) {
 async function main() {
   const mapping = JSON.parse(await readFile(MAPPING_PATH, 'utf8'));
   const copilot = [...new Set(fromCSV(await readFile(MODELS_PATH, 'utf8')).map(r => r.model))];
-  for (const m of copilot) if (!(m in mapping)) console.warn(`! ${m}: not in data/aa-mapping.json`);
-
   const { data } = await load();
   if (!Array.isArray(data) || !data.length) fail('empty API response');
+
+  // A model missing from the mapping falls back to its own name when Artificial Analysis lists it.
+  for (const m of copilot) {
+    if (m in mapping) continue;
+    if (Object.values(METRICS).some(key => pick(data, m, key))) mapping[m] = m;
+    else console.warn(`! ${m}: not in data/aa-mapping.json, and no "${m}" on Artificial Analysis`);
+  }
 
   const rows = [];
   for (const model of copilot) {

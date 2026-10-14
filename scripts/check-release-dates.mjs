@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Checks data/release-dates.csv (hand-maintained release history) against the Copilot models in data/models.csv,
-// matched through data/release-mapping.json. Read-only: it writes nothing.
+// matched through data/release-mapping.json (or by their own name when unmapped). Read-only: it writes nothing.
 // Fails on a malformed date, a duplicate model row, or a mapping value missing from release-dates.csv.
 //
 // Usage: node scripts/check-release-dates.mjs
@@ -54,7 +54,12 @@ async function main() {
     if (name != null && !dates.has(name)) fail(`${model}: "${name}" not in data/release-dates.csv`);
   }
 
-  for (const m of copilot) if (!(m in mapping)) console.warn(`! ${m}: not in data/release-mapping.json`);
+  // A model missing from the mapping falls back to its own name when release-dates.csv has it.
+  for (const m of copilot) {
+    if (m in mapping) continue;
+    if (dates.has(m)) mapping[m] = m;
+    else console.warn(`! ${m}: not in data/release-mapping.json, and no "${m}" in data/release-dates.csv`);
+  }
   const undated = copilot.filter(m => m in mapping && mapping[m] == null);
   for (const m of undated) console.warn(`! ${m}: no release date (null in data/release-mapping.json)`);
 

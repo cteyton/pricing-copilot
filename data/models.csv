@@ -36,6 +36,7 @@ Anthropic,Claude Fable,Claude Fable 5,Powerful,GA,default,,10,1,12.5,50,
 Anthropic,Claude Fable,Claude Fable 5.1,Powerful,GA,default,,10,0.25,12.5,50,
 Google,Gemini Flash,Gemini 3.7 Flash,Versatile,GA,default,,0.75,0.075,,3.75,"Gemini 3.7 Flash and Gemini 3.8 Flash are available at the promotional pricing of $0.75 per 1M input tokens, $0.075 per 1M cached input tokens, and $3.75 per 1M output tokens through December 31, 2026."
 Google,Gemini Flash,Gemini 3.8 Flash,Versatile,GA,default,,0.75,0.075,,3.75,"Gemini 3.7 Flash and Gemini 3.8 Flash are available at the promotional pricing of $0.75 per 1M input tokens, $0.075 per 1M cached input tokens, and $3.75 per 1M output tokens through December 31, 2026."
+Google,Gemini Argon,Gemini 4 Argon,Powerful,GA,default,,2,0.1,,10,"Gemini 4 Argon is available at the promotional pricing of $2.00 per 1M input tokens, $0.10 per 1M cached input tokens, and $10.00 per 1M output tokens until December 1, 2026."
 Microsoft,MAI-Code,MAI-Code-1.1-Flash,Lightweight,GA,default,,0.2,0.02,,1.2,
 xAI,Grok 4.5,Grok 4.5,Versatile,GA,default,≤ 200K,2,0.5,,6,
 xAI,Grok 4.5,Grok 4.5,Versatile,GA,long,> 200K,4,1,,12,

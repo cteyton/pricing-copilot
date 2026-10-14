@@ -44,7 +44,7 @@ No build or dependencies (Geist fonts load from Google Fonts, with a system fall
 ## Scores (Artificial Analysis)
 
 - Source: the free API `GET https://artificialanalysis.ai/api/v2/data/llms/models` (`x-api-key` header, 1,000 requests/day). The key must never reach client-side code, so the page only reads the committed `data/scores.csv`. Attribution to https://artificialanalysis.ai/ is required and shown in the footer.
-- `data/aa-mapping.json`: hand-maintained map from the Copilot `model` name to the Artificial Analysis base name (its `name` without the parenthesised effort, e.g. `Claude 4.5 Haiku`). `null` marks a model absent from Artificial Analysis. Add an entry when Copilot adds a model; the script warns about missing ones.
+- `data/aa-mapping.json`: hand-maintained map from the Copilot `model` name to the Artificial Analysis base name (its `name` without the parenthesised effort, e.g. `Claude 4.5 Haiku`). `null` marks a model absent from Artificial Analysis. A model missing from the map is looked up under its own name; add an entry only when the Artificial Analysis name differs (the script warns when neither matches).
 - Effort: Artificial Analysis lists one entry per reasoning effort. For each index separately, the script takes **High**, else the nearest variant that has that index: High > Xhigh > Medium > Max > Low > Reasoning (unlabeled) > Minimal > Non-reasoning.
 - `data/scores.csv`: one row per Copilot model with at least one index. Per index (`coding`, `intelligence`): the score, then `<index>Effort`, `<index>AaName`, `<index>AaId` of the variant used; empty when Artificial Analysis has no score yet.
 - `data/scores-meta.json`: `updated`, the date the scores last changed.
@@ -58,7 +58,7 @@ Run manually (not in CI). Same safeguards as the pricing script: nothing is writ
 ## Release dates
 
 - `data/release-dates.csv`: hand-maintained release history (`company,model,release_date`, ISO dates), sorted by date. It covers more models than Copilot offers. `company` and `model` are the vendor's names, not Copilot's.
-- `data/release-mapping.json`: map from the Copilot `model` name to the `model` in `release-dates.csv` (e.g. `Claude Opus 4.8 (fast mode) (preview)` → `Claude Opus 4.8`). `null` marks a model with no known date. Add an entry, and a dated row if needed, when Copilot adds a model.
+- `data/release-mapping.json`: map from the Copilot `model` name to the `model` in `release-dates.csv` (e.g. `Claude Opus 4.8 (fast mode) (preview)` → `Claude Opus 4.8`). `null` marks a model with no known date. A model missing from the map is looked up under its own name; add an entry only when the names differ, and a dated row if the model is new to the history.
 
 ```sh
 node scripts/check-release-dates.mjs

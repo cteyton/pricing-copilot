@@ -1,10 +1,6 @@
 model,coding,codingEffort,codingAaName,codingAaId,intelligence,intelligenceEffort,intelligenceAaName,intelligenceAaId
-GPT-5 mini,15.6,High,GPT-5 mini (High),29855680-7469-43eb-8b88-cd3fb1d99da3,16.8,High,GPT-5 mini (High),29855680-7469-43eb-8b88-cd3fb1d99da3
 GPT-5.3-Codex,,,,,32.5,Xhigh,GPT-5.3 Codex (Xhigh),59b5b14b-5365-4ee7-824a-18a8e6309644
-GPT-5.4,71.1,Xhigh,GPT-5.4 (Xhigh),a89c4b28-2d8c-456e-88ea-255fb51fd2b6,39,Xhigh,GPT-5.4 (Xhigh),a89c4b28-2d8c-456e-88ea-255fb51fd2b6
-GPT-5.4 mini,56.1,Xhigh,GPT-5.4 mini (Xhigh),ba242e40-83b7-4cd3-a0e0-b56237984914,24.1,Xhigh,GPT-5.4 mini (Xhigh),ba242e40-83b7-4cd3-a0e0-b56237984914
 GPT-5.4 nano,56.1,Xhigh,GPT-5.4 nano (Xhigh),d4fc3f33-f2b0-4da1-88ee-f1f82bd4de31,20.7,Xhigh,GPT-5.4 nano (Xhigh),d4fc3f33-f2b0-4da1-88ee-f1f82bd4de31
-GPT-5.5,71.6,High,GPT-5.5 (High),b13c1257-d746-4027-8fc8-4892dc14701c,37,High,GPT-5.5 (High),b13c1257-d746-4027-8fc8-4892dc14701c
 GPT-5.6 Luna,63.3,High,GPT-5.6 Luna (High),aa55297e-8fbf-4372-b4ab-9b068dc6396c,32.1,High,GPT-5.6 Luna (High),aa55297e-8fbf-4372-b4ab-9b068dc6396c
 GPT-5.6 Sol,77.2,High,GPT-5.6 Sol (High),8afc250d-b538-45a2-812a-4605f4ffd87e,42.3,High,GPT-5.6 Sol (High),8afc250d-b538-45a2-812a-4605f4ffd87e
 GPT-5.6 Terra,67.1,High,GPT-5.6 Terra (High),81972fba-1219-477e-bbfb-18c656a63ff7,34.2,High,GPT-5.6 Terra (High),81972fba-1219-477e-bbfb-18c656a63ff7
@@ -24,7 +20,6 @@ Claude Sonnet 5.5,,,,,46.8,High,"Claude Sonnet 5.5 (High, Default Fallback)",268
 Claude Opus 4.8 (fast mode) (preview),74.3,Max,Claude Opus 4.8 (Max),992b7b84-5069-4c6a-9295-834252553d50,41.8,Max,Claude Opus 4.8 (Max),992b7b84-5069-4c6a-9295-834252553d50
 Claude Fable 5,76.5,Max,"Claude Fable 5 (Max, Opus 4.8 Fallback)",cd55210d-358e-4df1-ba9c-9acb5f186cc9,49.6,Max,"Claude Fable 5 (Max, Opus 4.8 Fallback)",cd55210d-358e-4df1-ba9c-9acb5f186cc9
 Claude Fable 5.1,79.1,High,"Claude Fable 5.1 (High, Default Fallback)",9d7d72cd-d95d-45a0-b109-4ad292c9aabd,51.2,High,"Claude Fable 5.1 (High, Default Fallback)",9d7d72cd-d95d-45a0-b109-4ad292c9aabd
-Gemini 3.7 Flash,76.1,High,Gemini 3.7 Flash (High),b2331108-72ed-415a-82d1-188633875bbc,39.1,High,Gemini 3.7 Flash (High),b2331108-72ed-415a-82d1-188633875bbc
 Gemini 3.8 Flash,76.3,High,Gemini 3.8 Flash (High),8a999846-4c1d-4ce7-a8b7-1310a7166fd7,40.9,High,Gemini 3.8 Flash (High),8a999846-4c1d-4ce7-a8b7-1310a7166fd7
 Gemini 4 Argon,,,,,52.6,High,Gemini 4 Argon (High),d366dfa1-d940-4788-aa73-d298c45699b3
 Grok 4.5,72.4,High,Grok 4.5 (High),794f69b5-cede-482b-b1cc-d769478497cd,38.8,High,Grok 4.5 (High),794f69b5-cede-482b-b1cc-d769478497cd

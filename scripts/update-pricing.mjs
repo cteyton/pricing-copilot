@@ -36,6 +36,9 @@ const COLUMNS = {
   'Output': 'output',
 };
 
+// Sections whose pricing doesn't fit the text-model columns (no text output price).
+const SKIPPED_SECTIONS = new Set(['Image generation models']);
+
 const TIERS = { 'Default': 'default', 'Long context': 'long' };
 
 // Family = version for OpenAI / xAI, product line for Claude and Gemini. First match wins.
@@ -80,6 +83,7 @@ export function parse(md) {
 
   for (const section of md.split(/^### /m).slice(1)) {
     const heading = section.slice(0, section.indexOf('\n')).trim();
+    if (SKIPPED_SECTIONS.has(heading)) continue;
     const provider = PROVIDER_NAMES[heading] ?? heading;
     const lines = section.split('\n').filter(l => l.trim().startsWith('|'));
     if (!lines.length) continue;
